@@ -2,6 +2,7 @@ import './styles/tokens.css';
 import './styles/reset.css';
 import './styles/shell.css';
 import './styles/components.css';
+import './styles/stage2.css';
 
 import gsap from 'gsap';
 
@@ -18,6 +19,7 @@ import { RoleTabs }       from './components/RoleTabs.js';
 import { EndingTracker }  from './components/EndingTracker.js';
 import { LogPanel }       from './components/LogPanel.js';
 import { EventsTimeline } from './components/EventsTimeline.js';
+import { Debrief }        from './components/Debrief.js';
 
 // ─── INIT ENGINE ─────────────────────────────────────────────────────────────
 dispatch({ type: 'INIT' });
@@ -105,6 +107,8 @@ const logPanel = LogPanel(state);
 document.getElementById('fp-log-tabs-mount').appendChild(logPanel._tabs);
 document.getElementById('fp-log-content-mount').appendChild(logPanel._content);
 
+const debrief = Debrief();
+
 // ─── HEADER WIRING ───────────────────────────────────────────────────────────
 document.getElementById('fp-show-hidden').addEventListener('change', e => {
   gateCtrl.setShowHidden(e.target.checked);
@@ -122,6 +126,8 @@ document.getElementById('fp-btn-reset').addEventListener('click', () => {
   dispatch({ type: 'RESET' });
   dispatch({ type: 'INIT' });
 });
+
+document.getElementById('fp-btn-debrief').addEventListener('click', () => debrief.open());
 
 // ─── WAR ROOM ────────────────────────────────────────────────────────────────
 document.getElementById('fp-btn-warroom').addEventListener('click', openWarRoom);
@@ -226,6 +232,45 @@ EventBus.on('state:changed', ({ state: s, reason }) => {
         ? `<div class="fp-cascade-alert"><strong>⚠ CASCADE:</strong> ${labels[id]}</div>`
         : '';
     }).join('');
+  }
+});
+
+// ─── ACT TRANSITION BANNER ────────────────────────────────────────────────────
+const actBanner = document.createElement('div');
+actBanner.className = 'fp-act-banner';
+actBanner.innerHTML = `
+  <div class="fp-act-banner-inner">
+    <div class="fp-act-banner-label" id="fp-act-label"></div>
+    <div class="fp-act-banner-title" id="fp-act-title"></div>
+    <div class="fp-act-banner-desc" id="fp-act-desc"></div>
+  </div>`;
+document.body.appendChild(actBanner);
+
+const ACT_COPY = {
+  8:  { label: 'ACT 2', title: 'ESCALATION',  desc: 'The breach goes public. Regulatory and media pressure escalates.' },
+  15: { label: 'ACT 3', title: 'RESOLUTION',  desc: 'The investigation enters its final phase. Outcomes crystallise.' },
+};
+
+EventBus.on('day:advanced', ({ day }) => {
+  const copy = ACT_COPY[day];
+  if (!copy) return;
+  document.getElementById('fp-act-label').textContent = copy.label;
+  document.getElementById('fp-act-title').textContent = copy.title;
+  document.getElementById('fp-act-desc').textContent  = copy.desc;
+  gsap.timeline()
+    .to(actBanner, { opacity: 1, duration: 0.5, ease: 'power2.out', pointerEvents: 'none' })
+    .to(actBanner, { opacity: 0, duration: 0.6, ease: 'power2.in', delay: 2.8 });
+});
+
+// ─── CONSEQUENCE REVEAL ───────────────────────────────────────────────────────
+EventBus.on('decision:committed', ({ gateId }) => {
+  const card = document.getElementById(`gate-${gateId}`);
+  if (!card) return;
+  card.classList.add('fp-gate-committed');
+  setTimeout(() => card.classList.remove('fp-gate-committed'), 700);
+  const effects = card.querySelectorAll('.fp-consequence-effect');
+  if (effects.length) {
+    gsap.to(effects, { opacity: 1, x: 0, duration: 0.3, stagger: 0.07, ease: 'power2.out', delay: 0.15 });
   }
 });
 

@@ -49,6 +49,24 @@ function buildCard(gate, decisions, showHidden) {
     ? `<span class="fp-gate-decision-label">→ ${gate.choices[decisions[gate.id]].label}</span>`
     : '';
 
+  const committedEffects = isDone ? (CONSEQUENCES[gate.id]?.[decisions[gate.id]] ?? []) : [];
+  const visibleEffects = committedEffects.filter(e => showHidden || e.attr !== 'CAUSE_HIDDEN');
+  const revealHtml = isDone && visibleEffects.length > 0 ? `
+    <div class="fp-consequence-reveal">
+      <div class="fp-consequence-title">Effects Applied</div>
+      ${visibleEffects.map(e => {
+        const col = e.delta > 0 ? 'var(--green)' : (e.delta < 0 ? 'var(--red)' : 'var(--text-muted)');
+        const ds = e.delta > 0 ? `+${e.delta}` : `${e.delta}`;
+        const def = POOL_DEFS.find(p => p.id === resolvePool(e.pool));
+        const pname = def ? def.name.substring(0, 22) : e.pool;
+        return `<div class="fp-consequence-effect">
+          <span style="color:${col};font-weight:700;min-width:32px">${ds}</span>
+          <span>${pname}</span>
+          <span style="margin-left:auto;color:var(--text-muted);font-size:9px">${e.vis}</span>
+        </div>`;
+      }).join('')}
+    </div>` : '';
+
   const choicesHtml = choiceKeys.map(ck => {
     const ch = gate.choices[ck];
     const isSelected = decisions[gate.id] === ck;
@@ -75,7 +93,7 @@ function buildCard(gate, decisions, showHidden) {
     ${isActive ? `<div class="fp-gate-body">
       <div class="fp-gate-desc">${gate.desc}</div>
       <div>${choicesHtml}</div>
-    </div>` : ''}`;
+    </div>` : revealHtml}`;
 
   // Animate in
   requestAnimationFrame(() => {
