@@ -5,6 +5,7 @@ import './styles/components.css';
 import './styles/stage2.css';
 import './styles/stage3.css';
 import './styles/stage4.css';
+import './styles/stage5.css';
 
 import gsap from 'gsap';
 
@@ -20,6 +21,7 @@ import { LogPanel }       from './components/LogPanel.js';
 import { EventsTimeline } from './components/EventsTimeline.js';
 import { Debrief }        from './components/Debrief.js';
 import { WarRoom }        from './components/WarRoom.js';
+import { Atmosphere }     from './components/Atmosphere.js';
 
 // ─── INIT ENGINE ─────────────────────────────────────────────────────────────
 dispatch({ type: 'INIT' });
@@ -109,6 +111,7 @@ document.getElementById('fp-log-content-mount').appendChild(logPanel._content);
 
 const debrief  = Debrief();
 const warRoom  = WarRoom();
+Atmosphere();
 
 // ─── ROLE CONTEXT BAR ────────────────────────────────────────────────────────
 const ROLE_CONTEXT = {
