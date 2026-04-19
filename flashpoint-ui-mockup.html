@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLASHPOINT — CISO Player View (UI Mockup)</title>
+<style>
+:root {
+  --bg:        #0b0f17;
+  --surface:   #111827;
+  --surface2:  #1a2233;
+  --surface3:  #222d42;
+  --border:    #1f2d45;
+  --border2:   #2d3f5c;
+  --text:      #e2e8f0;
+  --dim:       #8fa3bf;
+  --muted:     #4d6580;
+  --accent:    #e05c2b;
+  --blue:      #60a5fa;
+  --green:     #34d399;
+  --yellow:    #fbbf24;
+  --red:       #f87171;
+  --purple:    #a78bfa;
+  --ciso:      #f87171;
+  --cfo:       #60a5fa;
+  --legal:     #a78bfa;
+  --comms:     #34d399;
+  --ceo:       #fb923c;
+  font-size: 13px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── TOPBAR ─────────────────────────────────────── */
+.topbar {
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.logo {
+  font-size: 15px; font-weight: 900; letter-spacing: 3px;
+  color: var(--accent);
+}
+.topbar-sep { width: 1px; height: 22px; background: var(--border2); flex-shrink: 0; }
+
+.role-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 14px; border-radius: 20px;
+  background: rgba(248,113,113,0.1);
+  border: 1px solid rgba(248,113,113,0.25);
+}
+.role-badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ciso); }
+.role-badge-name { font-size: 12px; font-weight: 800; color: var(--ciso); letter-spacing: 0.5px; }
+.role-badge-title { font-size: 11px; color: var(--dim); }
+
+.topbar-spacer { flex: 1; }
+
+.day-cluster { display: flex; align-items: center; gap: 10px; }
+.day-label { font-size: 13px; font-weight: 700; }
+.act-pill {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  padding: 3px 10px; border-radius: 4px;
+  background: rgba(96,165,250,0.1);
+  border: 1px solid rgba(96,165,250,0.25);
+  color: var(--blue);
+}
+.timeline-wrap { display: flex; flex-direction: column; gap: 2px; }
+.timeline-meta { font-size: 9px; color: var(--muted); display: flex; justify-content: space-between; width: 160px; }
+.timeline-track {
+  width: 160px; height: 4px;
+  background: var(--surface3); border-radius: 2px; overflow: hidden;
+}
+.timeline-fill {
+  height: 4px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--accent) 100%);
+  width: 14%;
+}
+
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 15px; position: relative;
+  color: var(--dim);
+}
+.icon-btn:hover { border-color: var(--border2); background: var(--surface3); }
+.notif-dot {
+  position: absolute; top: 5px; right: 5px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); border: 1.5px solid var(--surface);
+}
+
+/* ─── LAYOUT ─────────────────────────────────────── */
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 230px 1fr 292px;
+  overflow: hidden;
+}
+
+/* ─── SIDEBAR ─────────────────────────────────────── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.sb-section { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.sb-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sb-label-note { font-size: 9px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ciso); }
+
+.pool-item { margin-bottom: 9px; }
+.pool-item:last-child { margin-bottom: 0; }
+.pool-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.pool-name { font-size: 11px; color: var(--dim); }
+.pool-val { font-size: 12px; font-weight: 700; min-width: 28px; text-align: right; }
+.pool-delta { font-size: 9px; font-weight: 700; margin-left: 3px; }
+.pool-track { height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+.pool-fill { height: 3px; border-radius: 2px; transition: width 0.3s; }
+
+/* Org signals (other roles — restricted) */
+.org-signal { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid rgba(31,45,69,0.6); }
+.org-signal:last-child { border-bottom: none; }
+.org-role-tag {
+  font-size: 9px; font-weight: 800; letter-spacing: 0.5px;
+  min-width: 40px; color: var(--muted);
+}
+.org-signal-bar { flex: 1; height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+.org-signal-fill { height: 3px; border-radius: 2px; opacity: 0.7; }
+.org-signal-label { font-size: 9px; color: var(--muted); min-width: 46px; text-align: right; }
+.org-signal-lock { font-size: 10px; color: var(--muted); margin-left: 2px; }
+
+/* Workstreams */
+.ws-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.ws-row:last-child { margin-bottom: 0; }
+.ws-name { font-size: 10px; color: var(--dim); min-width: 70px; }
+.ws-track {
+  flex: 1; height: 4px; background: var(--surface3);
+  border-radius: 2px; overflow: hidden; position: relative;
+}
+.ws-fill { height: 4px; border-radius: 2px; background: var(--purple); }
+.ws-pct { font-size: 10px; color: var(--purple); min-width: 26px; text-align: right; font-weight: 700; }
+.ws-next { font-size: 9px; color: var(--muted); }
+
+/* ─── MAIN ─────────────────────────────────────────── */
+.main { overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; background: var(--bg); }
+.main::-webkit-scrollbar { width: 4px; }
+.main::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Completed gate pill */
+.completed-gate {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  border-radius: 0 8px 8px 0;
+}
+.cg-tag { font-size: 10px; font-weight: 700; color: var(--muted); }
+.cg-check { color: var(--green); font-size: 13px; }
+.cg-title { font-size: 12px; font-weight: 600; flex: 1; }
+.cg-choice {
+  font-size: 11px; padding: 2px 9px; border-radius: 4px;
+  background: rgba(52,211,153,0.1); color: var(--green); font-weight: 700;
+}
+.cg-day { font-size: 10px; color: var(--muted); }
+
+/* Notification received */
+.notif-banner {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px;
+  background: rgba(167,139,250,0.06);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 8px;
+}
+.notif-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.notif-content { flex: 1; }
+.notif-from { font-size: 10px; font-weight: 700; color: var(--purple); margin-bottom: 2px; }
+.notif-text { font-size: 11px; color: var(--dim); line-height: 1.5; }
+
+/* Active gate card */
+.gate-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.gate-card.active-gate { border-color: var(--yellow); }
+
+.gate-header {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.gate-icon {
+  width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0;
+  background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.2);
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.gate-meta { flex: 1; }
+.gate-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--yellow); margin-bottom: 3px;
+  display: flex; align-items: center; gap: 8px;
+}
+.gate-id-tag {
+  font-size: 10px; padding: 1px 6px; border-radius: 3px;
+  background: rgba(251,191,36,0.12); color: var(--yellow); letter-spacing: 1px;
+}
+.gate-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+.gate-roles { display: flex; gap: 6px; }
+.role-tag {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+}
+
+.gate-body { padding: 14px 18px; }
+.gate-brief {
+  font-size: 12px; color: var(--dim); line-height: 1.75; margin-bottom: 16px;
+}
+.gate-brief strong { color: var(--text); }
+.gate-brief .hl { color: var(--yellow); font-weight: 600; }
+
+/* Choices */
+.choices { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+
+.choice {
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px 12px 18px;
+  cursor: pointer; transition: all 0.14s; position: relative;
+}
+.choice::before {
+  content: ''; position: absolute; left: 0; top: 8px; bottom: 8px;
+  width: 3px; border-radius: 0 2px 2px 0;
+}
+.choice.a::before { background: var(--green); }
+.choice.b::before { background: var(--blue); }
+.choice.c::before { background: var(--red); }
+.choice:hover { background: var(--surface2); border-color: var(--border2); }
+.choice.active { background: rgba(96,165,250,0.06); border-color: var(--blue); box-shadow: 0 0 0 1px rgba(96,165,250,0.15); }
+
+.choice-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.choice-badge {
+  width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800;
+}
+.badge-a { background: rgba(52,211,153,0.12); color: var(--green); }
+.badge-b { background: rgba(96,165,250,0.12); color: var(--blue); }
+.badge-c { background: rgba(248,113,113,0.12); color: var(--red); }
+.choice-label { font-size: 13px; font-weight: 700; flex: 1; }
+.choice-cost {
+  font-size: 10px; color: var(--dim); padding: 2px 7px;
+  border-radius: 4px; background: var(--surface3);
+}
+.choice-desc { font-size: 11px; color: var(--dim); line-height: 1.55; padding-left: 32px; margin-bottom: 8px; }
+.choice-effects {
+  padding-left: 32px; display: flex; flex-wrap: wrap; gap: 5px;
+}
+.fx {
+  font-size: 10px; padding: 2px 7px; border-radius: 4px; border: 1px solid;
+  display: inline-flex; align-items: center; gap: 3px;
+}
+.fx.pos { background: rgba(52,211,153,0.07); border-color: rgba(52,211,153,0.22); color: var(--green); }
+.fx.neg { background: rgba(248,113,113,0.07); border-color: rgba(248,113,113,0.22); color: var(--red); }
+.fx.hid { background: rgba(167,139,250,0.07); border-color: rgba(167,139,250,0.22); color: var(--purple); font-style: italic; }
+.fx.neu { background: rgba(77,101,128,0.15); border-color: rgba(77,101,128,0.3); color: var(--muted); }
+
+.choice-commit-row { display: flex; justify-content: flex-end; margin-top: 10px; padding-left: 32px; }
+.commit-btn {
+  padding: 8px 22px; background: var(--blue); border: none;
+  border-radius: 6px; color: #fff; font-size: 12px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.3px;
+}
+.commit-btn:hover { background: #3b82f6; }
+
+/* Information restriction note */
+.hidden-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px 14px 50px;
+  font-size: 10px; color: var(--muted);
+}
+.hidden-row span { color: var(--purple); }
+
+/* Domain actions */
+.actions-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+.actions-head {
+  padding: 11px 16px 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.actions-title { font-size: 13px; font-weight: 700; flex: 1; }
+.ap-chip {
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+  padding: 3px 10px; border-radius: 4px;
+  background: var(--surface3); border: 1px solid var(--border2); color: var(--dim);
+}
+.ap-track { height: 3px; background: var(--surface3); margin: 0 16px 10px; border-radius: 2px; overflow: hidden; }
+.ap-fill {
+  height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--green), var(--blue));
+  width: 60%;
+}
+.action-list { padding: 4px 12px 10px; display: flex; flex-direction: column; gap: 3px; }
+.action-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 7px 8px; border-radius: 6px; cursor: pointer; transition: background 0.12s;
+}
+.action-row:hover { background: var(--surface2); }
+.action-row.on { background: rgba(52,211,153,0.06); }
+.action-row.used { opacity: 0.4; cursor: not-allowed; }
+.action-cb {
+  width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; flex-shrink: 0; margin-top: 1px;
+}
+.action-row.on .action-cb { background: var(--green); border-color: var(--green); color: #fff; }
+.action-content { flex: 1; min-width: 0; }
+.action-label { font-size: 12px; margin-bottom: 2px; }
+.action-fx-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.action-ap { font-size: 10px; font-weight: 700; color: var(--muted); padding: 2px 6px; background: var(--surface3); border-radius: 3px; flex-shrink: 0; margin-top: 1px; }
+
+.ready-wrap { padding: 10px 14px 14px; border-top: 1px solid var(--border); }
+.ready-btn {
+  width: 100%; padding: 10px;
+  background: rgba(52,211,153,0.07);
+  border: 1.5px solid rgba(52,211,153,0.3);
+  border-radius: 7px; color: var(--green);
+  font-size: 13px; font-weight: 700; cursor: pointer; letter-spacing: 0.3px;
+  transition: all 0.14s;
+}
+.ready-btn:hover { background: rgba(52,211,153,0.13); }
+
+/* ─── RIGHT PANEL ─────────────────────────────────── */
+.right {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.right-block { border-bottom: 1px solid var(--border); }
+.right-block.grow { flex: 1; overflow-y: auto; }
+.right-block::-webkit-scrollbar { width: 3px; }
+.right-block::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.rblock-head {
+  padding: 9px 14px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.rblock-title { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; flex: 1; }
+.rblock-badge {
+  font-size: 9px; padding: 2px 7px; border-radius: 10px;
+  background: var(--accent); color: #fff; font-weight: 700;
+}
+.rblock-badge.info { background: var(--blue); }
+.rblock-badge.green { background: var(--green); color: #111; }
+
+/* Inbox */
+.inbox-item {
+  padding: 10px 14px; border-bottom: 1px solid rgba(31,45,69,0.5);
+  cursor: pointer; transition: background 0.12s;
+}
+.inbox-item:hover { background: var(--surface2); }
+.inbox-item.unread { border-left: 2px solid var(--blue); }
+.inbox-item.urgent { border-left: 2px solid var(--yellow); }
+.inbox-from { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+.inbox-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.inbox-name { font-size: 11px; font-weight: 700; }
+.inbox-type {
+  font-size: 9px; padding: 1px 6px; border-radius: 3px;
+  font-weight: 700; letter-spacing: 0.5px; margin-left: auto;
+}
+.type-spend { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
+.type-hold  { background: rgba(248,113,113,0.12); color: var(--red);    border: 1px solid rgba(248,113,113,0.25); }
+.type-intel { background: rgba(96,165,250,0.12);  color: var(--blue);   border: 1px solid rgba(96,165,250,0.25); }
+.type-note  { background: rgba(77,101,128,0.15);  color: var(--dim);    border: 1px solid var(--border2); }
+.inbox-preview { font-size: 11px; color: var(--dim); line-height: 1.5; margin-bottom: 7px; }
+.inbox-preview strong { color: var(--text); }
+.inbox-btns { display: flex; gap: 5px; }
+.ibtn {
+  font-size: 10px; padding: 3px 9px; border-radius: 4px;
+  border: 1px solid; cursor: pointer; background: transparent; font-weight: 600;
+}
+.ibtn.ack  { border-color: var(--border2); color: var(--dim); }
+.ibtn.yes  { border-color: rgba(52,211,153,0.4); color: var(--green); }
+.ibtn.no   { border-color: rgba(248,113,113,0.35); color: var(--red); }
+.ibtn.view { border-color: rgba(96,165,250,0.35); color: var(--blue); }
+
+/* Events */
+.event-item {
+  padding: 8px 14px; border-bottom: 1px solid rgba(31,45,69,0.4);
+  display: flex; gap: 10px;
+}
+.ev-day { font-size: 10px; font-weight: 700; color: var(--muted); min-width: 22px; flex-shrink: 0; padding-top: 1px; }
+.ev-text { font-size: 11px; color: var(--dim); line-height: 1.5; flex: 1; }
+.ev-text.alert { color: var(--yellow); }
+.ev-text.warn  { color: var(--red); }
+.ev-text.overnight::before { content: '🌙 '; }
+.ev-fired { font-size: 9px; color: var(--muted); margin-top: 2px; font-style: italic; }
+.ev-tag {
+  font-size: 9px; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; margin-top: 2px;
+  background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.2);
+}
+
+/* Ending tracker */
+.ending-section { padding: 10px 14px 12px; }
+.ending-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.el { font-size: 11px; font-weight: 800; min-width: 12px; }
+.el.a { color: var(--green); }
+.el.b { color: var(--yellow); }
+.el.c { color: var(--red); }
+.etrack { flex: 1; height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+.efill { height: 5px; border-radius: 3px; }
+.efill.a { background: var(--green); }
+.efill.b { background: var(--yellow); }
+.efill.c { background: var(--red); }
+.epct { font-size: 10px; color: var(--muted); min-width: 26px; text-align: right; }
+.ending-note { font-size: 10px; color: var(--muted); line-height: 1.55; margin-top: 6px; }
+.ending-note strong { color: var(--dim); }
+
+/* ─── VIEW TOGGLE ────────────────────────────────── */
+.view-toggle { display:flex; gap:2px; padding:3px; background:var(--surface3); border-radius:8px; border:1px solid var(--border); }
+.vtab { padding:5px 16px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; color:var(--dim); transition:all 0.14s; letter-spacing:0.5px; border:none; background:transparent; }
+.vtab.active { background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,0.35); }
+.vtab.wr-active { background:var(--surface); color:var(--red); box-shadow:0 1px 3px rgba(0,0,0,0.35); }
+
+/* ─── WAR ROOM VIEW ───────────────────────────────── */
+.wr-view { display:none; flex-direction:column; flex:1; overflow:hidden; }
+.wr-view.visible { display:flex; }
+
+.wr-strip { display:flex; gap:1px; background:var(--border); border-bottom:1px solid var(--border); flex-shrink:0; }
+.wr-stat-box { flex:1; padding:12px 16px; background:var(--surface); text-align:center; }
+.wr-stat-num { font-size:26px; font-weight:900; line-height:1; margin-bottom:3px; }
+.wr-stat-lbl { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+.wr-stat-sub { font-size:10px; color:var(--dim); margin-top:2px; }
+
+.wr-grid { display:grid; grid-template-columns:250px 1fr 288px; flex:1; overflow:hidden; }
+.wr-col { overflow-y:auto; border-right:1px solid var(--border); background:var(--surface); }
+.wr-col:last-child { border-right:none; }
+.wr-col::-webkit-scrollbar { width:3px; }
+.wr-col::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.wr-section { padding:12px 14px; border-bottom:1px solid var(--border); }
+.wr-lbl { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:9px; }
+
+/* Presence cards */
+.presence-card { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:7px; background:var(--surface2); border:1px solid var(--border); margin-bottom:5px; }
+.presence-card:last-child { margin-bottom:0; }
+.p-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.p-name { font-size:12px; font-weight:700; min-width:56px; }
+.p-status { font-size:10px; font-weight:700; padding:2px 7px; border-radius:3px; }
+.p-ready   { background:rgba(52,211,153,0.12); color:var(--green); }
+.p-pending { background:rgba(77,101,128,0.12); color:var(--dim); }
+.p-conflict{ background:rgba(248,113,113,0.12); color:var(--red); }
+.p-right { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.p-health { font-size:10px; font-weight:700; }
+.p-ap { font-size:10px; color:var(--muted); }
+
+/* Pool compact rows */
+.pool-compact { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid rgba(31,45,69,0.4); }
+.pool-compact:last-child { border-bottom:none; }
+.pc-name { font-size:10px; color:var(--dim); min-width:106px; flex-shrink:0; }
+.pc-track { flex:1; height:4px; background:var(--surface3); border-radius:2px; overflow:hidden; position:relative; }
+.pc-fill { height:4px; border-radius:2px; }
+.pc-val { font-size:11px; font-weight:700; min-width:28px; text-align:right; }
+
+/* Workstream rows */
+.ws-compact { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid rgba(31,45,69,0.35); }
+.ws-compact:last-child { border-bottom:none; }
+.wsc-name { font-size:10px; color:var(--dim); min-width:76px; flex-shrink:0; }
+.wsc-track { flex:1; height:5px; background:var(--surface3); border-radius:2px; overflow:hidden; }
+.wsc-fill { height:5px; border-radius:2px; background:var(--purple); }
+.wsc-pct { font-size:10px; color:var(--purple); font-weight:700; min-width:26px; text-align:right; }
+.wsc-next { font-size:9px; color:var(--muted); min-width:60px; }
+
+/* Gate in flight */
+.gate-flight { background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:12px 14px; margin-bottom:10px; }
+.gf-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.gf-id { font-size:10px; font-weight:700; padding:2px 7px; border-radius:3px; background:rgba(251,191,36,0.1); color:var(--yellow); border:1px solid rgba(251,191,36,0.2); }
+.gf-title { font-size:13px; font-weight:700; flex:1; }
+.gf-day { font-size:10px; color:var(--muted); }
+.vote-row { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+.vr-name { font-size:10px; font-weight:700; min-width:60px; }
+.vr-status { font-size:10px; padding:2px 8px; border-radius:3px; }
+.vs-pending { color:var(--muted); background:var(--surface3); }
+.vs-concern { color:var(--yellow); background:rgba(251,191,36,0.1); }
+.vs-committed { color:var(--green); background:rgba(52,211,153,0.1); }
+
+/* Ops feed */
+.ops-item { display:flex; gap:10px; padding:7px 14px; border-bottom:1px solid rgba(31,45,69,0.4); }
+.ops-day { font-size:10px; font-weight:700; color:var(--muted); min-width:22px; flex-shrink:0; padding-top:1px; }
+.ops-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.ops-body { flex:1; }
+.ops-text { font-size:11px; color:var(--dim); line-height:1.4; }
+.ops-text strong { color:var(--text); }
+.ops-delta { font-size:10px; font-weight:700; }
+
+/* Escalation cards */
+.esc-card { padding:11px 14px; border-bottom:1px solid rgba(31,45,69,0.5); }
+.esc-card:last-child { border-bottom:none; }
+.esc-top { display:flex; align-items:flex-start; gap:8px; margin-bottom:4px; }
+.esc-icon { font-size:15px; flex-shrink:0; margin-top:1px; }
+.esc-right { flex:1; }
+.esc-title { font-size:12px; font-weight:700; margin-bottom:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.esc-badge { font-size:9px; padding:1px 6px; border-radius:3px; font-weight:700; border:1px solid; }
+.esc-high { background:rgba(248,113,113,0.1); color:var(--red); border-color:rgba(248,113,113,0.3); }
+.esc-med  { background:rgba(251,191,36,0.1);  color:var(--yellow); border-color:rgba(251,191,36,0.3); }
+.esc-desc { font-size:11px; color:var(--dim); line-height:1.5; margin-bottom:6px; }
+.esc-meta { display:flex; align-items:center; gap:6px; }
+.esc-from { font-size:10px; color:var(--blue); font-weight:600; }
+.esc-to   { font-size:10px; color:var(--purple); font-weight:600; }
+.esc-type-tag { font-size:9px; color:var(--muted); padding:1px 6px; border-radius:3px; background:var(--surface3); border:1px solid var(--border2); }
+.esc-actions { display:flex; gap:5px; margin-left:auto; }
+.esc-btn { font-size:10px; padding:3px 9px; border-radius:4px; border:1px solid var(--border2); cursor:pointer; background:transparent; color:var(--dim); }
+.esc-btn.primary { border-color:rgba(96,165,250,0.4); color:var(--blue); }
+.esc-btn.resolve { border-color:rgba(52,211,153,0.4); color:var(--green); }
+
+/* ─── MISC ────────────────────────────────────────── */
+.section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted);
+  padding: 12px 18px 8px;
+}
+.empty-note { font-size: 11px; color: var(--muted); padding: 12px 14px; }
+.divider { height: 1px; background: var(--border); margin: 0; }
+.tag {
+  display: inline-flex; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; border: 1px solid;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ TOPBAR ══════════════════════════════════════ -->
+<div class="topbar">
+  <div class="logo">FLASHPOINT</div>
+  <div class="topbar-sep"></div>
+  <div class="role-badge">
+    <div class="role-badge-dot"></div>
+    <span class="role-badge-name">CISO</span>
+    <span class="role-badge-title">Chief Information Security Officer</span>
+  </div>
+
+  <div class="topbar-sep"></div>
+
+  <div class="day-cluster">
+    <span class="day-label">Day 3</span>
+    <span class="act-pill">ACT 1 — EXPOSURE</span>
+    <div class="timeline-wrap">
+      <div class="timeline-track">
+        <div class="timeline-fill"></div>
+      </div>
+      <div class="timeline-meta"><span>Day 1</span><span>Day 21</span></div>
+    </div>
+  </div>
+
+  <div class="topbar-spacer"></div>
+
+  <div class="view-toggle">
+    <button class="vtab active"    id="btn-myview"  onclick="showView('role')">My View — CISO</button>
+    <button class="vtab"           id="btn-warroom" onclick="showView('warroom')">⚑ War Room</button>
+  </div>
+
+  <div class="icon-btn" title="2 unread messages">📥<div class="notif-dot"></div></div>
+  <div class="icon-btn" title="Debrief">⬡</div>
+</div>
+
+<!-- ══════ LAYOUT ══════════════════════════════════════ -->
+<div class="layout" id="view-role">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────── -->
+  <div class="sidebar">
+
+    <!-- Domain pools -->
+    <div class="sb-section">
+      <div class="sb-label">
+        Your Domain
+        <span class="sb-label-note">CISO</span>
+      </div>
+
+      <div class="pool-item">
+        <div class="pool-row">
+          <span class="pool-name">Security Posture</span>
+          <span class="pool-val" style="color:var(--green)">58 <span class="pool-delta" style="color:var(--green)">+3</span></span>
+        </div>
+        <div class="pool-track"><div class="pool-fill" style="width:58%;background:var(--green)"></div></div>
+      </div>
+
+      <div class="pool-item">
+        <div class="pool-row">
+          <span class="pool-name">Control Framework</span>
+          <span class="pool-val" style="color:var(--green)">62 <span class="pool-delta" style="color:var(--green)">+2</span></span>
+        </div>
+        <div class="pool-track"><div class="pool-fill" style="width:62%;background:var(--green)"></div></div>
+      </div>
+
+      <div class="pool-item">
+        <div class="pool-row">
+          <span class="pool-name">Audit Readiness</span>
+          <span class="pool-val" style="color:var(--green)">70</span>
+        </div>
+        <div class="pool-track"><div class="pool-fill" style="width:70%;background:var(--green)"></div></div>
+      </div>
+
+      <div class="pool-item">
+        <div class="pool-row">
+          <span class="pool-name">Team Morale</span>
+          <span class="pool-val" style="color:var(--yellow)">57 <span class="pool-delta" style="color:var(--red)">−8</span></span>
+        </div>
+        <div class="pool-track"><div class="pool-fill" style="width:57%;background:var(--yellow)"></div></div>
+      </div>
+
+      <div class="pool-item">
+        <div class="pool-row">
+          <span class="pool-name">Executive Trust</span>
+          <span class="pool-val" style="color:var(--green)">+51 <span class="pool-delta" style="color:var(--green)">+6</span></span>
+        </div>
+        <div class="pool-track" style="position:relative">
+          <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border2)"></div>
+          <div class="pool-fill" style="width:51%;margin-left:50%;background:var(--green)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shared org pools -->
+    <div class="sb-section">
+      <div class="sb-label">Organisation</div>
+
+      <div class="pool-item">
+        <div class="pool-row">
+          <span class="pool-name">Scenario Clock</span>
+          <span class="pool-val" style="color:var(--yellow)">90</span>
+        </div>
+        <div class="pool-track"><div class="pool-fill" style="width:90%;background:var(--green)"></div></div>
+      </div>
+
+      <div class="pool-item">
+        <div class="pool-row">
+          <span class="pool-name">Response Capacity</span>
+          <span class="pool-val" style="color:var(--yellow)">65 <span class="pool-delta" style="color:var(--red)">−10</span></span>
+        </div>
+        <div class="pool-track"><div class="pool-fill" style="width:65%;background:var(--yellow)"></div></div>
+      </div>
+
+      <div class="pool-item">
+        <div class="pool-row">
+          <span class="pool-name">Reputation</span>
+          <span class="pool-val" style="color:var(--green)">+7 <span class="pool-delta" style="color:var(--red)">−3</span></span>
+        </div>
+        <div class="pool-track" style="position:relative">
+          <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border2)"></div>
+          <div class="pool-fill" style="width:7%;margin-left:50%;background:var(--green)"></div>
+        </div>
+      </div>
+
+      <div class="pool-item">
+        <div class="pool-row">
+          <span class="pool-name">Regulator Posture</span>
+          <span class="pool-val" style="color:var(--green)">+5</span>
+        </div>
+        <div class="pool-track" style="position:relative">
+          <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border2)"></div>
+          <div class="pool-fill" style="width:5%;margin-left:50%;background:var(--green)"></div>
+        </div>
+      </div>
+
+      <div class="pool-item">
+        <div class="pool-row">
+          <span class="pool-name">Threat Picture</span>
+          <span class="pool-val" style="color:var(--yellow)">43 <span class="pool-delta" style="color:var(--green)">+18</span></span>
+        </div>
+        <div class="pool-track"><div class="pool-fill" style="width:43%;background:var(--yellow)"></div></div>
+      </div>
+    </div>
+
+    <!-- Other roles — restricted -->
+    <div class="sb-section">
+      <div class="sb-label">
+        Other Roles
+        <span style="font-size:9px;color:var(--purple);font-weight:600;letter-spacing:0;text-transform:none">signal only</span>
+      </div>
+
+      <div class="org-signal">
+        <span class="org-role-tag" style="color:var(--cfo)">CFO</span>
+        <div class="org-signal-bar"><div class="org-signal-fill" style="width:72%;background:var(--cfo)"></div></div>
+        <span class="org-signal-label" style="color:var(--dim)">Stable</span>
+        <span class="org-signal-lock">🔒</span>
+      </div>
+      <div class="org-signal">
+        <span class="org-role-tag" style="color:var(--legal)">LEGAL</span>
+        <div class="org-signal-bar"><div class="org-signal-fill" style="width:45%;background:var(--legal)"></div></div>
+        <span class="org-signal-label" style="color:var(--yellow)">Tension ↑</span>
+        <span class="org-signal-lock">🔒</span>
+      </div>
+      <div class="org-signal">
+        <span class="org-role-tag" style="color:var(--comms)">COMMS</span>
+        <div class="org-signal-bar"><div class="org-signal-fill" style="width:58%;background:var(--comms)"></div></div>
+        <span class="org-signal-label" style="color:var(--dim)">Stable</span>
+        <span class="org-signal-lock">🔒</span>
+      </div>
+      <div class="org-signal">
+        <span class="org-role-tag" style="color:var(--ceo)">CEO</span>
+        <div class="org-signal-bar"><div class="org-signal-fill" style="width:60%;background:var(--ceo)"></div></div>
+        <span class="org-signal-label" style="color:var(--dim)">Stable</span>
+        <span class="org-signal-lock">🔒</span>
+      </div>
+      <div style="font-size:9px;color:var(--muted);margin-top:8px;line-height:1.5">
+        Other roles' private pools are not visible to you. Request an INTEL_SHARE to surface specific signals.
+      </div>
+    </div>
+
+    <!-- Workstreams -->
+    <div class="sb-section" style="flex:1">
+      <div class="sb-label">Workstreams</div>
+
+      <div class="ws-row">
+        <span class="ws-name">Forensics</span>
+        <div class="ws-track"><div class="ws-fill" style="width:20%"></div></div>
+        <span class="ws-pct">20%</span>
+      </div>
+      <div style="font-size:9px;color:var(--muted);margin:-4px 0 8px 78px">Next: +5 IQ at 25%</div>
+
+      <div class="ws-row">
+        <span class="ws-name">Regulatory</span>
+        <div class="ws-track"><div class="ws-fill" style="width:0%"></div></div>
+        <span class="ws-pct" style="color:var(--muted)">0%</span>
+      </div>
+      <div class="ws-row">
+        <span class="ws-name">Media</span>
+        <div class="ws-track"><div class="ws-fill" style="width:0%"></div></div>
+        <span class="ws-pct" style="color:var(--muted)">0%</span>
+      </div>
+      <div class="ws-row">
+        <span class="ws-name">Financial</span>
+        <div class="ws-track"><div class="ws-fill" style="width:0%"></div></div>
+        <span class="ws-pct" style="color:var(--muted)">0%</span>
+      </div>
+      <div class="ws-row">
+        <span class="ws-name">Stakeholder</span>
+        <div class="ws-track"><div class="ws-fill" style="width:0%"></div></div>
+        <span class="ws-pct" style="color:var(--muted)">0%</span>
+      </div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- ── MAIN ─────────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- Completed gate: G1 -->
+    <div class="completed-gate">
+      <span class="cg-tag">G1</span>
+      <span class="cg-check">✓</span>
+      <span class="cg-title">Initial Response Posture — committed Day 1</span>
+      <span class="cg-choice">A — Activate Formal IR</span>
+      <span class="cg-day">Day 1</span>
+    </div>
+
+    <!-- Notification from Legal -->
+    <div class="notif-banner">
+      <div class="notif-icon">📨</div>
+      <div style="flex:1">
+        <div style="font-size:10px;font-weight:700;color:var(--legal);margin-bottom:3px">STATEMENT HOLD — from Legal</div>
+        <div style="font-size:11px;color:var(--dim);line-height:1.5">General Counsel has issued a hold on all written communications with NovaCare pending privilege review. <strong style="color:var(--text)">Do not send any written correspondence to NovaCare security contacts</strong> until you receive clearance.</div>
+      </div>
+      <button class="ibtn ack" style="flex-shrink:0;margin-top:auto">Acknowledged</button>
+    </div>
+
+    <!-- Active gate G3 -->
+    <div class="gate-card active-gate">
+      <div class="gate-header">
+        <div class="gate-icon">🔬</div>
+        <div class="gate-meta">
+          <div class="gate-eyebrow">
+            <span class="gate-id-tag">G3</span>
+            Decision Gate — Day 3
+          </div>
+          <div class="gate-title">External Forensics Engagement</div>
+          <div class="gate-roles">
+            <span class="role-tag" style="background:rgba(248,113,113,0.1);color:var(--ciso);border:1px solid rgba(248,113,113,0.2)">CISO</span>
+            <span class="role-tag" style="background:rgba(96,165,250,0.1);color:var(--cfo);border:1px solid rgba(96,165,250,0.2)">CFO</span>
+            <span style="font-size:10px;color:var(--muted);margin-left:2px">Joint decision — CFO will be notified of your recommendation</span>
+          </div>
+        </div>
+      </div>
+      <div class="gate-body">
+        <div class="gate-brief">
+          NovaCare has issued a <strong>formal denial</strong> of any breach on their infrastructure. Your internal investigation is producing limited signal — the team's capability ceiling is becoming visible. You must decide whether to bring in external forensics and at what investment level. <span class="hl">This decision directly affects your Threat Picture quality for the rest of Act 1.</span>
+        </div>
+
+        <div class="choices">
+
+          <!-- Choice A -->
+          <div class="choice a">
+            <div class="choice-top">
+              <div class="choice-badge badge-a">A</div>
+              <span class="choice-label">Top-Tier Forensics Firm — $150K</span>
+              <span class="choice-cost">Emergency spend · CISO + CFO</span>
+            </div>
+            <div class="choice-desc">Engage Mandiant or equivalent. Fastest, highest quality, definitive evidence chain. Significant liquidity event — CFO must authorise. Forensics complete by Day 7.</div>
+            <div class="choice-effects">
+              <span class="fx pos">+25 Threat Picture <em style="font-size:9px;opacity:0.7">(Act 1 close)</em></span>
+              <span class="fx neg">−12 CFO Liquidity</span>
+              <span class="fx neg">−8 Budget Integrity</span>
+              <span class="fx pos">+8 Security Posture</span>
+              <span class="fx hid">● hidden effects</span>
+            </div>
+          </div>
+
+          <!-- Choice B — active/highlighted -->
+          <div class="choice b active">
+            <div class="choice-top">
+              <div class="choice-badge badge-b">B</div>
+              <span class="choice-label">Mid-Tier Domestic Firm — $55K</span>
+              <span class="choice-cost">Moderate spend · CISO + CFO</span>
+            </div>
+            <div class="choice-desc">Engage a domestic mid-tier firm. Adequate quality, manageable cost, 48hr onboarding lag. Evidence picture is thorough but not definitive. CFO approval required.</div>
+            <div class="choice-effects">
+              <span class="fx pos">+15 Threat Picture <em style="font-size:9px;opacity:0.7">(Act 1 close)</em></span>
+              <span class="fx neg">−5 CFO Liquidity</span>
+              <span class="fx neg">−3 Budget Integrity</span>
+              <span class="fx pos">+4 Security Posture</span>
+            </div>
+            <div class="choice-commit-row">
+              <button class="commit-btn">Commit B ▶</button>
+            </div>
+          </div>
+
+          <!-- Choice C -->
+          <div class="choice c">
+            <div class="choice-top">
+              <div class="choice-badge badge-c">C</div>
+              <span class="choice-label">In-House Investigation Only — $0</span>
+              <span class="choice-cost">No spend · CISO only</span>
+            </div>
+            <div class="choice-desc">Decline external engagement. Your team runs the investigation. Zero cost; capability ceiling capped; intelligence quality cannot exceed current trajectory.</div>
+            <div class="choice-effects">
+              <span class="fx pos">+5 Threat Picture</span>
+              <span class="fx pos">+3 Budget Integrity</span>
+              <span class="fx neg">−12 Team Morale</span>
+              <span class="fx hid">● hidden legal effects</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="hidden-row">
+          <span>●</span> Some effects from this decision are <span>not visible</span> to you at this stage. They will surface at Act boundaries or in the debrief.
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Domain actions -->
+    <div class="actions-card">
+      <div class="actions-head">
+        <span class="actions-title">Your Day 3 Actions</span>
+        <span class="ap-chip">18 / 30 AP remaining</span>
+      </div>
+      <div class="ap-track"><div class="ap-fill"></div></div>
+      <div class="action-list">
+
+        <!-- Selected action -->
+        <div class="action-row on">
+          <div class="action-cb">✓</div>
+          <div class="action-content">
+            <div class="action-label">Conduct control review</div>
+            <div class="action-fx-row">
+              <span class="fx pos" style="font-size:9px">+4 Control Framework</span>
+              <span class="fx pos" style="font-size:9px">+2 Audit Readiness</span>
+            </div>
+          </div>
+          <div class="action-ap">12 AP</div>
+        </div>
+
+        <!-- Available actions -->
+        <div class="action-row">
+          <div class="action-cb"></div>
+          <div class="action-content">
+            <div class="action-label">Brief security team</div>
+            <div class="action-fx-row">
+              <span class="fx pos" style="font-size:9px">+7 Team Morale</span>
+            </div>
+          </div>
+          <div class="action-ap">8 AP</div>
+        </div>
+
+        <div class="action-row">
+          <div class="action-cb"></div>
+          <div class="action-content">
+            <div class="action-label">Threat intelligence review</div>
+            <div class="action-fx-row">
+              <span class="fx pos" style="font-size:9px">+5 Threat Picture</span>
+            </div>
+          </div>
+          <div class="action-ap">10 AP</div>
+        </div>
+
+        <div class="action-row">
+          <div class="action-cb"></div>
+          <div class="action-content">
+            <div class="action-label">Technical brief to CEO</div>
+            <div class="action-fx-row">
+              <span class="fx pos" style="font-size:9px">+6 Executive Trust</span>
+            </div>
+          </div>
+          <div class="action-ap">8 AP</div>
+        </div>
+
+        <!-- Cannot afford -->
+        <div class="action-row used">
+          <div class="action-cb"></div>
+          <div class="action-content">
+            <div class="action-label">Invest in Forensics workstream</div>
+            <div class="action-fx-row">
+              <span class="fx neu" style="font-size:9px">Forensics +20%</span>
+            </div>
+          </div>
+          <div class="action-ap" style="color:var(--red)">14 AP</div>
+        </div>
+
+      </div>
+      <div class="ready-wrap">
+        <button class="ready-btn">✓ Mark CISO Ready — Commit Day's Actions</button>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- ── RIGHT PANEL ──────────────────────────────────── -->
+  <div class="right">
+
+    <!-- Inbox -->
+    <div class="right-block">
+      <div class="rblock-head">
+        <span class="rblock-title">Inbox</span>
+        <span class="rblock-badge">2 unread</span>
+      </div>
+
+      <!-- Unread: CFO spend request -->
+      <div class="inbox-item unread">
+        <div class="inbox-from">
+          <div class="inbox-dot" style="background:var(--cfo)"></div>
+          <span class="inbox-name" style="color:var(--cfo)">CFO</span>
+          <span class="inbox-type type-spend">SPEND REQUEST</span>
+        </div>
+        <div class="inbox-preview">
+          Before you commit to a forensics vendor, I need to flag: <strong>discretionary budget is under pressure</strong> this quarter. I can authorise up to $55K without board approval — anything above requires an emergency resolution. Can you give me a heads-up on the cost profile you're considering?
+        </div>
+        <div class="inbox-btns">
+          <button class="ibtn view">View CFO Note</button>
+          <button class="ibtn yes">Respond</button>
+        </div>
+      </div>
+
+      <!-- Unread: Legal hold -->
+      <div class="inbox-item urgent">
+        <div class="inbox-from">
+          <div class="inbox-dot" style="background:var(--legal)"></div>
+          <span class="inbox-name" style="color:var(--legal)">General Counsel</span>
+          <span class="inbox-type type-hold">STATEMENT HOLD</span>
+        </div>
+        <div class="inbox-preview">
+          Hold all written comms with NovaCare pending privilege review. I'm reviewing the contract for <strong>indemnification clauses</strong> and do not want anything on record until I clear it. Verbal only until further notice.
+        </div>
+        <div class="inbox-btns">
+          <button class="ibtn ack">Acknowledged</button>
+        </div>
+      </div>
+
+    </div><!-- /inbox -->
+
+    <!-- Scenario events feed -->
+    <div class="right-block grow">
+      <div class="rblock-head">
+        <span class="rblock-title">Scenario Events</span>
+        <span class="rblock-badge info">Day 3</span>
+      </div>
+
+      <div class="event-item">
+        <span class="ev-day">D1</span>
+        <div>
+          <div class="ev-text">Monitoring logs flag 4.3GB export from NovaCare integration at 06:22.</div>
+          <div class="ev-fired">fired · +2 Threat Picture</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <span class="ev-day">D1</span>
+        <div>
+          <div class="ev-text">Claire Ashworth emails CISO — 40-record sample, 48h publication deadline.</div>
+          <div class="ev-fired">fired</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <span class="ev-day">D1</span>
+        <div>
+          <div class="ev-text alert">NovaCare security contact unresponsive — acknowledgement email only.</div>
+          <div class="ev-fired">fired · −5 NovaCare Trust</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <span class="ev-day">D2</span>
+        <div>
+          <div class="ev-text">CISO team confirms: sample records are authentic Meridian data.</div>
+          <div class="ev-fired">fired · +8 Threat Picture</div>
+        </div>
+      </div>
+
+      <div class="event-item">
+        <span class="ev-day" style="color:var(--text)">D3</span>
+        <div>
+          <div class="ev-text" style="color:var(--text)">NovaCare issues formal denial of breach on their infrastructure at 14:30.</div>
+          <div class="ev-tag">today · −8 NovaCare Trust</div>
+        </div>
+      </div>
+
+      <div class="event-item" style="opacity:0.45">
+        <span class="ev-day">D4</span>
+        <div>
+          <div class="ev-text">Board Chair Lisa Park calls CEO — briefing required.</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:2px">upcoming</div>
+        </div>
+      </div>
+
+      <div class="event-item" style="opacity:0.35">
+        <span class="ev-day">D7</span>
+        <div>
+          <div class="ev-text overnight">Ashworth reminder: "Publishing in 24h per my earlier commitment."</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:2px">overnight event · upcoming</div>
+        </div>
+      </div>
+
+      <!-- Ending tracker -->
+      <div style="border-top:1px solid var(--border);padding:12px 14px 4px">
+        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Ending Trajectory</div>
+        <div class="ending-row">
+          <span class="el a">A</span>
+          <div class="etrack"><div class="efill a" style="width:15%"></div></div>
+          <span class="epct">15%</span>
+        </div>
+        <div class="ending-row">
+          <span class="el b">B</span>
+          <div class="etrack"><div class="efill b" style="width:60%"></div></div>
+          <span class="epct">60%</span>
+        </div>
+        <div class="ending-row">
+          <span class="el c">C</span>
+          <div class="etrack"><div class="efill c" style="width:25%"></div></div>
+          <span class="epct">25%</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.55;margin-top:8px">
+          Based on <strong style="color:var(--dim)">G1 → A</strong>. Forensics decision (G3) will significantly shift trajectory. Ending A requires top-tier engagement.
+        </div>
+      </div>
+
+    </div><!-- /events + ending -->
+
+  </div><!-- /right -->
+
+</div><!-- /layout -->
+
+<!-- ══════ WAR ROOM VIEW ════════════════════════════ -->
+<div class="wr-view" id="view-warroom">
+
+  <!-- Situation strip -->
+  <div class="wr-strip">
+    <div class="wr-stat-box">
+      <div class="wr-stat-num">3</div>
+      <div class="wr-stat-lbl">Current Day</div>
+      <div class="wr-stat-sub">of 21</div>
+    </div>
+    <div class="wr-stat-box">
+      <div class="wr-stat-num" style="color:var(--blue)">ACT 1</div>
+      <div class="wr-stat-lbl">Exposure</div>
+      <div class="wr-stat-sub">Days 1–7</div>
+    </div>
+    <div class="wr-stat-box">
+      <div class="wr-stat-num" style="color:var(--green)">90</div>
+      <div class="wr-stat-lbl">Scenario Clock</div>
+      <div class="wr-stat-sub">−5 per day</div>
+    </div>
+    <div class="wr-stat-box">
+      <div class="wr-stat-num" style="color:var(--yellow)">65</div>
+      <div class="wr-stat-lbl">Response Capacity</div>
+      <div class="wr-stat-sub">−10 from G1-A</div>
+    </div>
+    <div class="wr-stat-box">
+      <div class="wr-stat-num" style="color:var(--yellow)">43</div>
+      <div class="wr-stat-lbl">Threat Picture</div>
+      <div class="wr-stat-sub">+18 from IR activation</div>
+    </div>
+    <div class="wr-stat-box">
+      <div class="wr-stat-num" style="color:var(--yellow)">2</div>
+      <div class="wr-stat-lbl">Escalations</div>
+      <div class="wr-stat-sub">1 high · 1 medium</div>
+    </div>
+    <div class="wr-stat-box">
+      <div class="wr-stat-num">3/5</div>
+      <div class="wr-stat-lbl">Roles Ready</div>
+      <div class="wr-stat-sub">Legal · CFO pending</div>
+    </div>
+  </div>
+
+  <!-- Three-column war room grid -->
+  <div class="wr-grid">
+
+    <!-- ── LEFT: pools + workstreams ─────────────── -->
+    <div class="wr-col">
+
+      <!-- Shared pools -->
+      <div class="wr-section">
+        <div class="wr-lbl">Shared Pools</div>
+        <div class="pool-compact">
+          <span class="pc-name">Scenario Clock</span>
+          <div class="pc-track"><div class="pc-fill" style="width:90%;background:var(--green)"></div></div>
+          <span class="pc-val" style="color:var(--green)">90</span>
+        </div>
+        <div class="pool-compact">
+          <span class="pc-name">Response Capacity</span>
+          <div class="pc-track"><div class="pc-fill" style="width:65%;background:var(--yellow)"></div></div>
+          <span class="pc-val" style="color:var(--yellow)">65</span>
+        </div>
+        <div class="pool-compact">
+          <span class="pc-name">Reputation</span>
+          <div class="pc-track" style="position:relative">
+            <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border2)"></div>
+            <div class="pc-fill" style="width:7%;margin-left:50%;background:var(--green)"></div>
+          </div>
+          <span class="pc-val" style="color:var(--green)">+7</span>
+        </div>
+        <div class="pool-compact">
+          <span class="pc-name">Regulator Posture</span>
+          <div class="pc-track" style="position:relative">
+            <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border2)"></div>
+            <div class="pc-fill" style="width:5%;margin-left:50%;background:var(--green)"></div>
+          </div>
+          <span class="pc-val" style="color:var(--green)">+5</span>
+        </div>
+        <div class="pool-compact">
+          <span class="pc-name">Threat Picture</span>
+          <div class="pc-track"><div class="pc-fill" style="width:43%;background:var(--yellow)"></div></div>
+          <span class="pc-val" style="color:var(--yellow)">43</span>
+        </div>
+      </div>
+
+      <!-- Scenario threads -->
+      <div class="wr-section">
+        <div class="wr-lbl">Scenario Threads</div>
+        <div class="pool-compact">
+          <span class="pc-name">NovaCare Trust</span>
+          <div class="pc-track"><div class="pc-fill" style="width:32%;background:var(--red)"></div></div>
+          <span class="pc-val" style="color:var(--red)">32</span>
+        </div>
+        <div class="pool-compact">
+          <span class="pc-name">Patient Confidence</span>
+          <div class="pc-track"><div class="pc-fill" style="width:75%;background:var(--green)"></div></div>
+          <span class="pc-val" style="color:var(--green)">75</span>
+        </div>
+        <div class="pool-compact">
+          <span class="pc-name">Researcher Goodwill</span>
+          <div class="pc-track"><div class="pc-fill" style="width:40%;background:var(--yellow)"></div></div>
+          <span class="pc-val" style="color:var(--yellow)">40</span>
+        </div>
+        <div class="pool-compact">
+          <span class="pc-name">Dr. Obi Trajectory</span>
+          <div class="pc-track"><div class="pc-fill" style="width:75%;background:var(--green)"></div></div>
+          <span class="pc-val" style="color:var(--green)">75</span>
+        </div>
+      </div>
+
+      <!-- Workstreams -->
+      <div class="wr-section">
+        <div class="wr-lbl">Workstream Progress</div>
+        <div class="ws-compact">
+          <span class="wsc-name">Forensics</span>
+          <div class="wsc-track"><div class="wsc-fill" style="width:20%"></div></div>
+          <span class="wsc-pct">20%</span>
+          <span class="wsc-next">→ 25%</span>
+        </div>
+        <div class="ws-compact">
+          <span class="wsc-name">Regulatory</span>
+          <div class="wsc-track"><div class="wsc-fill" style="width:0%"></div></div>
+          <span class="wsc-pct" style="color:var(--muted)">0%</span>
+          <span class="wsc-next">not started</span>
+        </div>
+        <div class="ws-compact">
+          <span class="wsc-name">Media</span>
+          <div class="wsc-track"><div class="wsc-fill" style="width:0%"></div></div>
+          <span class="wsc-pct" style="color:var(--muted)">0%</span>
+          <span class="wsc-next">not started</span>
+        </div>
+        <div class="ws-compact">
+          <span class="wsc-name">Financial</span>
+          <div class="wsc-track"><div class="wsc-fill" style="width:0%"></div></div>
+          <span class="wsc-pct" style="color:var(--muted)">0%</span>
+          <span class="wsc-next">not started</span>
+        </div>
+        <div class="ws-compact">
+          <span class="wsc-name">Stakeholder</span>
+          <div class="wsc-track"><div class="wsc-fill" style="width:0%"></div></div>
+          <span class="wsc-pct" style="color:var(--muted)">0%</span>
+          <span class="wsc-next">not started</span>
+        </div>
+      </div>
+
+      <!-- Committed gates -->
+      <div class="wr-section">
+        <div class="wr-lbl">Committed Decisions</div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(31,45,69,0.4)">
+          <span style="font-size:10px;font-weight:700;color:var(--muted);min-width:22px">G1</span>
+          <span style="font-size:11px;flex:1;color:var(--dim)">Initial Response Posture</span>
+          <span style="font-size:10px;padding:1px 7px;border-radius:3px;background:rgba(52,211,153,0.1);color:var(--green);font-weight:700">A</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(31,45,69,0.4)">
+          <span style="font-size:10px;font-weight:700;color:var(--muted);min-width:22px">G2</span>
+          <span style="font-size:11px;flex:1;color:var(--dim)">NDB Notification Clock</span>
+          <span style="font-size:10px;padding:1px 7px;border-radius:3px;background:rgba(251,191,36,0.1);color:var(--yellow);font-weight:700">B</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;opacity:0.5">
+          <span style="font-size:10px;font-weight:700;color:var(--muted);min-width:22px">G3</span>
+          <span style="font-size:11px;flex:1;color:var(--dim)">External Forensics Engagement</span>
+          <span style="font-size:10px;color:var(--yellow)">⏳ Active</span>
+        </div>
+      </div>
+
+    </div><!-- /left col -->
+
+    <!-- ── MIDDLE: gate in flight + ops feed ───── -->
+    <div class="wr-col" style="background:var(--bg)">
+
+      <div style="padding:14px">
+
+        <!-- Gate in flight -->
+        <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Gate In Flight</div>
+        <div class="gate-flight">
+          <div class="gf-head">
+            <span class="gf-id">G3</span>
+            <span class="gf-title">External Forensics Engagement</span>
+            <span class="gf-day">Day 3</span>
+          </div>
+          <div style="font-size:11px;color:var(--dim);line-height:1.6;margin-bottom:10px">
+            NovaCare has issued a formal denial. Internal investigation is producing limited signal. Forensics decision required — this gate is a joint CISO + CFO decision.
+          </div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:6px;text-transform:uppercase">Role Positions</div>
+          <div class="vote-row">
+            <span class="vr-name" style="color:var(--ciso)">CISO</span>
+            <span class="vr-status vs-committed">Leaning B — Mid-tier</span>
+          </div>
+          <div class="vote-row">
+            <span class="vr-name" style="color:var(--cfo)">CFO</span>
+            <span class="vr-status vs-concern">⚠ Budget concern raised</span>
+          </div>
+          <div style="margin-top:8px;padding:8px 10px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:6px;font-size:11px;color:var(--yellow)">
+            CFO has flagged a budget constraint via inbox. Resolution required before committing. This is an active war room coordination point.
+          </div>
+        </div>
+
+        <!-- Advance control -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="font-size:12px;font-weight:700;flex:1">Day Advance Control</div>
+            <span style="font-size:11px;color:var(--muted)">3 of 5 roles ready</span>
+          </div>
+          <div style="display:flex;gap:4px;margin-bottom:10px">
+            <div style="flex:1;height:6px;border-radius:3px;background:var(--green)"></div>
+            <div style="flex:1;height:6px;border-radius:3px;background:var(--surface3)"></div>
+            <div style="flex:1;height:6px;border-radius:3px;background:var(--green)"></div>
+            <div style="flex:1;height:6px;border-radius:3px;background:var(--surface3)"></div>
+            <div style="flex:1;height:6px;border-radius:3px;background:var(--green)"></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;text-align:center;font-size:9px;color:var(--green)">CISO ✓</div>
+            <div style="flex:1;text-align:center;font-size:9px;color:var(--muted)">CFO ⏳</div>
+            <div style="flex:1;text-align:center;font-size:9px;color:var(--green)">LEGAL ✓</div>
+            <div style="flex:1;text-align:center;font-size:9px;color:var(--muted)">COMMS ⏳</div>
+            <div style="flex:1;text-align:center;font-size:9px;color:var(--green)">CEO ✓</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--dim);font-size:11px;font-weight:600;cursor:pointer">Wait for All Roles</button>
+            <button style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(251,191,36,0.4);background:rgba(251,191,36,0.06);color:var(--yellow);font-size:11px;font-weight:600;cursor:pointer">Override — Advance (3/5)</button>
+          </div>
+        </div>
+
+        <!-- Cross-role ops feed -->
+        <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Cross-Role Activity</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+
+          <div class="ops-item">
+            <span class="ops-day">D3</span>
+            <div class="ops-dot" style="background:var(--legal)"></div>
+            <div class="ops-body">
+              <div class="ops-text"><strong>Legal</strong> issued STATEMENT HOLD — all NovaCare written comms suspended pending privilege review</div>
+            </div>
+          </div>
+
+          <div class="ops-item">
+            <span class="ops-day">D3</span>
+            <div class="ops-dot" style="background:var(--ciso)"></div>
+            <div class="ops-body">
+              <div class="ops-text"><strong>CISO</strong> completed control review — <span class="ops-delta" style="color:var(--green)">+4 Control Framework</span></div>
+            </div>
+          </div>
+
+          <div class="ops-item">
+            <span class="ops-day">D3</span>
+            <div class="ops-dot" style="background:var(--cfo)"></div>
+            <div class="ops-body">
+              <div class="ops-text"><strong>CFO</strong> raised SPEND REQUEST — flagging budget constraint on forensics ahead of G3 commit</div>
+            </div>
+          </div>
+
+          <div class="ops-item">
+            <span class="ops-day">D2</span>
+            <div class="ops-dot" style="background:var(--legal)"></div>
+            <div class="ops-body">
+              <div class="ops-text"><strong>Legal</strong> committed G2 → B (Hold NDB clock pending investigation) — <span class="ops-delta" style="color:var(--red)">+12 Ethical Tension</span> <span style="font-size:9px;color:var(--purple)">[CAUSE_VISIBLE]</span></div>
+            </div>
+          </div>
+
+          <div class="ops-item">
+            <span class="ops-day">D2</span>
+            <div class="ops-dot" style="background:var(--ciso)"></div>
+            <div class="ops-body">
+              <div class="ops-text"><strong>CISO</strong> — NovaCare access log review produced intelligence — <span class="ops-delta" style="color:var(--green)">+8 Threat Picture</span></div>
+            </div>
+          </div>
+
+          <div class="ops-item">
+            <span class="ops-day">D1</span>
+            <div class="ops-dot" style="background:var(--ciso)"></div>
+            <div class="ops-body">
+              <div class="ops-text"><strong>CISO</strong> committed G1 → A (Activate Formal IR) — shared capacity draw <span class="ops-delta" style="color:var(--red)">−10 Capacity</span> <span style="font-size:9px;color:var(--purple)">[CAUSE_HIDDEN to CFO]</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div><!-- /middle col -->
+
+    <!-- ── RIGHT: role board + escalations ───────── -->
+    <div class="wr-col">
+
+      <!-- Role presence board -->
+      <div class="wr-section">
+        <div class="wr-lbl">Role Presence — Day 3</div>
+
+        <div class="presence-card" style="border-top:2px solid var(--ciso)">
+          <div class="p-dot" style="background:var(--ciso)"></div>
+          <span class="p-name" style="color:var(--ciso)">CISO</span>
+          <span class="p-status p-ready">✓ Ready</span>
+          <div class="p-right">
+            <span class="p-health" style="color:var(--green)">Stable</span>
+            <span class="p-ap">18/30 AP</span>
+          </div>
+        </div>
+
+        <div class="presence-card" style="border-top:2px solid var(--cfo)">
+          <div class="p-dot" style="background:var(--cfo)"></div>
+          <span class="p-name" style="color:var(--cfo)">CFO</span>
+          <span class="p-status p-pending">⏳ Pending</span>
+          <div class="p-right">
+            <span class="p-health" style="color:var(--green)">Stable</span>
+            <span class="p-ap">25/25 AP</span>
+          </div>
+        </div>
+
+        <div class="presence-card" style="border-top:2px solid var(--legal)">
+          <div class="p-dot" style="background:var(--legal)"></div>
+          <span class="p-name" style="color:var(--legal)">Legal</span>
+          <span class="p-status p-ready">✓ Ready</span>
+          <div class="p-right">
+            <span class="p-health" style="color:var(--yellow)">Tension ↑</span>
+            <span class="p-ap">15/25 AP</span>
+          </div>
+        </div>
+
+        <div class="presence-card" style="border-top:2px solid var(--comms)">
+          <div class="p-dot" style="background:var(--comms)"></div>
+          <span class="p-name" style="color:var(--comms)">Comms</span>
+          <span class="p-status p-pending">⏳ Pending</span>
+          <div class="p-right">
+            <span class="p-health" style="color:var(--green)">Stable</span>
+            <span class="p-ap">25/25 AP</span>
+          </div>
+        </div>
+
+        <div class="presence-card" style="border-top:2px solid var(--ceo)">
+          <div class="p-dot" style="background:var(--ceo)"></div>
+          <span class="p-name" style="color:var(--ceo)">CEO</span>
+          <span class="p-status p-ready">✓ Ready</span>
+          <div class="p-right">
+            <span class="p-health" style="color:var(--green)">Stable</span>
+            <span class="p-ap">20/30 AP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Escalation queue -->
+      <div class="wr-section" style="padding-bottom:0">
+        <div class="wr-lbl">
+          Escalation Queue
+          <span style="font-size:9px;padding:1px 7px;border-radius:10px;background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.3);margin-left:6px;font-weight:700">2 active</span>
+        </div>
+      </div>
+
+      <div class="esc-card">
+        <div class="esc-top">
+          <span class="esc-icon">💰</span>
+          <div class="esc-right">
+            <div class="esc-title">
+              Forensics spend needs CFO alignment
+              <span class="esc-badge esc-high">HIGH</span>
+            </div>
+            <div class="esc-desc">CISO is leaning toward a forensics commitment that creates an unplanned liquidity event. CFO has not yet been consulted on the cost profile. War room coordination required before G3 is committed.</div>
+            <div class="esc-meta">
+              <span class="esc-from">CISO</span>
+              <span style="color:var(--muted);font-size:10px"> → </span>
+              <span class="esc-to">CFO</span>
+              <span class="esc-type-tag">SPEND</span>
+              <div class="esc-actions">
+                <button class="esc-btn primary">Discuss</button>
+                <button class="esc-btn resolve">Resolve</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="esc-card">
+        <div class="esc-top">
+          <span class="esc-icon">⚡</span>
+          <div class="esc-right">
+            <div class="esc-title">
+              NDB clock held — ethical tension building
+              <span class="esc-badge esc-med">MEDIUM</span>
+            </div>
+            <div class="esc-desc">Legal committed G2-B (hold clock). Ethical Tension in the Legal domain is now at 42 and rising daily. CEO should be aware this pressure is accumulating without a release valve.</div>
+            <div class="esc-meta">
+              <span class="esc-from">Legal</span>
+              <span style="color:var(--muted);font-size:10px"> → </span>
+              <span class="esc-to">CEO</span>
+              <span class="esc-type-tag">CONFLICT</span>
+              <div class="esc-actions">
+                <button class="esc-btn primary">Brief CEO</button>
+                <button class="esc-btn resolve">Acknowledge</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ending tracker -->
+      <div class="wr-section">
+        <div class="wr-lbl">Ending Trajectory</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+          <span style="font-size:11px;font-weight:800;color:var(--green);min-width:12px">A</span>
+          <div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden"><div style="width:15%;height:5px;background:var(--green);border-radius:3px"></div></div>
+          <span style="font-size:10px;color:var(--muted);min-width:26px;text-align:right">15%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+          <span style="font-size:11px;font-weight:800;color:var(--yellow);min-width:12px">B</span>
+          <div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden"><div style="width:60%;height:5px;background:var(--yellow);border-radius:3px"></div></div>
+          <span style="font-size:10px;color:var(--muted);min-width:26px;text-align:right">60%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:800;color:var(--red);min-width:12px">C</span>
+          <div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden"><div style="width:25%;height:5px;background:var(--red);border-radius:3px"></div></div>
+          <span style="font-size:10px;color:var(--muted);min-width:26px;text-align:right">25%</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.55">
+          G1→A sets Ending A foundation. G3 forensics decision is the next significant branch point. Top-tier engagement required for A trajectory.
+        </div>
+      </div>
+
+    </div><!-- /right col -->
+
+  </div><!-- /wr-grid -->
+</div><!-- /war room view -->
+
+<script>
+function showView(v) {
+  const role    = document.getElementById('view-role');
+  const warroom = document.getElementById('view-warroom');
+  const btnMy   = document.getElementById('btn-myview');
+  const btnWr   = document.getElementById('btn-warroom');
+  if (v === 'role') {
+    role.style.display    = '';
+    warroom.classList.remove('visible');
+    btnMy.classList.add('active');
+    btnMy.classList.remove('wr-active');
+    btnWr.classList.remove('active','wr-active');
+  } else {
+    role.style.display    = 'none';
+    warroom.classList.add('visible');
+    btnWr.classList.add('active','wr-active');
+    btnMy.classList.remove('active');
+  }
+}
+</script>
+
+</body>
+</html>

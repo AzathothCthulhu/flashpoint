@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLASHPOINT — Where Decisions Have Consequences</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#07090f;
+  --s1:#0d1520;
+  --s2:#121e2e;
+  --s3:#172234;
+  --border:#1c2d42;
+  --border2:#243650;
+  --amber:#e8920c;
+  --amber-d:rgba(232,146,12,0.10);
+  --amber-g:rgba(232,146,12,0.20);
+  --blue:#2a5fd6;
+  --blue-d:rgba(42,95,214,0.13);
+  --red:#dc3545;
+  --red-d:rgba(220,53,69,0.12);
+  --green:#198754;
+  --purple:#7c5fdb;
+  --purple-d:rgba(124,95,219,0.12);
+  --text:#e2ddd0;
+  --muted:#5a6878;
+  --subtle:#8a96a4;
+  --white:#ffffff;
+}
+
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* GRID BG */
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(28,45,66,0.28) 1px,transparent 1px),linear-gradient(90deg,rgba(28,45,66,0.28) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;z-index:0}
+
+/* DECK */
+.deck{width:100vw;height:100vh;position:relative;overflow:hidden}
+
+/* SLIDES */
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;padding:52px 80px 90px;opacity:0;pointer-events:none;transition:opacity 0.35s ease;z-index:1}
+.slide.active{opacity:1;pointer-events:all}
+.slide>*{position:relative;z-index:1}
+
+/* NAV */
+.nav{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:18px;z-index:100}
+.nav-btn{width:42px;height:42px;border:1px solid var(--border2);background:var(--s1);color:var(--subtle);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);font-family:inherit}
+.nav-btn:hover{border-color:var(--amber);color:var(--amber);background:var(--amber-d)}
+.slide-counter{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:3px;color:var(--muted);min-width:72px;text-align:center}
+.slide-dots{display:flex;gap:5px;align-items:center}
+.dot{width:4px;height:4px;background:var(--border2);border-radius:50%;cursor:pointer;transition:all 0.2s}
+.dot.active{background:var(--amber);width:16px;border-radius:2px}
+
+.progress{position:fixed;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--amber),rgba(232,146,12,0.4));transition:width 0.35s ease;z-index:100}
+
+/* LABEL */
+.label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--amber);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.label::before{content:'';display:inline-block;width:20px;height:1px;background:var(--amber);opacity:0.6}
+
+/* TITLES */
+.slide-title{font-family:'Syne',sans-serif;font-size:clamp(28px,3.6vw,48px);font-weight:800;line-height:1.05;color:var(--text);margin-bottom:28px}
+.slide-title em{color:var(--amber);font-style:normal}
+.large-text{font-family:'Barlow Condensed',sans-serif;font-size:clamp(17px,2vw,24px);font-weight:400;line-height:1.55;color:var(--subtle);max-width:960px;margin-bottom:28px}
+
+/* =============================================
+   SLIDE 1 — COVER
+============================================= */
+.s-cover{justify-content:center}
+.cover-pre{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:6px;text-transform:uppercase;color:var(--amber);margin-bottom:28px}
+.cover-wordmark{font-family:'Syne',sans-serif;font-size:clamp(80px,13vw,168px);font-weight:800;letter-spacing:-3px;line-height:0.88;color:var(--text);margin-bottom:28px}
+.cover-wordmark span{color:var(--amber)}
+.cover-tagline{font-family:'Barlow Condensed',sans-serif;font-size:clamp(20px,2.4vw,30px);font-weight:300;color:var(--muted);letter-spacing:1px;margin-bottom:48px;max-width:640px}
+.cover-tags{display:flex;gap:10px;flex-wrap:wrap}
+.ctag{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);color:var(--muted)}
+.cover-deco{position:absolute;right:80px;top:50%;transform:translateY(-50%);width:280px;height:280px;border:1px solid var(--border);opacity:0.35;background:linear-gradient(135deg,var(--amber-d),transparent 60%)}
+.cover-deco::after{content:'';position:absolute;inset:16px;border:1px solid var(--border)}
+.cover-line{position:absolute;right:79px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--amber),transparent);opacity:0.25}
+
+/* =============================================
+   SLIDE 2 — PROBLEM
+============================================= */
+.quote-block{border-left:3px solid var(--amber);padding:18px 24px;background:var(--amber-d);margin:20px 0 24px}
+.quote-text{font-family:'Barlow Condensed',sans-serif;font-size:clamp(20px,2.5vw,32px);font-style:italic;color:var(--text);margin-bottom:6px}
+.quote-attr{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.prob-card{padding:18px 20px;border:1px solid var(--border);background:var(--s1)}
+.prob-card .pn{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--amber);opacity:0.3;line-height:1;margin-bottom:6px}
+.prob-card .pf{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px}
+.prob-card .pd{font-size:13px;color:var(--muted);line-height:1.55}
+
+/* =============================================
+   SLIDE 3 — DIAGNOSIS
+============================================= */
+.comp-table{width:100%;border-collapse:collapse;margin-top:24px}
+.comp-table th{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;padding:12px 20px;text-align:left}
+.comp-table th:first-child{color:var(--muted);background:var(--s1);width:45%}
+.comp-table th:last-child{color:var(--amber);background:var(--amber-d)}
+.comp-table td{padding:12px 20px;font-size:14px;border-top:1px solid var(--border);vertical-align:top}
+.comp-table tr td:first-child{color:var(--muted);background:var(--s1);font-style:italic}
+.comp-table tr td:last-child{color:var(--text);background:var(--s2)}
+.comp-table tr:hover td{opacity:0.85}
+
+/* =============================================
+   SLIDE 4 — THE INSIGHT
+============================================= */
+.insight-split{display:grid;grid-template-columns:1fr 1fr;gap:32px;flex:1;align-items:start;margin-top:20px}
+.insight-side{padding:24px;border:1px solid var(--border)}
+.insight-side.off{background:var(--s1);opacity:0.7}
+.insight-side.on{background:var(--amber-d);border-color:var(--amber)}
+.ig-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:16px}
+.off .ig-title{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--border2)}
+.on .ig-title{color:var(--amber)}
+.ig-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-size:17px}
+.ig-row .bul{width:5px;height:5px;flex-shrink:0}
+.off .bul{background:var(--border2)}
+.on .bul{background:var(--amber)}
+.off .ig-row{color:var(--muted)}
+.on .ig-row{color:var(--text)}
+.on .ig-row em{color:var(--amber);font-style:normal}
+.changed{margin-top:14px;font-size:13px;color:var(--amber);font-style:italic}
+.principle-box{padding:18px 24px;border:1px solid var(--blue);background:var(--blue-d);margin-top:20px}
+.principle-box p{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:var(--text);line-height:1.45}
+
+/* =============================================
+   SLIDE 5 — INTRODUCING FLASHPOINT
+============================================= */
+.pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
+.pillar{padding:22px 20px;border:1px solid var(--border);background:var(--s1);position:relative;overflow:hidden}
+.pillar::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--amber)}
+.p-num{font-family:'Syne',sans-serif;font-size:44px;font-weight:800;color:var(--amber);opacity:0.18;line-height:1;margin-bottom:10px}
+.p-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;color:var(--text);margin-bottom:8px}
+.p-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* =============================================
+   SLIDE 6 — CORE GAME LOOP
+============================================= */
+.loop-wrap{flex:1;display:flex;align-items:center;gap:48px;margin-top:16px}
+.loop-diagram{position:relative;width:400px;height:400px;flex-shrink:0}
+.loop-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:110px;height:110px;border:2px solid var(--amber);background:var(--amber-d);display:flex;align-items:center;justify-content:center;text-align:center}
+.lc-text{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--amber);line-height:1.3}
+.loop-node{position:absolute;width:86px;height:86px;border:1px solid var(--border2);background:var(--s1);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px;cursor:default;transition:all 0.25s}
+.loop-node:hover{border-color:var(--amber);background:var(--amber-d);z-index:2}
+.ln-num{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--amber);opacity:0.4;line-height:1}
+.ln-name{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:var(--text);line-height:1.2}
+/* Pentagon positions (400x400, 5 nodes, top-first clockwise) */
+.n0{left:157px;top:6px}    /* 12 o'clock: center 200,49 */
+.n1{left:308px;top:123px}  /* ~2 o'clock: center 351,166 */
+.n2{left:246px;top:282px}  /* ~4 o'clock: center 289,325 */
+.n3{left:68px;top:282px}   /* ~8 o'clock: center 111,325 */
+.n4{left:6px;top:123px}    /* ~10 o'clock: center 49,166 */
+
+.loop-detail{flex:1;display:flex;flex-direction:column;gap:10px}
+.ld-item{padding:12px 16px;border:1px solid var(--border);background:var(--s1);display:flex;gap:14px;align-items:flex-start;transition:border-color 0.2s}
+.ld-item:hover{border-color:var(--amber)}
+.ld-phase{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--amber);min-width:86px;padding-top:2px}
+.ld-desc{font-size:13px;color:var(--muted);line-height:1.55}
+
+/* =============================================
+   SLIDE 7 — RESOURCE ECONOMY
+============================================= */
+.res-intro{font-family:'Barlow Condensed',sans-serif;font-size:18px;color:var(--subtle);max-width:800px;margin-bottom:20px;line-height:1.5}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1}
+.res-card{padding:18px 20px;border:1px solid var(--border);background:var(--s1)}
+.res-card.featured{border-color:var(--amber);background:var(--amber-d);grid-column:span 2}
+.res-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:2px;color:var(--text);margin-bottom:4px}
+.featured .res-name{color:var(--amber)}
+.res-desc{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+.res-bar{height:5px;background:var(--border);margin-bottom:5px}
+.res-fill{height:100%;transition:width 1.5s ease}
+.fill-amber{background:var(--amber)}
+.fill-red{background:var(--red)}
+.fill-green{background:var(--green)}
+.res-note{font-size:11px;color:var(--muted);font-style:italic}
+.cascade-note{margin-top:14px;padding:10px 16px;border:1px solid var(--border2);background:var(--s2);font-size:12px;color:var(--subtle);grid-column:span 2}
+.cascade-note strong{color:var(--amber)}
+
+/* =============================================
+   SLIDE 8 — INFORMATION ASYMMETRY
+============================================= */
+.asym-intro{font-family:'Barlow Condensed',sans-serif;font-size:17px;color:var(--subtle);margin-bottom:18px;line-height:1.5;max-width:880px}
+.card-spread{display:flex;gap:16px;flex:1;align-items:stretch}
+.role-card{flex:1;border:1px solid var(--border);background:var(--s1);display:flex;flex-direction:column;overflow:hidden}
+.rc-head{padding:14px 18px;background:var(--s2);border-bottom:1px solid var(--border)}
+.rc-role{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:var(--text)}
+.rc-org{font-size:11px;color:var(--muted);margin-top:1px}
+.rc-body{padding:14px 18px;flex:1;display:flex;flex-direction:column;gap:10px}
+.info-layer{padding:9px 12px;border-left:2px solid}
+.il-know{border-color:var(--blue);background:var(--blue-d)}
+.il-intel{border-color:var(--amber);background:var(--amber-d)}
+.il-obj{border-color:var(--purple);background:var(--purple-d)}
+.il-fault{border-color:var(--red);background:var(--red-d)}
+.il-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+.il-know .il-lbl{color:#6b9bd6}
+.il-intel .il-lbl{color:var(--amber)}
+.il-obj .il-lbl{color:#a48cf4}
+.il-fault .il-lbl{color:#f47b7b}
+.il-text{font-size:12px;color:var(--text);line-height:1.5}
+
+/* =============================================
+   SLIDE 9 — ESCALATION ENGINE
+============================================= */
+.esc-wrap{flex:1;display:flex;gap:40px;align-items:center;margin-top:16px}
+.esc-tree{flex:0 0 340px}
+.esc-detail{flex:1;display:flex;flex-direction:column;gap:12px}
+.ep-card{padding:16px 20px;border:1px solid var(--border);background:var(--s1)}
+.ep-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;color:var(--amber);margin-bottom:6px}
+.ep-text{font-size:13px;color:var(--muted);line-height:1.6}
+.end-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.end-badge{padding:7px 14px;border:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px}
+.badge-blue{border-color:#6b9bd6;color:#6b9bd6}
+.badge-grey{color:var(--muted)}
+.badge-amber{border-color:var(--amber);color:var(--amber)}
+
+/* =============================================
+   SLIDE 10 — MINIGAME LAYER
+============================================= */
+.mg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.mg-card{padding:18px 20px;border:1px solid var(--border);background:var(--s1);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.mg-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--amber);opacity:0.3}
+.mg-icon{font-size:22px;margin-bottom:10px}
+.mg-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;color:var(--amber);margin-bottom:6px}
+.mg-desc{font-size:13px;color:var(--muted);line-height:1.5;flex:1;margin-bottom:10px}
+.mg-meta{display:flex;gap:10px;align-items:center}
+.mg-time{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--border2)}
+.dual-banner{margin-top:16px;padding:12px 18px;border:1px solid var(--amber);background:var(--amber-d);font-family:'Barlow Condensed',sans-serif;font-size:15px;color:var(--text);line-height:1.5}
+.dual-banner strong{color:var(--amber)}
+
+/* =============================================
+   SLIDE 11 — NARRATIVE LAYER
+============================================= */
+.narr-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.nc-card{padding:22px;border:1px solid var(--border);background:var(--s1)}
+.nc-icon{font-size:26px;margin-bottom:12px}
+.nc-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;letter-spacing:1px}
+.nc-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.lastofus-box{margin-top:16px;padding:18px 24px;border:1px solid var(--amber);background:var(--amber-d);font-family:'Barlow Condensed',sans-serif;font-size:19px;color:var(--text);line-height:1.5}
+.lastofus-box em{color:var(--amber);font-style:normal}
+
+/* =============================================
+   SLIDE 12 — SCENARIO: THIRD PARTY
+============================================= */
+.scen-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1;margin-top:18px}
+.scen-left,.scen-right{display:flex;flex-direction:column;gap:10px}
+.sb{padding:13px 17px;border:1px solid var(--border);background:var(--s1)}
+.sb-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+.sb-txt{font-size:13px;color:var(--text);line-height:1.6}
+.end-card{padding:14px 18px;border:1px solid var(--border);background:var(--s1);flex:1}
+.e1{border-left:3px solid #6b9bd6}
+.e2{border-left:3px solid var(--muted)}
+.e3{border-left:3px solid var(--amber)}
+.e-lbl{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:5px}
+.e1 .e-lbl{color:#6b9bd6}
+.e2 .e-lbl{color:var(--muted)}
+.e3 .e-lbl{color:var(--amber)}
+.e-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.mg-triggers{padding:12px 17px;border:1px solid var(--border);background:var(--s2)}
+.mg-t-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;color:var(--amber);margin-bottom:5px}
+.mg-t-chain{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mg-t-chain span{padding:3px 10px;border:1px solid var(--border);color:var(--subtle);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px}
+.mg-t-chain .arr{color:var(--border2)}
+
+/* =============================================
+   SLIDE 13 — PLATFORM ARCHITECTURE
+============================================= */
+.arch-layers{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+.arch-row{padding:14px 22px;border:1px solid var(--border);background:var(--s1);display:flex;align-items:center;gap:20px}
+.arch-row.highlight{border-color:var(--amber);background:var(--amber-d)}
+.arch-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;min-width:190px}
+.highlight .arch-name{color:var(--amber)}
+.arch-row:not(.highlight) .arch-name{color:var(--muted)}
+.arch-desc{font-size:13px;color:var(--muted);flex:1}
+.arch-tags{display:flex;gap:7px;flex-wrap:wrap;margin-left:auto}
+.arch-tag{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;padding:3px 9px;border:1px solid var(--border);color:var(--muted)}
+.arch-tag.hi{border-color:var(--amber);color:var(--amber)}
+.verts-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+.vert{padding:11px;border:1px solid var(--border);text-align:center}
+.vert:first-child{border-color:var(--amber);background:var(--amber-d)}
+.vert-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--text);margin-bottom:3px}
+.vert:first-child .vert-name{color:var(--amber)}
+.vert-status{font-size:11px;color:var(--muted)}
+
+/* =============================================
+   SLIDE 14 — BUSINESS MODEL
+============================================= */
+.bm-intro{font-family:'Barlow Condensed',sans-serif;font-size:18px;color:var(--subtle);margin-bottom:18px;max-width:800px;line-height:1.5}
+.phases{display:flex;flex-direction:column;gap:10px}
+.phase{display:flex;border:1px solid var(--border);background:var(--s1);overflow:hidden}
+.ph-time{padding:14px 18px;background:var(--s2);border-right:1px solid var(--border);min-width:130px;display:flex;flex-direction:column;justify-content:center}
+.ph-period{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;color:var(--amber)}
+.ph-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.ph-body{padding:14px 22px;flex:1}
+.ph-model{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px}
+.ph-detail{font-size:13px;color:var(--muted);line-height:1.5}
+.ph-rev{padding:14px 18px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;min-width:150px;border-left:1px solid var(--border)}
+.ph-fig{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text)}
+.ph-note{font-size:11px;color:var(--muted);text-align:right;margin-top:2px}
+.bm-warning{margin-top:14px;padding:10px 18px;border:1px solid var(--border2);background:var(--s2);font-size:13px;color:var(--subtle);font-style:italic}
+.bm-warning strong{color:var(--amber);font-style:normal}
+
+/* =============================================
+   SLIDE 15 — WHY NOW
+============================================= */
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.why-card{padding:22px;border:1px solid var(--border);background:var(--s1)}
+.why-cat{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.why-head{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px}
+.why-body{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* =============================================
+   SLIDE 16 — FINAL
+============================================= */
+.s-final{justify-content:center;align-items:center;text-align:center}
+.final-glow{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(232,146,12,0.05) 0%,transparent 65%);pointer-events:none}
+.f-pre{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:7px;text-transform:uppercase;color:var(--amber);margin-bottom:24px}
+.f-wordmark{font-family:'Syne',sans-serif;font-size:clamp(64px,11vw,140px);font-weight:800;letter-spacing:-2px;line-height:0.9;color:var(--text);margin-bottom:20px}
+.f-wordmark span{color:var(--amber)}
+.f-sub{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:300;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-bottom:44px}
+.f-steps{display:flex;gap:20px;justify-content:center}
+.f-step{padding:18px 28px;border:1px solid var(--border);text-align:center}
+.f-step-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;color:var(--amber);margin-bottom:5px}
+.f-step-txt{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<div class="deck" id="deck">
+
+<!-- ============================================
+     SLIDE 1: COVER
+============================================= -->
+<div class="slide s-cover active" id="s1">
+  <div class="cover-deco"></div>
+  <div class="cover-line"></div>
+  <div class="cover-pre">Professional Simulation Engine · First Vertical: Cybersecurity</div>
+  <div class="cover-wordmark">FLASH<span>POINT</span></div>
+  <div class="cover-tagline">Where decisions have consequences.</div>
+  <div class="cover-tags">
+    <div class="ctag">Game Engine</div>
+    <div class="ctag">Cybersecurity First</div>
+    <div class="ctag">Multi-Vertical</div>
+    <div class="ctag">Online Platform</div>
+    <div class="ctag">Credentialled Outcomes</div>
+    <div class="ctag">Replayable by Design</div>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 2: THE PROBLEM
+============================================= -->
+<div class="slide" id="s2">
+  <div class="label">The Problem</div>
+  <div class="slide-title">Tabletop exercises are training products<br>wearing a <em>game's costume.</em></div>
+  <div class="quote-block">
+    <div class="quote-text">"The exercise was excellent."</div>
+    <div class="quote-attr">— Every post-exercise survey. Regardless of outcome. Regardless of what changed afterwards.</div>
+  </div>
+  <div class="prob-grid">
+    <div class="prob-card">
+      <div class="pn">01</div>
+      <div class="pf">Players know the answer exists</div>
+      <div class="pd">The facilitator has a script. Everyone in the room knows it. Real crisis decisions do not come with a pre-agreed correct answer waiting to be revealed.</div>
+    </div>
+    <div class="prob-card">
+      <div class="pn">02</div>
+      <div class="pf">Stakes aren't real</div>
+      <div class="pd">When nothing materially changes based on your decision, you don't feel the decision. You answer the question. That is not the same thing as making the call under pressure.</div>
+    </div>
+    <div class="prob-card">
+      <div class="pn">03</div>
+      <div class="pf">Evaluation anxiety destroys honesty</div>
+      <div class="pd">Participants perform competence rather than exercise judgment. The wrong learning happens in a room full of people trying not to look bad in front of leadership.</div>
+    </div>
+    <div class="prob-card">
+      <div class="pn">04</div>
+      <div class="pf">Forgettable by design</div>
+      <div class="pd">Without emotional stakes and narrative tension, retention is measured in days. The compliance checkbox gets ticked. The organisation is not actually more prepared.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 3: DIAGNOSIS
+============================================= -->
+<div class="slide" id="s3">
+  <div class="label">The Diagnosis</div>
+  <div class="slide-title">The gap isn't <em>content.</em> It's a design failure.</div>
+  <div class="large-text">Existing platforms solve the orchestration problem. They do not solve the engagement contract. These are different problems entirely.</div>
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>Current State — Tabletop Exercise</th>
+        <th>What It Could Be — FLASHPOINT</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Training delivery with game aesthetics</td><td>Genuine game with training outcomes embedded invisibly</td></tr>
+      <tr><td>Scripted scenarios with predetermined paths</td><td>State machine driven entirely by player decisions</td></tr>
+      <tr><td>Facilitator controls what happens next</td><td>Game mechanics determine consequence — mechanics, not people</td></tr>
+      <tr><td>Identical information for all participants</td><td>Asymmetric information that reflects organisational reality</td></tr>
+      <tr><td>Score reported outside the fiction</td><td>Consequence experienced inside the story world</td></tr>
+      <tr><td>Compliance checkbox event, quarterly at best</td><td>Experience players choose to repeat — replayable by design</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============================================
+     SLIDE 4: THE INSIGHT
+============================================= -->
+<div class="slide" id="s4">
+  <div class="label">The Design Insight</div>
+  <div class="slide-title">The <em>Last of Us</em> Principle</div>
+  <div class="large-text" style="margin-bottom:16px">The mechanics of The Last of Us are not remarkable. Cover, shoot, stealth, scavenge, survive. These exist in dozens of games nobody remembers.</div>
+  <div class="insight-split">
+    <div class="insight-side off">
+      <div class="ig-title">Generic Survival Shooter</div>
+      <div class="ig-row"><span class="bul"></span>Cover and shoot enemies</div>
+      <div class="ig-row"><span class="bul"></span>Stealth movement mechanics</div>
+      <div class="ig-row"><span class="bul"></span>Resource scavenging system</div>
+      <div class="ig-row"><span class="bul"></span>Enemy escalation waves</div>
+      <div class="ig-row"><span class="bul"></span>Survival under pressure</div>
+    </div>
+    <div class="insight-side on">
+      <div class="ig-title">The Last of Us</div>
+      <div class="ig-row"><span class="bul"></span>Cover and shoot — <em>for someone you love</em></div>
+      <div class="ig-row"><span class="bul"></span>Stealth — <em>because you cannot afford to fail her</em></div>
+      <div class="ig-row"><span class="bul"></span>Scavenge — <em>in a world that took everything</em></div>
+      <div class="ig-row"><span class="bul"></span>Escalation — <em>with real human cost</em></div>
+      <div class="ig-row"><span class="bul"></span>Survival — <em>that changes what survival means</em></div>
+      <div class="changed">Same mechanics. Story makes them matter.</div>
+    </div>
+  </div>
+  <div class="principle-box">
+    <p>Game mechanics are agnostic to story. Story is not agnostic to mechanics. <strong>Together, they create meaning.</strong> This is the foundational principle FLASHPOINT is built on.</p>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 5: INTRODUCING FLASHPOINT
+============================================= -->
+<div class="slide" id="s5">
+  <div class="label">The Product</div>
+  <div class="slide-title"><em>FLASHPOINT</em> is a professional simulation<br>game engine.</div>
+  <div class="large-text">Cybersecurity is the first vertical. The architecture is built for expansion from day one. The mechanics are story-agnostic. Every scenario is a different story on the same engine.</div>
+  <div class="pillars">
+    <div class="pillar">
+      <div class="p-num">01</div>
+      <div class="p-title">Real Game Mechanics</div>
+      <div class="p-desc">A genuine state machine where player decisions determine outcomes. Not a script. Not a quiz. A game with actual consequence.</div>
+    </div>
+    <div class="pillar">
+      <div class="p-num">02</div>
+      <div class="p-title">Credentialled Outcomes</div>
+      <div class="p-desc">Every game decision maps invisibly to competency frameworks. Players experience a game. Organisations receive audit-ready evidence.</div>
+    </div>
+    <div class="pillar">
+      <div class="p-num">03</div>
+      <div class="p-title">Story-Driven Scenarios</div>
+      <div class="p-desc">Scenarios have characters, moral questions, and human stakes. The mechanics enforce decisions. The story makes players care about the answer.</div>
+    </div>
+    <div class="pillar">
+      <div class="p-num">04</div>
+      <div class="p-title">Modular Minigames</div>
+      <div class="p-desc">Discrete skill challenges embedded in play. Triggered by game state. Isolate specific competencies. Also work as standalone online tools.</div>
+    </div>
+    <div class="pillar">
+      <div class="p-num">05</div>
+      <div class="p-title">Engine Architecture</div>
+      <div class="p-desc">Not a cybersecurity product — a simulation engine. The same mechanics run crisis management, board governance, financial crime, healthcare incidents.</div>
+    </div>
+    <div class="pillar">
+      <div class="p-num">06</div>
+      <div class="p-title">Replayable by Design</div>
+      <div class="p-desc">Branching state trees, modular scenario components, and variable information packs mean the same team plays again and gets a materially different experience.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 6: CORE GAME LOOP
+============================================= -->
+<div class="slide" id="s6">
+  <div class="label">Core Mechanic — 1 of 4</div>
+  <div class="slide-title">The <em>Game Loop</em></div>
+  <div class="loop-wrap">
+    <div class="loop-diagram">
+      <!-- SVG Arrows -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 400 400">
+        <defs>
+          <marker id="ah" markerWidth="7" markerHeight="7" refX="4" refY="3.5" orient="auto">
+            <polygon points="0,0 7,3.5 0,7" fill="rgba(232,146,12,0.55)"/>
+          </marker>
+        </defs>
+        <!-- Outer guide circle -->
+        <circle cx="200" cy="200" r="155" fill="none" stroke="#1c2d42" stroke-width="1" stroke-dasharray="3 7"/>
+        <!-- INTEL(200,49)→INTERPRET(351,166) -->
+        <path d="M 243,62 Q 315,80 348,150" fill="none" stroke="rgba(232,146,12,0.5)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <!-- INTERPRET(351,166)→DECIDE(289,325) -->
+        <path d="M 388,205 Q 400,280 330,313" fill="none" stroke="rgba(232,146,12,0.5)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <!-- DECIDE(289,325)→CONSEQUENCE(111,325) -->
+        <path d="M 249,325 L 157,325" fill="none" stroke="rgba(232,146,12,0.5)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <!-- CONSEQUENCE(111,325)→ESCALATE(49,166) -->
+        <path d="M 70,313 Q 10,260 52,206" fill="none" stroke="rgba(232,146,12,0.5)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <!-- ESCALATE(49,166)→INTEL(200,49) -->
+        <path d="M 56,130 Q 80,30 162,46" fill="none" stroke="rgba(232,146,12,0.5)" stroke-width="1.5" marker-end="url(#ah)"/>
+      </svg>
+      <!-- Center -->
+      <div class="loop-center"><div class="lc-text">GAME<br>STATE</div></div>
+      <!-- Nodes (Pentagon, top-first CW) -->
+      <div class="loop-node n0"><div class="ln-num">1</div><div class="ln-name">INTEL</div></div>
+      <div class="loop-node n1"><div class="ln-num">2</div><div class="ln-name">INTER-PRET</div></div>
+      <div class="loop-node n2"><div class="ln-num">3</div><div class="ln-name">DECIDE</div></div>
+      <div class="loop-node n3"><div class="ln-num">4</div><div class="ln-name">CONSE-QUENCE</div></div>
+      <div class="loop-node n4"><div class="ln-num">5</div><div class="ln-name">ESCA-LATE</div></div>
+    </div>
+
+    <div class="loop-detail">
+      <div class="ld-item">
+        <span class="ld-phase">INTEL</span>
+        <span class="ld-desc">New information arrives. Always fragmentary, always asymmetric. The CISO sees something Legal doesn't. What players share — and when — is itself a consequential decision.</span>
+      </div>
+      <div class="ld-item">
+        <span class="ld-phase">INTERPRET</span>
+        <span class="ld-desc">Players must synthesise partial information under time pressure. Organisational dynamics play out. Who trusts whom? What gets withheld? The game creates conditions — players create outcomes.</span>
+      </div>
+      <div class="ld-item">
+        <span class="ld-phase">DECIDE</span>
+        <span class="ld-desc">A decision gate arrives. Resource allocation. Notification timing. Public statement. Made with incomplete information under real time pressure. No safety net.</span>
+      </div>
+      <div class="ld-item">
+        <span class="ld-phase">CONSEQUENCE</span>
+        <span class="ld-desc">The decision changes game state — not by facilitator intervention, but by mechanics. Delay notification and dwell time compounds. Resource pools shift. The world responds to decisions, not to intentions.</span>
+      </div>
+      <div class="ld-item">
+        <span class="ld-phase">ESCALATE</span>
+        <span class="ld-desc">The world does not wait. New injects arrive conditioned on the current state. Respond well: escalation is lateral. Respond poorly: it compounds. The loop repeats with higher stakes.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 7: RESOURCE ECONOMY
+============================================= -->
+<div class="slide" id="s7">
+  <div class="label">Core Mechanic — 2 of 4</div>
+  <div class="slide-title">The <em>Resource Economy</em></div>
+  <div class="res-intro">Five pools represent the organisation's operational health. Decisions deplete and restore them. The cascade when any one runs out is what makes risk appetite stop being an abstract concept.</div>
+  <div class="res-grid">
+    <div class="res-card featured">
+      <div class="res-name">TIME</div>
+      <div class="res-desc">The only non-renewable resource. Runs in real-time during sessions. Every decision, investigation, and communication costs it. Cannot be recovered. Models the brutal arithmetic of real incidents.</div>
+      <div class="res-bar"><div class="res-fill fill-amber" style="width:62%"></div></div>
+      <div class="res-note">Depleting → Capacity degrades → Decision quality falls → Cascade accelerates</div>
+    </div>
+    <div class="res-card">
+      <div class="res-name">CAPACITY</div>
+      <div class="res-desc">Staff hours available for response. Allocate people to workstreams. Under-staff a stream and it degrades. Models the "we only have two people" reality most security teams live in.</div>
+      <div class="res-bar"><div class="res-fill fill-amber" style="width:72%"></div></div>
+      <div class="res-note">Depleted by time pressure and poor prioritisation</div>
+    </div>
+    <div class="res-card">
+      <div class="res-name">REPUTATION</div>
+      <div class="res-desc">Public and stakeholder trust. Degraded by poor communications, regulatory failures, visible gaps between what was said and what happened. Hard to recover once lost.</div>
+      <div class="res-bar"><div class="res-fill fill-red" style="width:28%"></div></div>
+      <div class="res-note" style="color:var(--red)">Currently critical — delayed public statement, media coverage compounding</div>
+    </div>
+    <div class="res-card">
+      <div class="res-name">REGULATORY STANDING</div>
+      <div class="res-desc">Your position with regulators. Starts neutral. Improves through proactive notification and transparency. Degrades through delay, obfuscation, or incomplete disclosure. Determines tolerance for future errors.</div>
+      <div class="res-bar"><div class="res-fill fill-amber" style="width:52%"></div></div>
+      <div class="res-note">Regulator flexibility is conditional on this score</div>
+    </div>
+    <div class="res-card">
+      <div class="res-name">INTELLIGENCE QUALITY</div>
+      <div class="res-desc">How accurate your picture of the threat actually is. Degrades without investigation. Improves with correct attribution and analysis. Directly affects quality of every downstream decision.</div>
+      <div class="res-bar"><div class="res-fill fill-amber" style="width:44%"></div></div>
+      <div class="res-note">Low IQ means all decisions are made on wrong assumptions</div>
+    </div>
+    <div class="cascade-note">
+      <strong>The cascade principle:</strong> Running out of TIME damages CAPACITY. Low REPUTATION reduces regulator goodwill and depletes REGULATORY STANDING. Poor INTELLIGENCE QUALITY means DECIDE phase outcomes are less predictable. The resources are not independent — they are a system.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 8: INFORMATION ASYMMETRY
+============================================= -->
+<div class="slide" id="s8">
+  <div class="label">Core Mechanic — 3 of 4</div>
+  <div class="slide-title"><em>Information Asymmetry</em> &amp; Role Architecture</div>
+  <div class="asym-intro">Each player holds a Role Packet — information only they receive. Three layers: what their role knows, what their character was told, what they personally need. Optionally: a Fault Line Card — a conflicting interest that creates realistic organisational friction without making anyone the villain.</div>
+  <div class="card-spread">
+    <div class="role-card">
+      <div class="rc-head">
+        <div class="rc-role">CISO</div>
+        <div class="rc-org">Meridian Health — "Third Party" Scenario</div>
+      </div>
+      <div class="rc-body">
+        <div class="info-layer il-know">
+          <div class="il-lbl">Role Knowledge</div>
+          <div class="il-text">The NovaCare integration used a shared API key. Audit logs from the connector have not been reviewed in 90 days.</div>
+        </div>
+        <div class="info-layer il-intel">
+          <div class="il-lbl">Personal Intel</div>
+          <div class="il-text">Unusual data export alert at 06:22. You have not briefed the CEO yet. NovaCare is not returning calls.</div>
+        </div>
+        <div class="info-layer il-obj">
+          <div class="il-lbl">Primary Objective</div>
+          <div class="il-text">Identify source. Contain breach.</div>
+        </div>
+        <div class="info-layer il-obj">
+          <div class="il-lbl">Secondary Objective</div>
+          <div class="il-text">Ensure the risk flag your team raised 6 weeks ago — ignored by leadership — is on record before the post-incident review.</div>
+        </div>
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="rc-head">
+        <div class="rc-role">General Counsel</div>
+        <div class="rc-org">Meridian Health — "Third Party" Scenario</div>
+      </div>
+      <div class="rc-body">
+        <div class="info-layer il-know">
+          <div class="il-lbl">Role Knowledge</div>
+          <div class="il-text">NDB notification threshold is "likely to result in serious harm." The 30-day clock is contingent on establishing exactly when "awareness" began — which is legally contested.</div>
+        </div>
+        <div class="info-layer il-intel">
+          <div class="il-lbl">Personal Intel</div>
+          <div class="il-text">You have an email from the CISO, 6 weeks ago, flagging API key risks. This email may move your notification clock back significantly.</div>
+        </div>
+        <div class="info-layer il-obj">
+          <div class="il-lbl">Primary Objective</div>
+          <div class="il-text">Minimise Meridian's legal and regulatory exposure.</div>
+        </div>
+        <div class="info-layer il-fault">
+          <div class="il-lbl">⚠ Fault Line Card</div>
+          <div class="il-text">The Board Chair instructed you — verbally, off-record — to delay notification until NovaCare confirms source. This directly conflicts with your NDB obligations.</div>
+        </div>
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="rc-head">
+        <div class="rc-role">Communications Lead</div>
+        <div class="rc-org">Meridian Health — "Third Party" Scenario</div>
+      </div>
+      <div class="rc-body">
+        <div class="info-layer il-know">
+          <div class="il-lbl">Role Knowledge</div>
+          <div class="il-text">Three health-sector journalists follow Meridian's accounts. One has been researching a health data security story for two months.</div>
+        </div>
+        <div class="info-layer il-intel">
+          <div class="il-lbl">Personal Intel</div>
+          <div class="il-text">The researcher planning to publish has 84,000 followers and a documented history of naming organisations before they self-disclose.</div>
+        </div>
+        <div class="info-layer il-obj">
+          <div class="il-lbl">Primary Objective</div>
+          <div class="il-text">Protect Meridian's reputation through transparent, timely communication.</div>
+        </div>
+        <div class="info-layer il-obj">
+          <div class="il-lbl">Secondary Objective</div>
+          <div class="il-text">You know Dr. Obi personally. She would want to know. You are weighing whether to tell her informally before any official notification goes out.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 9: ESCALATION ENGINE
+============================================= -->
+<div class="slide" id="s9">
+  <div class="label">Core Mechanic — 4 of 4</div>
+  <div class="slide-title">The <em>Escalation Engine</em></div>
+  <div class="esc-wrap">
+    <div class="esc-tree">
+      <svg viewBox="0 0 340 500" style="width:100%;height:auto">
+        <defs>
+          <marker id="ah2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <polygon points="0,0 6,3 0,6" fill="#1c2d42"/>
+          </marker>
+        </defs>
+        <!-- SEED -->
+        <rect x="95" y="10" width="150" height="48" fill="#0d1520" stroke="#e8920c" stroke-width="1.5" rx="1"/>
+        <text x="170" y="29" fill="#e8920c" font-family="Barlow Condensed" font-size="11" letter-spacing="2" text-anchor="middle">SEED EVENT</text>
+        <text x="170" y="46" fill="#e2ddd0" font-family="DM Sans" font-size="11" text-anchor="middle">Data found on dark web</text>
+        <!-- seed → decision 1 -->
+        <line x1="170" y1="58" x2="170" y2="88" stroke="#1c2d42" stroke-width="1.5" marker-end="url(#ah2)"/>
+        <!-- DECISION 1 diamond -->
+        <polygon points="170,90 220,122 170,154 120,122" fill="#121e2e" stroke="#2a5fd6" stroke-width="1.5"/>
+        <text x="170" y="118" fill="#6b9bd6" font-family="Barlow Condensed" font-size="10" text-anchor="middle">DECISION 1</text>
+        <text x="170" y="132" fill="#e2ddd0" font-family="DM Sans" font-size="10" text-anchor="middle">Investigate?</text>
+        <!-- L: Investigate -->
+        <line x1="125" y1="133" x2="70" y2="178" stroke="#1c2d42" stroke-width="1.2" marker-end="url(#ah2)"/>
+        <rect x="18" y="178" width="104" height="40" fill="#0d1520" stroke="#1c2d42"/>
+        <text x="70" y="194" fill="#6b7a8d" font-family="Barlow Condensed" font-size="10" text-anchor="middle">INVESTIGATE</text>
+        <text x="70" y="208" fill="#e2ddd0" font-family="DM Sans" font-size="10" text-anchor="middle">IQ+20 Time−30</text>
+        <!-- R: Contain -->
+        <line x1="215" y1="133" x2="270" y2="178" stroke="#1c2d42" stroke-width="1.2" marker-end="url(#ah2)"/>
+        <rect x="218" y="178" width="104" height="40" fill="#0d1520" stroke="#1c2d42"/>
+        <text x="270" y="194" fill="#6b7a8d" font-family="Barlow Condensed" font-size="10" text-anchor="middle">CONTAIN ONLY</text>
+        <text x="270" y="208" fill="#e2ddd0" font-family="DM Sans" font-size="10" text-anchor="middle">Rep−10 Time−10</text>
+        <!-- convergence -->
+        <line x1="70" y1="218" x2="70" y2="258" stroke="#1c2d42" stroke-width="1.2"/>
+        <line x1="270" y1="218" x2="270" y2="258" stroke="#1c2d42" stroke-width="1.2"/>
+        <line x1="70" y1="258" x2="270" y2="258" stroke="#1c2d42" stroke-width="1.2"/>
+        <line x1="170" y1="258" x2="170" y2="285" stroke="#1c2d42" stroke-width="1.2" marker-end="url(#ah2)"/>
+        <!-- CRISIS POINT -->
+        <polygon points="170,286 228,320 170,354 112,320" fill="#07090f" stroke="#dc3545" stroke-width="1.5"/>
+        <text x="170" y="315" fill="#f47b7b" font-family="Barlow Condensed" font-size="10" text-anchor="middle">CRISIS POINT</text>
+        <text x="170" y="329" fill="#e2ddd0" font-family="DM Sans" font-size="10" text-anchor="middle">Notify now?</text>
+        <!-- Three endings -->
+        <line x1="117" y1="337" x2="55" y2="400" stroke="#1c2d42" stroke-width="1.2" marker-end="url(#ah2)"/>
+        <line x1="170" y1="354" x2="170" y2="400" stroke="#1c2d42" stroke-width="1.2" marker-end="url(#ah2)"/>
+        <line x1="223" y1="337" x2="285" y2="400" stroke="#1c2d42" stroke-width="1.2" marker-end="url(#ah2)"/>
+        <!-- End circles -->
+        <circle cx="55" cy="422" r="20" fill="#0d1520" stroke="#6b9bd6" stroke-width="1.5"/>
+        <text x="55" y="418" fill="#6b9bd6" font-family="Barlow Condensed" font-size="9" text-anchor="middle">END</text>
+        <text x="55" y="429" fill="#6b9bd6" font-family="Barlow Condensed" font-size="9" text-anchor="middle">01</text>
+        <circle cx="170" cy="422" r="20" fill="#0d1520" stroke="#5a6878" stroke-width="1.5"/>
+        <text x="170" y="418" fill="#5a6878" font-family="Barlow Condensed" font-size="9" text-anchor="middle">END</text>
+        <text x="170" y="429" fill="#5a6878" font-family="Barlow Condensed" font-size="9" text-anchor="middle">02</text>
+        <circle cx="285" cy="422" r="20" fill="#0d1520" stroke="#e8920c" stroke-width="1.5"/>
+        <text x="285" y="418" fill="#e8920c" font-family="Barlow Condensed" font-size="9" text-anchor="middle">END</text>
+        <text x="285" y="429" fill="#e8920c" font-family="Barlow Condensed" font-size="9" text-anchor="middle">03</text>
+        <text x="285" y="466" fill="#e8920c" font-family="Barlow Condensed" font-size="10" text-anchor="middle">BEST</text>
+        <text x="55" y="466" fill="#6b9bd6" font-family="Barlow Condensed" font-size="10" text-anchor="middle">COSTLY</text>
+        <text x="170" y="466" fill="#5a6878" font-family="Barlow Condensed" font-size="10" text-anchor="middle">DAMAGED</text>
+      </svg>
+    </div>
+    <div class="esc-detail">
+      <div class="ep-card">
+        <div class="ep-title">Not A Script. A State Machine.</div>
+        <div class="ep-text">The scenario runs on player decisions, not a facilitator's script. Every decision moves game state. The next inject is conditioned on the current state. The facilitator reads the machine — they do not author the story.</div>
+      </div>
+      <div class="ep-card">
+        <div class="ep-title">Compound Consequences</div>
+        <div class="ep-text">Delayed notification increases dwell time → regulatory exposure window grows → Regulatory Standing depletes → regulator becomes less forgiving when the next mistake arrives. Players feel the cascade. That is the lesson — not the slide that explains it afterwards.</div>
+      </div>
+      <div class="ep-card">
+        <div class="ep-title">Three Endings. None Clean.</div>
+        <div class="ep-text">There is no pass or fail. Three different consequence states — each with different costs, different lessons, different debrief conversations. The best ending requires near-perfect play. The worst teaches the most. Players come away wanting to know what the other endings felt like.</div>
+      </div>
+      <div class="end-badges">
+        <div class="end-badge badge-blue">Transparent &amp; Damaging</div>
+        <div class="end-badge badge-grey">Contained &amp; Compromised</div>
+        <div class="end-badge badge-amber">The Right Call</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 10: MINIGAME LAYER
+============================================= -->
+<div class="slide" id="s10">
+  <div class="label">Expandable Layer</div>
+  <div class="slide-title">The <em>Minigame Layer</em></div>
+  <div class="large-text" style="margin-bottom:0">Triggered by game state — not the clock. Each minigame isolates a skill, returns a result that changes the game state, and works standalone as an online training tool.</div>
+  <div class="mg-grid">
+    <div class="mg-card">
+      <div class="mg-icon">📋</div>
+      <div class="mg-title">LOG ANALYSER</div>
+      <div class="mg-desc">A stream of log events. Players identify 3 meaningful indicators from noise within the time limit. Success raises Intelligence Quality. Failure degrades it — and the scenario state shifts accordingly.</div>
+      <div class="mg-meta"><div class="mg-time">⏱ 4 min · Affects: IQ</div></div>
+    </div>
+    <div class="mg-card">
+      <div class="mg-icon">💰</div>
+      <div class="mg-title">CONTROL TRIAGE</div>
+      <div class="mg-desc">Budget shock event. 12 planned controls — 4 must be cut immediately. Players justify their cuts against a live risk scoring rubric. Outcome affects Regulatory Standing. Makes "risk appetite" tangible.</div>
+      <div class="mg-meta"><div class="mg-time">⏱ 6 min · Affects: Reg Standing</div></div>
+    </div>
+    <div class="mg-card">
+      <div class="mg-icon">📢</div>
+      <div class="mg-title">COMMS DRAFT</div>
+      <div class="mg-desc">Media is calling. 3-sentence holding statement required with information still arriving. Reviewed in debrief against ASD comms principles. Errors translate directly to Reputation damage in the game state.</div>
+      <div class="mg-meta"><div class="mg-time">⏱ 5 min · Affects: Reputation</div></div>
+    </div>
+    <div class="mg-card">
+      <div class="mg-icon">🎯</div>
+      <div class="mg-title">ATTRIBUTION BOARD</div>
+      <div class="mg-desc">Evidence packets arrive. Players attribute threat actor with stated confidence levels. Overconfident wrong attribution triggers severe escalation. Correct attribution unlocks additional intel and shortens the scenario.</div>
+      <div class="mg-meta"><div class="mg-time">⏱ 7 min · Affects: IQ + Branch</div></div>
+    </div>
+    <div class="mg-card">
+      <div class="mg-icon">⏰</div>
+      <div class="mg-title">NOTIFICATION CLOCK</div>
+      <div class="mg-desc">Regulatory timeline puzzle across multiple regimes — NDB, Privacy Act, sector-specific obligations. Players sequence notifications against an incident timeline with missing data. Errors deplete Regulatory Standing.</div>
+      <div class="mg-meta"><div class="mg-time">⏱ 5 min · Affects: Reg Standing</div></div>
+    </div>
+    <div class="mg-card">
+      <div class="mg-icon">🔍</div>
+      <div class="mg-title">THREAT HUNT</div>
+      <div class="mg-desc">Annotated network diagram. Players identify the lateral movement path. Maps directly to MITRE ATT&amp;CK tactics. Correct identification shortens the incident timeline; errors extend dwell time and compound all resource drains.</div>
+      <div class="mg-meta"><div class="mg-time">⏱ 8 min · Affects: Time + IQ</div></div>
+    </div>
+  </div>
+  <div class="dual-banner"><strong>Dual-use commercial model:</strong> Every minigame works embedded in a live scenario AND as a standalone 10-minute online tool — certification prep, onboarding, continuous assessment. Each minigame is independently licensable and updateable.</div>
+</div>
+
+<!-- ============================================
+     SLIDE 11: NARRATIVE LAYER
+============================================= -->
+<div class="slide" id="s11">
+  <div class="label">Design Principle</div>
+  <div class="slide-title">The <em>Narrative Layer</em> gives mechanics meaning.</div>
+  <div class="narr-grid">
+    <div class="nc-card">
+      <div class="nc-icon">🏢</div>
+      <div class="nc-title">An Organisation With a Soul</div>
+      <div class="nc-desc">Not "TechCorp Ltd." A company with history, culture, internal politics, and people who have names and feel real. Players must want this organisation to survive the scenario — not merely solve it.</div>
+    </div>
+    <div class="nc-card">
+      <div class="nc-icon">👤</div>
+      <div class="nc-title">A Human Protagonist</div>
+      <div class="nc-desc">Not the player characters — a character in the scenario world affected by the crisis. The IT administrator who made an honest mistake. The patient whose records are exposed. Their fate is woven through the mechanics.</div>
+    </div>
+    <div class="nc-card">
+      <div class="nc-icon">⚖️</div>
+      <div class="nc-title">A Moral Question</div>
+      <div class="nc-desc">Not a lesson — a question. "How much transparency does an organisation owe when the truth is uncertain?" "When does following the rules become the wrong thing to do?" The mechanics enforce the decision. The story makes players care about the answer.</div>
+    </div>
+    <div class="nc-card">
+      <div class="nc-icon">🌍</div>
+      <div class="nc-title">A World With Consequence</div>
+      <div class="nc-desc">The CEO is on holiday and unreachable. The intern sent the phishing email because they were never trained. The vendor sold a product with a known vulnerability. These details affect game state — and they are also story.</div>
+    </div>
+  </div>
+  <div class="lastofus-box">
+    The mechanics <em>enforce</em> the decision. The story makes players <em>care about the answer.</em> This is what makes a FLASHPOINT scenario memorable — not the technical challenge, but the human weight of getting it wrong.
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 12: SCENARIO — THIRD PARTY
+============================================= -->
+<div class="slide" id="s12">
+  <div class="label">Scenario Architecture</div>
+  <div class="slide-title"><em>"Third Party"</em> — Complete Scenario Specification</div>
+  <div class="scen-layout">
+    <div class="scen-left">
+      <div class="sb">
+        <div class="sb-lbl">The Organisation</div>
+        <div class="sb-txt">Meridian Health — a mid-sized private hospital group that migrated to NovaCare's patient management system three months ago to reduce costs.</div>
+      </div>
+      <div class="sb">
+        <div class="sb-lbl">The Trigger Event</div>
+        <div class="sb-txt">A security researcher contacts Meridian claiming to have found patient records for sale on a dark web forum. The data format matches NovaCare exactly. NovaCare denies any breach. The researcher is publishing in 48 hours regardless of Meridian's response.</div>
+      </div>
+      <div class="sb">
+        <div class="sb-lbl">The Human Element</div>
+        <div class="sb-txt">Buried in the exposed data is Dr. Sarah Obi — a Meridian cardiologist who is also a patient there, receiving treatment for a mental health condition she has not disclosed to her employer. She doesn't know. She is at work today.</div>
+      </div>
+      <div class="sb">
+        <div class="sb-lbl">The Moral Question</div>
+        <div class="sb-txt">Transparency requires notifying Dr. Obi and all affected patients. But doing so before breach confirmation risks destroying NovaCare — 40 employees, potentially innocent. The NDB says notify at "likely." When does the evidence reach that threshold?</div>
+      </div>
+      <div class="sb">
+        <div class="sb-lbl">Resource Pressure</div>
+        <div class="sb-txt" style="font-size:12px;line-height:1.7">TIME: researcher publishes in 48h &nbsp;·&nbsp; CAPACITY: Meridian has 2 security staff &nbsp;·&nbsp; INTELLIGENCE: NovaCare is stonewalling &nbsp;·&nbsp; REPUTATION: every hour without notification is compounding liability &nbsp;·&nbsp; REGULATORY: NDB awareness clock is contested</div>
+      </div>
+    </div>
+    <div class="scen-right">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--amber);margin-bottom:10px">THREE ENDINGS</div>
+      <div class="end-card e1">
+        <div class="e-lbl">TRANSPARENT &amp; DAMAGING</div>
+        <div class="e-desc">Players notify patients early. Dr. Obi finds out at work. NovaCare is later exonerated — breach was a third-party aggregator. Meridian did the right thing. It cost them. What does that teach?</div>
+      </div>
+      <div class="end-card e2">
+        <div class="e-lbl">CONTAINED &amp; COMPROMISED</div>
+        <div class="e-desc">Players delay notification, technically within regulatory limits. The researcher publishes. Regulatory investigation follows. Meridian survives — but in what condition, and what version of "survive" is this?</div>
+      </div>
+      <div class="end-card e3">
+        <div class="e-lbl">THE RIGHT CALL</div>
+        <div class="e-desc">Players solve attribution correctly, notify patients with appropriate framing, work with NovaCare to contain the aggregator. Hard, expensive, technically demanding. Requires near-perfect play across all mechanics. This is what "excellent" actually looks like.</div>
+      </div>
+      <div class="mg-triggers">
+        <div class="mg-t-lbl">Minigame Trigger Sequence</div>
+        <div class="mg-t-chain">
+          <span>Log Analyser</span><span class="arr">→</span>
+          <span>Attribution Board</span><span class="arr">→</span>
+          <span>Notification Clock</span><span class="arr">→</span>
+          <span>Comms Draft</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 13: PLATFORM ARCHITECTURE
+============================================= -->
+<div class="slide" id="s13">
+  <div class="label">Platform Vision</div>
+  <div class="slide-title">One <em>engine.</em> Every domain.</div>
+  <div class="arch-layers">
+    <div class="arch-row highlight">
+      <div class="arch-name">CORE ENGINE</div>
+      <div class="arch-desc">Game loop · State machine · Resource economy · Information asymmetry system · Escalation engine · Diegetic scoring · Reporting pipeline</div>
+      <div class="arch-tags">
+        <span class="arch-tag hi">DOMAIN AGNOSTIC</span>
+        <span class="arch-tag hi">PRIMARY IP</span>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-name">VERTICAL LAYER</div>
+      <div class="arch-desc">Domain-specific rule sets, competency frameworks, regulatory contexts, and subject matter glossaries — applied per vertical without touching the engine</div>
+      <div class="arch-tags">
+        <span class="arch-tag">Cybersecurity</span>
+        <span class="arch-tag">Crisis &amp; BC</span>
+        <span class="arch-tag">Governance</span>
+        <span class="arch-tag">Financial Crime</span>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-name">SCENARIO LAYER</div>
+      <div class="arch-desc">Storylines, characters, organisations, moral questions. Modular — new scenarios built without engine changes. First-party and eventually third-party authored</div>
+      <div class="arch-tags">
+        <span class="arch-tag">Third Party</span>
+        <span class="arch-tag">Insider Threat</span>
+        <span class="arch-tag">Ransomware</span>
+        <span class="arch-tag">Supply Chain</span>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-name">MINIGAME LAYER</div>
+      <div class="arch-desc">Discrete skill challenges — triggered by game state in sessions, sold standalone as online tools. Updated independently without scenario changes</div>
+      <div class="arch-tags">
+        <span class="arch-tag">State-triggered</span>
+        <span class="arch-tag">Standalone SaaS</span>
+        <span class="arch-tag">Cert prep</span>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-name">REPORTING LAYER</div>
+      <div class="arch-desc">Invisible to players. Maps every decision to learning outcomes and competency frameworks. Audit-ready evidence. Debrief data that emerges from fiction, not from a post-game survey</div>
+      <div class="arch-tags">
+        <span class="arch-tag">NIST CSF</span>
+        <span class="arch-tag">Essential Eight</span>
+        <span class="arch-tag">ISO 27001</span>
+        <span class="arch-tag">SOCI Act</span>
+      </div>
+    </div>
+  </div>
+  <div class="verts-row">
+    <div class="vert"><div class="vert-name">CYBERSECURITY</div><div class="vert-status">V1 — First to Market</div></div>
+    <div class="vert"><div class="vert-name">CRISIS &amp; BC</div><div class="vert-status">V2 — Natural Neighbour</div></div>
+    <div class="vert"><div class="vert-name">BOARD GOVERNANCE</div><div class="vert-status">V3 — Premium Buyer</div></div>
+    <div class="vert"><div class="vert-name">FINANCIAL CRIME</div><div class="vert-status">V4 — ACFE Adjacent</div></div>
+    <div class="vert"><div class="vert-name">HEALTHCARE</div><div class="vert-status">V5 — Clinical Governance</div></div>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 14: BUSINESS MODEL
+============================================= -->
+<div class="slide" id="s14">
+  <div class="label">Business Model</div>
+  <div class="slide-title">A product business that <em>funds itself</em><br>through services.</div>
+  <div class="bm-intro">The trap is building a platform before validating the game. This model inverts that — content and mechanics are the IP, infrastructure is commodity. Services revenue finances the product while the product matures.</div>
+  <div class="phases">
+    <div class="phase">
+      <div class="ph-time"><div class="ph-period">0–12 months</div><div class="ph-lbl">Phase 1</div></div>
+      <div class="ph-body">
+        <div class="ph-model">Premium Facilitated Engagements</div>
+        <div class="ph-detail">4–6 delivered engagements at high-touch pricing. R&amp;D that pays for itself. Each session refines the product and generates a case study asset.</div>
+      </div>
+      <div class="ph-rev"><div class="ph-fig">$60K–$150K</div><div class="ph-note">at $15–30K per engagement</div></div>
+    </div>
+    <div class="phase">
+      <div class="ph-time"><div class="ph-period">12–24 months</div><div class="ph-lbl">Phase 2</div></div>
+      <div class="ph-body">
+        <div class="ph-model">Facilitator Licensing + Scenario Packs</div>
+        <div class="ph-detail">2–3 consulting partners licensed to deliver. Scenario packs sold separately. AISA/AICD accreditation pathway creates network effect without requiring headcount.</div>
+      </div>
+      <div class="ph-rev"><div class="ph-fig">$120–$300K</div><div class="ph-note">licensing + content + direct</div></div>
+    </div>
+    <div class="phase">
+      <div class="ph-time"><div class="ph-period">24–36 months</div><div class="ph-lbl">Phase 3</div></div>
+      <div class="ph-body">
+        <div class="ph-model">Online Async Tier + Standalone Minigame Tools</div>
+        <div class="ph-detail">Self-paced scenarios for individuals and small teams. Minigame tools sold as certification prep, onboarding, and continuous assessment SaaS. Per-seat and subscription models.</div>
+      </div>
+      <div class="ph-rev"><div class="ph-fig">Volume play</div><div class="ph-note">lower ARPU, high reach</div></div>
+    </div>
+    <div class="phase">
+      <div class="ph-time"><div class="ph-period">36 months+</div><div class="ph-lbl">Phase 4</div></div>
+      <div class="ph-body">
+        <div class="ph-model">Platform + Scenario Marketplace</div>
+        <div class="ph-detail">Third parties build scenarios on the engine. Revenue share model. New verticals via partner organisations with domain expertise. FLASHPOINT becomes the standard for professional simulation games.</div>
+      </div>
+      <div class="ph-rev"><div class="ph-fig">Uncapped</div><div class="ph-note">creator economy model</div></div>
+    </div>
+  </div>
+  <div class="bm-warning">The ceiling on facilitated-only is real but the floor is solid. <strong>The content IP path has genuine scale if the mechanics are tight and the facilitation methodology is transferable.</strong></div>
+</div>
+
+<!-- ============================================
+     SLIDE 15: WHY NOW
+============================================= -->
+<div class="slide" id="s15">
+  <div class="label">Market Timing</div>
+  <div class="slide-title">The gap has never been more <em>obvious</em><br>or more <em>costly.</em></div>
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-cat">Regulatory Pressure</div>
+      <div class="why-head">Boards are now personally liable</div>
+      <div class="why-body">Australia's updated Privacy Act, SOCI amendments, and equivalent offshore regulations mean boards must demonstrate genuine preparedness — not compliance theatre. A checkbox tabletop is no longer sufficient legal cover.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-cat">Threat Landscape</div>
+      <div class="why-head">The incidents are real and recent</div>
+      <div class="why-body">Medibank. Optus. Latitude. These created genuine organisational appetite for preparation that feels real. The question has shifted from "should we do a tabletop" to "why didn't our tabletop prepare us for what just happened."</div>
+    </div>
+    <div class="why-card">
+      <div class="why-cat">Competitive Gap</div>
+      <div class="why-head">Nobody owns this territory</div>
+      <div class="why-body">Platform vendors (Gauntlet, Immersive Labs) are SaaS infrastructure plays. Consulting firms are bespoke and non-scalable. No product combines genuine game design with enterprise training rigour. The white space is real and uncontested.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-cat">Founder Advantage</div>
+      <div class="why-head">Domain credibility + design thinking</div>
+      <div class="why-body">Most game designers don't understand enterprise security procurement. Most security professionals don't understand what makes games work. This product requires both simultaneously. That is the moat. It is also why most people cannot build it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SLIDE 16: FINAL
+============================================= -->
+<div class="slide s-final" id="s16">
+  <div class="final-glow"></div>
+  <div class="f-pre">Professional Simulation Engine · Cybersecurity First</div>
+  <div class="f-wordmark">FLASH<span>POINT</span></div>
+  <div class="f-sub">Where decisions have consequences.</div>
+  <div class="f-steps">
+    <div class="f-step">
+      <div class="f-step-lbl">Next Step</div>
+      <div class="f-step-txt">Full Game Design Document</div>
+    </div>
+    <div class="f-step">
+      <div class="f-step-lbl">Then</div>
+      <div class="f-step-txt">Pilot Engagement Design</div>
+    </div>
+    <div class="f-step">
+      <div class="f-step-lbl">Then</div>
+      <div class="f-step-txt">First Paid Delivery</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<!-- NAVIGATION -->
+<div class="nav">
+  <button class="nav-btn" onclick="go(-1)">←</button>
+  <div class="slide-dots" id="dots"></div>
+  <div class="slide-counter" id="ctr">01 / 16</div>
+  <button class="nav-btn" onclick="go(1)">→</button>
+</div>
+<div class="progress" id="prog"></div>
+
+<script>
+let cur = 0;
+const slides = document.querySelectorAll('.slide');
+const N = slides.length;
+const dotsEl = document.getElementById('dots');
+const ctrEl = document.getElementById('ctr');
+const progEl = document.getElementById('prog');
+
+// Build dots
+for(let i=0;i<N;i++){
+  const d = document.createElement('div');
+  d.className='dot';
+  d.onclick=()=>to(i);
+  dotsEl.appendChild(d);
+}
+
+function to(n){
+  slides[cur].classList.remove('active');
+  document.querySelectorAll('.dot')[cur].classList.remove('active');
+  cur=Math.max(0,Math.min(N-1,n));
+  slides[cur].classList.add('active');
+  document.querySelectorAll('.dot')[cur].classList.add('active');
+  ctrEl.textContent=String(cur+1).padStart(2,'0')+' / '+String(N).padStart(2,'0');
+  progEl.style.width=((cur+1)/N*100)+'%';
+}
+
+function go(d){to(cur+d)}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+});
+
+to(0);
+</script>
+</body>
+</html>

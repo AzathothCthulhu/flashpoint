@@ -1,0 +1,233 @@
+================================================================================
+FLASHPOINT GDD — SUPPLEMENTARY SECTION
+Section X: The War Room
+================================================================================
+
+--- PASTE THIS CONTENT INTO THE GDD AFTER THE "FM DOMAIN LAYER" SECTION ---
+
+
+X. THE WAR ROOM
+───────────────────────────────────────────────────────────────────────────────
+
+X.1  Design Rationale
+───────────────────────────────────────────────────────────────────────────────
+
+Every real major incident has a war room. It is the physical or virtual space
+where senior leaders converge to share situational awareness, surface conflicts
+between workstreams, escalate decisions that exceed any single role's authority,
+and maintain a unified command picture across an otherwise fragmented response.
+
+Without a war room, incident response degenerates into silos. The CISO optimises
+for forensic completeness while Legal is strategically delaying notification to
+protect privilege, and Comms is making public statements that contradict both.
+Each team is operating rationally within their domain; collectively, the
+organisation is in chaos.
+
+The war room in FLASHPOINT is designed to simulate this exact tension. It is not
+simply a dashboard — it is a shared situational awareness layer that makes
+cross-role conflict visible, names the decisions that require multi-role
+alignment, and tracks whether the team is converging or fragmenting.
+
+The war room is the game's primary vehicle for teaching that a data breach is
+not a technical problem, a legal problem, a communications problem, or a
+financial problem. It is all of those simultaneously, and the role of senior
+leadership is to hold the whole picture at once.
+
+
+X.2  Mechanical Role in the Game
+───────────────────────────────────────────────────────────────────────────────
+
+The war room operates as a shared overlay accessible to all players. It surfaces
+information that no single role can see in their own domain view.
+
+Individual role views enforce information asymmetry: each player sees their own
+domain pools in full and other roles' status only as aggregate health signals
+(strong / mixed / poor). This models the reality that a CFO does not have
+moment-to-moment visibility into the CISO's forensic team morale, and the CISO
+does not know the precise legal exposure calculation Legal is running.
+
+The war room breaks this asymmetry intentionally and deliberately. When a player
+opens the war room, they see:
+
+  SITUATION STRIP
+  Seven headline numbers drawn from shared resource pools: Regulatory Exposure,
+  Intelligence Quality, Public Trust, Reputation, Liquidity Pressure, Board
+  Confidence, and Crisis Containment. These are the metrics every role is
+  simultaneously affecting through their daily actions. Seeing them together,
+  for the first time, often produces the game's most significant learning
+  moments — a CISO who has been investing heavily in forensics discovers that
+  Reputation has been collapsing because Comms had no budget to invest in the
+  media workstream.
+
+  ROLE PRESENCE BOARD
+  Every role's current status: ready / acting, AP spent vs budget, health
+  signal, and whether they have unread cross-role messages. This surfaces
+  coordination failures — three roles marked ready but one is still deliberating
+  creates visible pressure, as does a role with 0 AP spent (a signal that either
+  they have not engaged with the day's choices, or they are strategically
+  hoarding points).
+
+  ESCALATION QUEUE
+  Ten conditional escalation rules evaluate against current game state every
+  time the war room is opened. When triggered, they appear as prioritised items
+  requiring CEO arbitration. Escalations represent decisions that cross role
+  boundaries — a forensics spend that has created an unplanned liquidity event
+  (CISO → CFO), an NDB notification delay that has breached the ethical tension
+  threshold (Legal → CEO), a board briefing window approaching with no
+  coordinated position (CEO → All), a public statement that contradicts the
+  internal technical timeline (Comms → CISO). These are not failure states;
+  they are the natural consequence of independent domain decisions intersecting.
+  The game rewards teams that catch and resolve escalations early.
+
+  CROSS-ROLE ACTIVITY FEED
+  A time-stamped log of all domain actions taken across all roles. Individual
+  players can only see their own action log; the war room aggregates these into
+  a single feed, enabling the CEO or any facilitator to reconstruct what each
+  role actually did on a given day.
+
+  WORKSTREAM PROGRESS
+  The five workstreams (forensics, regulatory, media, financial, stakeholder)
+  aggregate investment from all roles. A workstream only reaches its threshold
+  payoffs if multiple roles coordinate investment — no single role has enough
+  AP to fund a workstream to 100% alone. The war room is the only place all
+  five workstream bars appear together, making resource allocation tradeoffs
+  visible as a collective decision rather than a series of independent ones.
+
+  GATE-IN-FLIGHT PANEL
+  When a decision gate is active, the war room shows each role's stated
+  position. This enables the CEO to identify contested decisions before they
+  are committed and to call for explicit alignment rather than discovering a
+  split outcome after the fact.
+
+
+X.3  The War Room and Learning Outcomes
+───────────────────────────────────────────────────────────────────────────────
+
+The war room is designed to support three core learning outcomes that cannot be
+achieved through individual role play alone:
+
+  1. SYSTEMS THINKING — CONSEQUENCES CROSS BOUNDARIES
+     Players who see only their role view experience consequences as mysterious.
+     Why did Legal Exposure jump when I didn't make a Legal decision? The war
+     room reveals that a Comms public statement (G7: Option C) triggered a
+     cascade into Regulatory Exposure. Seeing the shared pool state as a
+     collective responsibility — not a background threat — is the shift the
+     war room is designed to produce.
+
+  2. COORDINATION UNDER PRESSURE IS NOT AUTOMATIC
+     Even when everyone is acting competently within their domain, the team can
+     fragment. The escalation queue makes this failure mode legible. Teams that
+     debrief with the war room visible understand why the outcome diverged from
+     their intent — not because anyone made a bad decision, but because the
+     decisions were never reconciled into a unified response.
+
+  3. THE CEO ROLE IS STRUCTURAL, NOT SYMBOLIC
+     In most tabletop exercises, the CEO is a title without mechanical weight.
+     In FLASHPOINT, the CEO is the only role with authority to override a day
+     advance when roles are split, to resolve escalated cross-role conflicts,
+     and to absorb Reputation pool impacts on behalf of the organisation. The
+     war room is where the CEO's structural role becomes operationally visible:
+     it is not enough to set strategy; the CEO must actively monitor the shared
+     picture and intervene before cascade thresholds trigger.
+
+
+X.4  War Room Design Constraints
+───────────────────────────────────────────────────────────────────────────────
+
+The war room must be kept out of the individual role view by design. If players
+can always see cross-role information, the information asymmetry mechanic
+collapses and the simulation loses its primary tension. The war room is accessed
+explicitly — in the prototype, via a toolbar button; in the facilitated mockup,
+via a view toggle — and this friction is intentional.
+
+Escalation rules are evaluated dynamically against current game state, not
+pre-scripted. This means the escalation queue reflects the actual decisions the
+team has made, not a predetermined narrative. A team that resolves G2 as Option
+A (immediate NDB notification) will never see the ESC-02 escalation (NDB clock
+held / ethical tension accumulating). The escalation queue is a mirror, not a
+script.
+
+The activity feed is append-only and never edits or deletes entries. This models
+the incident log reality: actions taken are on record, regardless of subsequent
+decisions. This is particularly important for the post-exercise debrief, where
+the facilitator can reconstruct the full decision sequence from the war room feed
+rather than relying on player recollection.
+
+
+X.5  Escalation Rules Reference
+───────────────────────────────────────────────────────────────────────────────
+
+The following ten escalation rules are implemented in the current prototype.
+Each rule has an ID, urgency level, originating role, destination role, and a
+conditional trigger evaluated against current pool state, decision log, and day.
+
+  ESC-01  SPEND      HIGH    CISO → CFO
+  Forensics spend unreconciled with CFO
+  Trigger: G3 committed as A or B AND G8 not yet decided.
+  Rationale: External forensics engagement has created an unplanned liquidity
+  event that requires CFO visibility before the next day advance.
+
+  ESC-02  CONFLICT   HIGH    Legal → CEO
+  NDB clock held — ethical tension accumulating
+  Trigger: G2 committed as B (hold notification) AND Day ≥ 5 AND
+  LEGAL.ETHICAL_TENSION > 45.
+  Rationale: Sustained notification delay has pushed Legal into territory where
+  the strategic decision conflicts with ethical obligations. CEO arbitration
+  required.
+
+  ESC-03  INTEL      MEDIUM  CISO → Legal
+  Forensics evidence not yet shared with Legal
+  Trigger: G3 committed AND G5 not yet decided.
+  Rationale: Legal cannot assess privilege scope without visibility into
+  forensic evidence chain. Cross-role INTEL_SHARE pending.
+
+  ESC-04  COMMS      HIGH    Comms → CEO
+  Public statement window — no coordinated position
+  Trigger: Day ≥ 7 AND G7 not yet decided AND PUBLIC_TRUST < 35.
+  Rationale: Media pressure has reached a threshold requiring a public
+  statement. No cross-role position has been established. Reputational
+  cascade risk.
+
+  ESC-05  BOARD      HIGH    CEO → All
+  Board briefing window — preparation incomplete
+  Trigger: G6 not yet decided AND BOARD_CONFIDENCE < 40.
+  Rationale: Board confidence has degraded to a level that will trigger
+  governance intervention if not addressed before end of Act 1.
+
+  ESC-06  SPEND      MEDIUM  CFO → CEO
+  Liquidity threshold approaching — budget reconciliation needed
+  Trigger: CFO.BUDGET_INTEGRITY < 40 AND G8 not yet decided.
+  Rationale: Budget integrity below threshold indicates unreconciled
+  commitments. CEO sign-off required before further spend authorisation.
+
+  ESC-07  CONFLICT   MEDIUM  Comms → Legal
+  Media narrative conflicts with legal hold position
+  Trigger: G7 committed AND G2 committed as B.
+  Rationale: Public communications have been made that are potentially
+  inconsistent with the decision to delay NDB notification. Privilege
+  exposure risk.
+
+  ESC-08  INTEL      LOW     CISO → Comms
+  Technical timeline not shared with Comms
+  Trigger: G3 committed AND G7 not yet decided.
+  Rationale: Comms cannot make accurate public statements about the incident
+  scope without access to the technical forensic timeline.
+
+  ESC-09  SPEND      HIGH    Legal → CFO
+  External counsel spend — board approval threshold approaching
+  Trigger: LEGAL.LEGAL_EXPOSURE > 60 AND G8 not yet decided.
+  Rationale: Legal exposure has reached a level where external counsel spend
+  will approach the board approval threshold. Finance must be informed.
+
+  ESC-10  CONFLICT   HIGH    All → CEO
+  Multi-role conflict — containment strategy split
+  Trigger: Day ≥ 10 AND CRISIS_CONTAINMENT < 30 AND
+  REGULATORY_EXPOSURE > 55.
+  Rationale: Crisis containment has failed to the point where regulatory
+  exposure is critical. The team's containment strategy is no longer aligned.
+  CEO must establish unified command position.
+
+
+================================================================================
+END OF WAR ROOM SECTION
+================================================================================

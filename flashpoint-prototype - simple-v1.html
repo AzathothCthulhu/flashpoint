@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLASHPOINT — Engine Prototype · Third Party</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2128;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --accent: #e05c2b;
+  --accent2: #58a6ff;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+  --teal: #39d353;
+  --shared-col: #58a6ff;
+  --ciso-col: #ff7b72;
+  --cfo-col: #79c0ff;
+  --legal-col: #bc8cff;
+  --comms-col: #56d364;
+  --scenario-col: #ffa657;
+  font-size: 13px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* HEADER */
+.header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 16px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.header-logo { font-weight: 800; font-size: 15px; letter-spacing: 2px; color: var(--accent); }
+.header-sub { color: var(--muted); font-size: 11px; }
+.header-spacer { flex: 1; }
+.day-badge { background: var(--surface2); border: 1px solid var(--border); padding: 4px 12px; border-radius: 6px; font-size: 12px; }
+.act-badge { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: 1px; }
+.act-1 { background: rgba(88,166,255,0.15); color: var(--accent2); border: 1px solid rgba(88,166,255,0.3); }
+.act-2 { background: rgba(255,123,114,0.15); color: #ff7b72; border: 1px solid rgba(255,123,114,0.3); }
+.act-3 { background: rgba(188,140,255,0.15); color: var(--purple); border: 1px solid rgba(188,140,255,0.3); }
+.btn { padding: 5px 12px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 12px; transition: background 0.15s; }
+.btn:hover { background: var(--border); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn-primary:hover { background: #c5511f; }
+.btn-danger { background: rgba(248,81,73,0.15); border-color: rgba(248,81,73,0.4); color: var(--red); }
+.btn-danger:hover { background: rgba(248,81,73,0.25); }
+
+/* MAIN LAYOUT */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* LEFT: POOLS */
+.pools-panel { width: 260px; flex-shrink: 0; border-right: 1px solid var(--border); overflow-y: auto; background: var(--surface); }
+.pools-panel::-webkit-scrollbar { width: 4px; }
+.pools-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.pool-group { border-bottom: 1px solid var(--border); }
+.pool-group-header { padding: 6px 10px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; }
+.pool-group-header:hover { background: var(--surface2); }
+.pool-group-header .color-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.pool-item { padding: 5px 10px 6px; border-bottom: 1px solid rgba(48,54,61,0.5); }
+.pool-item:last-child { border-bottom: none; }
+.pool-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.pool-name { font-size: 11px; color: var(--muted); }
+.pool-value { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 30px; text-align: right; }
+.pool-bar-track { height: 4px; background: var(--surface2); border-radius: 2px; position: relative; }
+.pool-bar-fill { height: 4px; border-radius: 2px; transition: width 0.4s ease, background-color 0.4s; }
+/* For -50 to +50 pools: show center-relative bar */
+.pool-bar-center { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--border); }
+.pool-delta-flash { animation: deltaFlash 1.5s ease-out; }
+@keyframes deltaFlash { 0% { background: rgba(255,255,255,0.2); } 100% { background: transparent; } }
+
+/* CENTER: GATES + EVENTS */
+.center-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.center-top { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.center-top::-webkit-scrollbar { width: 4px; }
+.center-top::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* GATE CARD */
+.gate-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.gate-card.active { border-color: var(--accent); }
+.gate-card.completed { border-color: var(--green); opacity: 0.7; }
+.gate-card.upcoming { border-color: var(--border); opacity: 0.5; }
+.gate-header { padding: 10px 14px; display: flex; align-items: center; gap: 8px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+.gate-id { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--muted); }
+.gate-day { font-size: 10px; color: var(--muted); padding: 1px 6px; background: var(--bg); border-radius: 3px; }
+.gate-role-tag { font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.gate-title { font-size: 13px; font-weight: 600; flex: 1; }
+.gate-status-icon { font-size: 14px; }
+.gate-body { padding: 10px 14px; }
+.gate-desc { font-size: 11px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
+.gate-choices { display: flex; flex-direction: column; gap: 6px; }
+.choice-btn { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; text-align: left; transition: all 0.15s; position: relative; }
+.choice-btn:hover { border-color: var(--accent2); background: rgba(88,166,255,0.08); }
+.choice-btn.selected { border-color: var(--green); background: rgba(63,185,80,0.08); }
+.choice-btn.previewing { border-color: var(--yellow); background: rgba(210,153,34,0.08); }
+.choice-label { font-size: 11px; font-weight: 700; color: var(--accent2); margin-bottom: 2px; }
+.choice-btn.selected .choice-label { color: var(--green); }
+.choice-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.choice-preview { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: none; }
+.choice-btn:hover .choice-preview, .choice-btn.previewing .choice-preview { display: block; }
+.preview-effect { font-size: 10px; display: flex; gap: 6px; align-items: center; margin-bottom: 2px; }
+.preview-effect .delta { font-weight: 700; min-width: 28px; }
+.delta-pos { color: var(--green); }
+.delta-neg { color: var(--red); }
+.delta-zero { color: var(--muted); }
+.preview-vis { color: var(--muted); font-size: 9px; padding: 1px 4px; border: 1px solid var(--border); border-radius: 2px; }
+.preview-attr { font-size: 9px; color: var(--muted); }
+.attr-hidden { color: var(--purple); }
+.choice-btn-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+.commit-btn { padding: 5px 14px; border-radius: 4px; background: var(--accent); border: none; color: #fff; font-size: 11px; font-weight: 600; cursor: pointer; }
+.commit-btn:hover { background: #c5511f; }
+
+/* EVENTS SECTION */
+.events-section { padding: 8px 12px 4px; border-top: 1px solid var(--border); }
+.section-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.events-list { display: flex; flex-direction: column; gap: 4px; max-height: 130px; overflow-y: auto; }
+.event-item { padding: 5px 10px; border-radius: 5px; border-left: 3px solid; font-size: 11px; display: flex; gap: 8px; align-items: flex-start; }
+.event-item.fired { background: rgba(88,166,255,0.06); border-color: var(--accent2); }
+.event-item.upcoming { background: rgba(48,54,61,0.3); border-color: var(--border); color: var(--muted); }
+.event-item.overnight { background: rgba(188,140,255,0.06); border-color: var(--purple); }
+.event-item.warning { background: rgba(248,81,73,0.06); border-color: var(--red); }
+.event-day { font-size: 10px; font-weight: 700; min-width: 32px; color: var(--muted); }
+.event-desc { flex: 1; line-height: 1.4; }
+
+/* RIGHT: LOG + BRANCHES */
+.right-panel { width: 280px; flex-shrink: 0; border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.right-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.right-tab { flex: 1; padding: 7px; text-align: center; font-size: 11px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; }
+.right-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.right-content { flex: 1; overflow-y: auto; }
+.right-content::-webkit-scrollbar { width: 4px; }
+.right-content::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* LOG */
+.log-entry { padding: 7px 12px; border-bottom: 1px solid rgba(48,54,61,0.5); font-size: 11px; line-height: 1.4; }
+.log-entry:last-child { border-bottom: none; }
+.log-time { font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+.log-action { font-weight: 600; color: var(--accent2); margin-bottom: 3px; }
+.log-effect { color: var(--muted); font-size: 10px; }
+.log-effect-pos { color: var(--green); }
+.log-effect-neg { color: var(--red); }
+.log-hidden { color: var(--purple); }
+
+/* BRANCHES */
+.branch-item { padding: 6px 10px; border-bottom: 1px solid rgba(48,54,61,0.5); display: flex; gap-8px; align-items: flex-start; gap: 8px; }
+.branch-status { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.branch-name { font-size: 11px; font-weight: 600; }
+.branch-type { font-size: 10px; color: var(--muted); }
+.branch-open { color: var(--green); }
+.branch-closed { color: var(--red); text-decoration: line-through; opacity: 0.5; }
+.branch-neutral { color: var(--muted); }
+
+/* ENDING BAR */
+.ending-bar { padding: 8px 10px; border-top: 1px solid var(--border); background: var(--surface); }
+.ending-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.ending-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 11px; }
+.ending-letter { font-weight: 700; min-width: 14px; }
+.ending-letter-a { color: var(--green); }
+.ending-letter-b { color: var(--yellow); }
+.ending-letter-c { color: var(--red); }
+.ending-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.ending-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+.ending-fill-a { background: var(--green); }
+.ending-fill-b { background: var(--yellow); }
+.ending-fill-c { background: var(--red); }
+.ending-pct { font-size: 10px; color: var(--muted); min-width: 28px; text-align: right; }
+
+/* CASCADE WARNING */
+.cascade-alert { margin: 0 12px 8px; padding: 6px 10px; background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.3); border-radius: 5px; font-size: 11px; color: var(--red); }
+.cascade-alert-title { font-weight: 700; margin-bottom: 2px; }
+
+/* EMPTY STATE */
+.empty-state { padding: 24px; text-align: center; color: var(--muted); font-size: 12px; }
+
+/* TOOLTIP */
+.tooltip-wrap { position: relative; }
+.tooltip-wrap:hover .tooltip-box { display: block; }
+.tooltip-box { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 1px solid var(--border); padding: 6px 8px; border-radius: 5px; font-size: 10px; width: 180px; z-index: 100; pointer-events: none; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* DEBRIEF MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:200; overflow-y:auto; }
+.modal-overlay.open { display:block; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:10px; max-width:860px; margin:32px auto; padding:0; overflow:hidden; }
+.modal-header { background:var(--surface2); border-bottom:1px solid var(--border); padding:16px 24px; display:flex; align-items:center; gap:12px; }
+.modal-header-title { font-size:16px; font-weight:800; letter-spacing:1px; flex:1; }
+.modal-close { background:none; border:1px solid var(--border); color:var(--muted); border-radius:5px; padding:4px 10px; cursor:pointer; font-size:12px; }
+.modal-close:hover { color:var(--text); border-color:var(--text); }
+.modal-body { padding:24px; }
+
+/* DEBRIEF STYLES */
+.debrief-preamble { background:var(--surface2); border-left:3px solid var(--accent); padding:12px 16px; border-radius:0 6px 6px 0; margin-bottom:24px; font-size:13px; line-height:1.7; color:var(--muted); }
+.debrief-preamble strong { color:var(--text); }
+.ending-verdict { display:flex; align-items:center; gap:16px; padding:16px 20px; border-radius:8px; margin-bottom:24px; border:1px solid; }
+.ending-verdict-a { background:rgba(63,185,80,0.08); border-color:rgba(63,185,80,0.3); }
+.ending-verdict-b { background:rgba(210,153,34,0.08); border-color:rgba(210,153,34,0.3); }
+.ending-verdict-c { background:rgba(248,81,73,0.08); border-color:rgba(248,81,73,0.3); }
+.ending-letter-big { font-size:42px; font-weight:900; line-height:1; }
+.ending-verdict-text h2 { font-size:15px; font-weight:700; margin-bottom:4px; }
+.ending-verdict-text p { font-size:12px; color:var(--muted); line-height:1.5; }
+.debrief-section { margin-bottom:28px; }
+.debrief-section-title { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:14px; }
+.role-card { background:var(--surface2); border:1px solid var(--border); border-radius:7px; margin-bottom:12px; overflow:hidden; }
+.role-card-header { padding:10px 14px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
+.role-card-name { font-size:13px; font-weight:700; flex:1; }
+.role-verdict { font-size:11px; font-weight:700; padding:3px 10px; border-radius:4px; }
+.verdict-strong { background:rgba(63,185,80,0.15); color:var(--green); }
+.verdict-mixed { background:rgba(210,153,34,0.15); color:var(--yellow); }
+.verdict-poor { background:rgba(248,81,73,0.15); color:var(--red); }
+.role-card-body { padding:12px 14px; }
+.role-narrative { font-size:12px; line-height:1.75; color:var(--text); margin-bottom:10px; }
+.role-narrative em { color:var(--accent2); font-style:normal; font-weight:600; }
+.role-narrative .neg { color:var(--red); font-weight:600; }
+.role-narrative .pos { color:var(--green); font-weight:600; }
+.pool-delta-summary { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.pool-chip { font-size:10px; padding:2px 8px; border-radius:3px; border:1px solid; display:flex; gap:4px; }
+.chip-pos { background:rgba(63,185,80,0.1); border-color:rgba(63,185,80,0.3); color:var(--green); }
+.chip-neg { background:rgba(248,81,73,0.1); border-color:rgba(248,81,73,0.3); color:var(--red); }
+.chip-neu { background:rgba(125,133,144,0.1); border-color:var(--border); color:var(--muted); }
+.cross-role-item { padding:8px 0; border-bottom:1px solid rgba(48,54,61,0.5); font-size:12px; line-height:1.5; }
+.cross-role-item:last-child { border-bottom:none; }
+.cross-role-item .source { color:var(--accent2); font-weight:600; }
+.cross-role-item .target { color:var(--purple); font-weight:600; }
+.turning-point { display:flex; gap:12px; padding:8px 0; border-bottom:1px solid rgba(48,54,61,0.5); align-items:flex-start; }
+.turning-point:last-child { border-bottom:none; }
+.turning-day { font-size:10px; font-weight:700; color:var(--muted); min-width:40px; padding-top:2px; }
+.turning-text { font-size:12px; line-height:1.5; }
+.turning-impact { font-size:10px; padding:1px 6px; border-radius:3px; margin-top:3px; display:inline-block; }
+.impact-good { background:rgba(63,185,80,0.15); color:var(--green); }
+.impact-bad { background:rgba(248,81,73,0.15); color:var(--red); }
+.impact-mixed { background:rgba(210,153,34,0.15); color:var(--yellow); }
+
+/* ── INTRO OVERLAY ─────────────────────────────────────── */
+#intro-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.intro-hero {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 48px 0 40px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.intro-logo {
+  font-size: 38px; font-weight: 900; letter-spacing: 6px;
+  color: var(--accent); margin-bottom: 6px;
+}
+.intro-scenario-tag {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 18px;
+  font-size: 11px; color: var(--muted); letter-spacing: 1px;
+  margin-bottom: 28px;
+}
+.intro-scenario-tag span { color: var(--accent2); font-weight: 600; }
+.intro-tagline {
+  font-size: 22px; font-weight: 700; color: var(--text);
+  margin-bottom: 8px; line-height: 1.3;
+}
+.intro-subtitle {
+  font-size: 13px; color: var(--muted); max-width: 520px;
+  margin: 0 auto 32px; line-height: 1.7;
+}
+.intro-begin-btn {
+  display: inline-block; padding: 13px 40px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 7px;
+  font-size: 14px; font-weight: 700; letter-spacing: 1px;
+  cursor: pointer; transition: background 0.15s;
+}
+.intro-begin-btn:hover { background: #c5511f; }
+.intro-begin-sub {
+  margin-top: 10px; font-size: 11px; color: var(--muted);
+}
+
+.intro-body {
+  max-width: 900px; margin: 0 auto;
+  padding: 40px 24px 60px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px 40px;
+}
+.intro-section { grid-column: span 1; }
+.intro-section.full { grid-column: span 2; }
+
+.intro-section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.intro-section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.intro-section h3 {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  margin-bottom: 8px;
+}
+.intro-section p, .intro-section li {
+  font-size: 12px; color: var(--muted); line-height: 1.75;
+}
+.intro-section ul { padding-left: 16px; }
+.intro-section li { margin-bottom: 4px; }
+.intro-section li strong { color: var(--text); }
+
+/* Panel diagram cards */
+.panel-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-top: 4px;
+}
+.panel-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 12px 14px;
+}
+.panel-card-top {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.panel-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.panel-card-name { font-size: 12px; font-weight: 700; }
+.panel-card-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+/* Pool legend */
+.pool-legend { display: flex; flex-direction: column; gap: 8px; }
+.pool-eg {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 9px 12px;
+}
+.pool-eg-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.pool-eg-name { font-size: 11px; color: var(--text); font-weight: 600; }
+.pool-eg-val { font-size: 12px; font-weight: 700; }
+.pool-eg-track {
+  height: 5px; background: var(--bg); border-radius: 3px;
+  margin-bottom: 4px; position: relative; overflow: hidden;
+}
+.pool-eg-fill { height: 100%; border-radius: 3px; }
+.pool-eg-tag { font-size: 10px; color: var(--muted); }
+
+/* Decision flow */
+.decision-flow {
+  display: flex; flex-direction: column; gap: 0;
+}
+.flow-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(48,54,61,0.5);
+}
+.flow-step:last-child { border-bottom: none; }
+.flow-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.flow-text { font-size: 12px; line-height: 1.6; color: var(--muted); }
+.flow-text strong { color: var(--text); }
+
+/* Role roster */
+.role-roster { display: flex; flex-direction: column; gap: 6px; }
+.role-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 10px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.role-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.role-row-name { font-size: 12px; font-weight: 700; color: var(--text); }
+.role-row-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* Attr legend */
+.attr-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 0; border-bottom: 1px solid rgba(48,54,61,0.5);
+  font-size: 11px;
+}
+.attr-row:last-child { border-bottom: none; }
+.attr-badge {
+  font-size: 10px; padding: 2px 7px; border-radius: 3px;
+  border: 1px solid; min-width: 110px; text-align: center; flex-shrink: 0;
+}
+.attr-full  { background:rgba(88,166,255,0.1); border-color:rgba(88,166,255,0.3); color:var(--accent2); }
+.attr-vis   { background:rgba(63,185,80,0.1);  border-color:rgba(63,185,80,0.3);  color:var(--green); }
+.attr-hid   { background:rgba(188,140,255,0.1);border-color:rgba(188,140,255,0.3);color:var(--purple); }
+.attr-imm   { background:rgba(255,166,87,0.1); border-color:rgba(255,166,87,0.3); color:var(--scenario-col); }
+.attr-desc { color: var(--muted); line-height: 1.5; }
+
+/* Scenario context box */
+.scenario-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent2);
+  border-radius: 0 7px 7px 0;
+  padding: 14px 16px;
+}
+.scenario-box h4 { font-size: 12px; font-weight: 700; color: var(--accent2); margin-bottom: 6px; }
+.scenario-box p { font-size: 12px; color: var(--muted); line-height: 1.7; }
+.scenario-box p + p { margin-top: 8px; }
+.scenario-box strong { color: var(--text); }
+
+/* Solo testing note */
+.solo-note {
+  grid-column: span 2;
+  background: rgba(224,92,43,0.07);
+  border: 1px solid rgba(224,92,43,0.25);
+  border-radius: 7px;
+  padding: 14px 18px;
+  font-size: 12px; color: var(--muted); line-height: 1.7;
+}
+.solo-note strong { color: var(--accent); }
+
+.intro-begin-footer {
+  grid-column: span 2; text-align: center;
+  padding-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- INTRO OVERLAY                                         -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="intro-overlay">
+
+  <!-- HERO -->
+  <div class="intro-hero">
+    <div class="intro-logo">FLASHPOINT</div>
+    <div style="margin-bottom:20px">
+      <div class="intro-scenario-tag">
+        Scenario · <span>Third Party</span> · Meridian Health · 21-day run
+      </div>
+    </div>
+    <div class="intro-tagline">Where decisions have consequences.</div>
+    <div class="intro-subtitle">
+      A professional crisis simulation engine. You are running Meridian Health through a data breach. Every decision you commit changes the state machine. Nothing is cosmetic.
+    </div>
+    <button class="intro-begin-btn" onclick="beginScenario()">Begin Scenario ▶</button>
+    <div class="intro-begin-sub">You can return to this screen at any time via ↺ Reset</div>
+  </div>
+
+  <!-- BODY -->
+  <div class="intro-body">
+
+    <!-- SCENARIO CONTEXT (full width) -->
+    <div class="intro-section full">
+      <div class="intro-section-label">The Scenario</div>
+      <div class="scenario-box">
+        <h4>Third Party — Meridian Health</h4>
+        <p>
+          <strong>Day 0, 06:22.</strong> CISO monitoring logs flag an unusual 4.3GB export from the NovaCare integration — a third-party healthcare data platform Meridian uses to manage patient appointment records. Within hours, security researcher <strong>Claire Ashworth</strong> emails the CISO with a 40-record sample of what appears to be authentic Meridian patient data, now circulating on a dark web forum. She is publishing in 48 hours.
+        </p>
+        <p>
+          You will run Meridian Health's executive response across <strong>21 days and three Acts</strong> — making decisions as CISO, CFO, General Counsel, Communications Lead, and CEO. Each decision changes resource pools, triggers cross-role consequences, and opens or forecloses narrative branches. There is no correct answer. There are three possible endings. Which one you reach depends entirely on the decisions you commit.
+        </p>
+        <p>
+          <strong>Senior physician Dr. Sarah Obi</strong> is among those whose records may be in the exposed sample. How you treat her — and when — is one of the most consequential threads in the scenario.
+        </p>
+      </div>
+    </div>
+
+    <!-- THE THREE ACTS -->
+    <div class="intro-section">
+      <div class="intro-section-label">The Three Acts</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="padding:10px 12px;border-radius:6px;background:rgba(88,166,255,0.06);border:1px solid rgba(88,166,255,0.2)">
+          <div style="font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:3px">ACT 1 — EXPOSURE · Days 1–7</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6">The incident is discovered and assessed. Initial response posture is set. Forensics are engaged or not. The board is briefed at some level. The NDB clock question is live. Staff are notified or not. The world does not yet know.</div>
+        </div>
+        <div style="padding:10px 12px;border-radius:6px;background:rgba(255,123,114,0.06);border:1px solid rgba(255,123,114,0.2)">
+          <div style="font-size:11px;font-weight:700;color:#ff7b72;margin-bottom:3px">ACT 2 — ESCALATION · Days 8–15</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6">Ashworth publishes. Media picks it up. Attribution must be decided. The regulator makes contact. The remediation budget is authorised. Strategic posture is set. Cross-role consequences compound and become visible.</div>
+        </div>
+        <div style="padding:10px 12px;border-radius:6px;background:rgba(188,140,255,0.06);border:1px solid rgba(188,140,255,0.2)">
+          <div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:3px">ACT 3 — RESOLUTION · Days 16–21</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6">The shape of the ending is now determined by prior play. Dr. Obi's trajectory resolves. CEO accountability is decided. The final public narrative closes the scenario. The debrief surfaces what the run produced.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROLES -->
+    <div class="intro-section">
+      <div class="intro-section-label">The Roles</div>
+      <div class="role-roster">
+        <div class="role-row">
+          <div class="role-dot" style="background:var(--ciso-col)"></div>
+          <div><div class="role-row-name">CISO</div><div class="role-row-desc">Incident lead. Owns Security Posture, Control Framework, Audit Readiness, Team Morale, and Executive Trust. Decides response posture, forensics, and technical attribution.</div></div>
+        </div>
+        <div class="role-row">
+          <div class="role-dot" style="background:var(--cfo-col)"></div>
+          <div><div class="role-row-name">CFO</div><div class="role-row-desc">Financial lead. Owns Liquidity, Budget Integrity, Financial Reporting Risk. Authorises or declines emergency spend — the single most visible cross-role action in the game.</div></div>
+        </div>
+        <div class="role-row">
+          <div class="role-dot" style="background:var(--legal-col)"></div>
+          <div><div class="role-row-name">General Counsel</div><div class="role-row-desc">Legal and regulatory lead. Owns Legal Exposure, Privilege Integrity, Regulatory Relationships, Ethical Tension. Decides the NDB clock, disclosure scope, and regulator posture.</div></div>
+        </div>
+        <div class="role-row">
+          <div class="role-dot" style="background:var(--comms-col)"></div>
+          <div><div class="role-row-name">Comms / PR Lead</div><div class="role-row-desc">Narrative lead. Owns Message Control, Narrative Coherence, Stakeholder Confidence, Media Relationships. Decides every external statement. Every statement creates a legal surface.</div></div>
+        </div>
+        <div class="role-row">
+          <div class="role-dot" style="background:var(--scenario-col)"></div>
+          <div><div class="role-row-name">CEO + HR</div><div class="role-row-desc">Executive and people lead. Decides board briefing scope, internal notification, strategic posture, CEO accountability, and the final public narrative.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THE PANELS -->
+    <div class="intro-section full">
+      <div class="intro-section-label">Reading the Interface</div>
+      <div class="panel-grid">
+        <div class="panel-card">
+          <div class="panel-card-top">
+            <div class="panel-icon" style="background:rgba(88,166,255,0.12);color:var(--accent2)">◧</div>
+            <div class="panel-card-name" style="color:var(--accent2)">Left Panel — Resource Pools</div>
+          </div>
+          <div class="panel-card-desc">All 27 resource pools, grouped by owner: Shared (organisation-wide), CISO, CFO, Legal, Comms, and Scenario-specific. Each pool shows its current value as a number and a colour-coded bar. Values update instantly when you commit a decision. Watch this panel to see what your decisions are actually doing to the organisation.</div>
+        </div>
+        <div class="panel-card">
+          <div class="panel-card-top">
+            <div class="panel-icon" style="background:rgba(224,92,43,0.12);color:var(--accent)">⬤</div>
+            <div class="panel-card-name" style="color:var(--accent)">Centre Panel — Decision Gates</div>
+          </div>
+          <div class="panel-card-desc">Decision gates appear here on their scheduled day. Each gate shows the scenario context, the deciding role(s), and two or three choices. Hover a choice to preview its pool effects before committing. Click <strong>Commit</strong> to lock in the decision — it cannot be undone. Gates with a green ✓ are completed. Gates with a filled dot are active today.</div>
+        </div>
+        <div class="panel-card">
+          <div class="panel-card-top">
+            <div class="panel-icon" style="background:rgba(188,140,255,0.12);color:var(--purple)">≡</div>
+            <div class="panel-card-name" style="color:var(--purple)">Right Panel — Log &amp; Branches</div>
+          </div>
+          <div class="panel-card-desc">Two tabs. <strong>Decision Log</strong> records every pool change — gate, delta, pool name, visibility tag, and the note explaining what caused it. Read this to trace cause and effect. <strong>Branches</strong> shows all 40 narrative branches: ✓ open (your decision matched), ✗ foreclosed (a different choice was made), ○ not yet decided.</div>
+        </div>
+        <div class="panel-card">
+          <div class="panel-card-top">
+            <div class="panel-icon" style="background:rgba(255,166,87,0.12);color:var(--scenario-col)">▤</div>
+            <div class="panel-card-name" style="color:var(--scenario-col)">Bottom Centre — Timeline</div>
+          </div>
+          <div class="panel-card-desc">The scenario event timeline shows scheduled injects and state-triggered events near the current day. <strong>🌙 overnight events</strong> are morning-anxiety events that fire during low-activity periods. <strong>Warning events</strong> are state-conditioned — they only fire if specific pool thresholds are crossed. Fired events are highlighted in blue.</div>
+        </div>
+        <div class="panel-card">
+          <div class="panel-card-top">
+            <div class="panel-icon" style="background:rgba(63,185,80,0.12);color:var(--green)">▊</div>
+            <div class="panel-card-name" style="color:var(--green)">Bottom Right — Ending Probability</div>
+          </div>
+          <div class="panel-card-desc">A live estimate of which ending you are tracking toward based on your committed decisions and current pool values. <strong>Ending A</strong> (green) is the best-case resolution, reached by roughly 10–15% of runs. <strong>B</strong> (yellow) is the most common. <strong>C</strong> (red) is the worst-case, reached by 25–40% of runs. Updated after every committed decision.</div>
+        </div>
+        <div class="panel-card">
+          <div class="panel-card-top">
+            <div class="panel-icon" style="background:rgba(188,140,255,0.12);color:var(--purple)">⬡</div>
+            <div class="panel-card-name" style="color:var(--purple)">Debrief Button</div>
+          </div>
+          <div class="panel-card-desc">Opens the narrative debrief at any point in the run — not just at Day 21. The debrief generates a role-by-role analysis of what went right and wrong, identifies the key turning points in the run, surfaces cross-role consequences that would have been hidden from individual players, and delivers a final verdict on the scenario outcome.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW TO READ POOLS -->
+    <div class="intro-section">
+      <div class="intro-section-label">Reading the Resource Pools</div>
+      <div class="pool-legend">
+        <div class="pool-eg">
+          <div class="pool-eg-row">
+            <span class="pool-eg-name">Intelligence Quality</span>
+            <span class="pool-eg-val" style="color:var(--yellow)">42</span>
+          </div>
+          <div class="pool-eg-track"><div class="pool-eg-fill" style="width:42%;background:var(--yellow)"></div></div>
+          <div class="pool-eg-tag">0–100 scale · higher = better · bar fills left to right · yellow = caution zone (30–60%)</div>
+        </div>
+        <div class="pool-eg">
+          <div class="pool-eg-row">
+            <span class="pool-eg-name">Legal Exposure <span style="font-size:10px;color:var(--muted)">(INV)</span></span>
+            <span class="pool-eg-val" style="color:var(--red)">65</span>
+          </div>
+          <div class="pool-eg-track"><div class="pool-eg-fill" style="width:65%;background:var(--red)"></div></div>
+          <div class="pool-eg-tag">Inverted pool — higher value = worse outcome. Red means this pool is in a bad state even though the number is high.</div>
+        </div>
+        <div class="pool-eg">
+          <div class="pool-eg-row">
+            <span class="pool-eg-name">Reputation</span>
+            <span class="pool-eg-val" style="color:var(--green)">+18</span>
+          </div>
+          <div class="pool-eg-track" style="position:relative">
+            <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border)"></div>
+            <div class="pool-eg-fill" style="width:18%;margin-left:50%;background:var(--green)"></div>
+          </div>
+          <div class="pool-eg-tag">−50 to +50 scale. Bar is centre-relative — right of centre is positive (green), left is negative (red). Starts at +10.</div>
+        </div>
+        <div class="pool-eg">
+          <div class="pool-eg-row">
+            <span class="pool-eg-name">TIME — Scenario Clock</span>
+            <span class="pool-eg-val" style="color:var(--red)">22</span>
+          </div>
+          <div class="pool-eg-track"><div class="pool-eg-fill" style="width:22%;background:var(--red)"></div></div>
+          <div class="pool-eg-tag">Non-renewable. Decays −5 per day automatically. Below 25 triggers a cascade: Capacity and Intelligence Quality drain accelerates.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW TO MAKE DECISIONS -->
+    <div class="intro-section">
+      <div class="intro-section-label">Making Decisions</div>
+      <div class="decision-flow">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-text"><strong>Advance the day</strong> using the <strong>Advance Day ▶</strong> button in the header. Each click applies daily decay to TIME and Intelligence Quality, fires any scheduled events for that day, and reveals active decision gates.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-text"><strong>Read the gate context.</strong> Each decision gate shows which role is deciding, the scenario situation, and two or three choices. The context is drawn directly from the game design document — it reflects the real information the role would have.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-text"><strong>Hover a choice</strong> to preview its pool effects before committing. Effects show the delta value, the pool name, the visibility tag (when it would appear to players), and whether the cause would be hidden from the affected role.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-text"><strong>Click Commit</strong> to lock in the decision. Consequences apply immediately to the pool state. The decision is logged, branches are updated, and the ending probability recalculates. <em>Committed decisions cannot be undone — by design.</em></div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <div class="flow-text"><strong>Check the Decision Log</strong> after committing to see every pool delta produced — including hidden cross-role effects that individual players would not normally see. Toggle <em>Show hidden effects</em> in the header to control what the preview shows.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">6</div>
+          <div class="flow-text"><strong>Open the Debrief</strong> at any time — mid-run or at Day 21 — for the full narrative analysis. Run the scenario multiple times with different choices to map the consequence space.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTRIBUTION AND VISIBILITY -->
+    <div class="intro-section">
+      <div class="intro-section-label">Effect Visibility &amp; Attribution</div>
+      <p style="margin-bottom:10px">Every pool effect carries two tags that describe what players in a real multiplayer run would — and would not — see.</p>
+      <div>
+        <div class="attr-row"><span class="attr-badge attr-imm">IMMEDIATE</span><span class="attr-desc">Effect applies the moment the decision is committed — visible in the same session.</span></div>
+        <div class="attr-row"><span class="attr-badge" style="background:rgba(210,153,34,0.1);border-color:rgba(210,153,34,0.3);color:var(--yellow);">NEXT_LOGIN</span><span class="attr-desc">Effect is queued — the affected role sees it when they next log in. Simulates overnight consequences.</span></div>
+        <div class="attr-row"><span class="attr-badge" style="background:rgba(63,185,80,0.08);border-color:rgba(63,185,80,0.25);color:var(--green);">ACT_BOUNDARY</span><span class="attr-desc">Effect materialises at the next live checkpoint session — end of Days 7, 15, or 19.</span></div>
+        <div class="attr-row"><span class="attr-badge" style="background:rgba(125,133,144,0.1);border-color:var(--border);color:var(--muted);">END</span><span class="attr-desc">Effect only becomes visible at scenario close — long-tail consequences of decisions made weeks earlier.</span></div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="attr-row"><span class="attr-badge attr-full">FULL_DISCLOSURE</span><span class="attr-desc">All roles see cause and effect — this is a visible, shared consequence.</span></div>
+        <div class="attr-row"><span class="attr-badge attr-vis">CAUSE_VISIBLE</span><span class="attr-desc">The affected role sees the effect and knows what caused it.</span></div>
+        <div class="attr-row"><span class="attr-badge attr-hid">CAUSE_HIDDEN ●</span><span class="attr-desc">The affected role sees their pool move but cannot see what caused it. This is the engine's information asymmetry in action — the drama of not knowing why your domain is under pressure.</span></div>
+      </div>
+    </div>
+
+    <!-- CASCADE RULES -->
+    <div class="intro-section">
+      <div class="intro-section-label">Cascade Rules</div>
+      <p style="margin-bottom:10px">Four threshold conditions trigger automatic cascade effects — they fire silently when pools cross their limits.</p>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="padding:8px 10px;border-radius:5px;border:1px solid rgba(248,81,73,0.25);background:rgba(248,81,73,0.06);font-size:11px;color:var(--muted)">
+          <strong style="color:var(--red)">TIME &lt; 25</strong> — Accelerated drain on Capacity (−5) and Intelligence Quality (−3). Time pressure degrades organisational function.
+        </div>
+        <div style="padding:8px 10px;border-radius:5px;border:1px solid rgba(248,81,73,0.25);background:rgba(248,81,73,0.06);font-size:11px;color:var(--muted)">
+          <strong style="color:var(--red)">REPUTATION ≤ −20</strong> — Regulatory Standing takes an additional −5 hit. A damaged public reputation makes the regulator less forgiving.
+        </div>
+        <div style="padding:8px 10px;border-radius:5px;border:1px solid rgba(248,81,73,0.25);background:rgba(248,81,73,0.06);font-size:11px;color:var(--muted)">
+          <strong style="color:var(--red)">REGULATORY_STANDING ≤ −20</strong> — Capacity takes a −8 hit. Legal capacity is consumed by formal proceedings.
+        </div>
+        <div style="padding:8px 10px;border-radius:5px;border:1px solid rgba(210,153,34,0.25);background:rgba(210,153,34,0.06);font-size:11px;color:var(--muted)">
+          <strong style="color:var(--yellow)">INTELLIGENCE_QUALITY &lt; 30</strong> — Decision outcomes enter a ±20% noise band. Decisions feel "unlucky" — correct choices produce weaker results, poor choices produce worse ones.
+        </div>
+      </div>
+    </div>
+
+    <!-- SOLO TESTING NOTE (full width) -->
+    <div class="solo-note">
+      <strong>Solo testing mode.</strong> This prototype is designed for a single tester running all roles. A few things to know: <strong>(1)</strong> In full multiplayer play, each role sees only their own domain pools and shared pools — here you see everything. Use the <em>Show hidden effects</em> toggle to simulate what individual roles would experience. <strong>(2)</strong> Committed decisions are final — there is no undo. Use <strong>↺ Reset</strong> to restart cleanly and explore a different decision path. <strong>(3)</strong> The debrief works at any point in the run, not just at the end — use it mid-scenario to understand the consequences of decisions made so far. <strong>(4)</strong> Delta values are calibrated so no single decision depletes any pool below 50% of its range in isolation — catastrophic states require compound poor decisions across multiple gates.
+    </div>
+
+    <!-- FINAL BEGIN -->
+    <div class="intro-begin-footer">
+      <button class="intro-begin-btn" onclick="beginScenario()">Begin Scenario — Day 1 ▶</button>
+      <div class="intro-begin-sub" style="margin-top:8px">Meridian Health · Third Party · 21 days · 13 decision gates · 3 possible endings</div>
+    </div>
+
+  </div><!-- /intro-body -->
+</div><!-- /intro-overlay -->
+
+<div class="header">
+  <div>
+    <div class="header-logo">FLASHPOINT</div>
+    <div class="header-sub">Third Party · Engine Prototype v1.0</div>
+  </div>
+  <div id="day-badge" class="day-badge">Day 1 of 21</div>
+  <div id="act-badge" class="act-badge act-1">ACT 1 — EXPOSURE</div>
+  <div class="header-spacer"></div>
+  <label style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;">
+    <input type="checkbox" id="show-hidden" checked> Show hidden effects
+  </label>
+  <button class="btn" onclick="prevDay()" id="btn-prev">◀ Day</button>
+  <button class="btn btn-primary" onclick="nextDay()" id="btn-next">Advance Day ▶</button>
+  <button class="btn" onclick="openDebrief()" id="btn-debrief" style="border-color:var(--purple);color:var(--purple);">⬡ Debrief</button>
+  <button class="btn btn-danger" onclick="resetGame()">↺ Reset</button>
+</div>
+
+<!-- DEBRIEF MODAL -->
+<div class="modal-overlay" id="debrief-modal" onclick="if(event.target===this)closeDebrief()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-title">FLASHPOINT — Scenario Debrief</div>
+        <div style="font-size:11px;color:var(--muted);">Third Party · What went right, what went wrong, and why</div>
+      </div>
+      <button class="modal-close" onclick="closeDebrief()">✕ Close</button>
+    </div>
+    <div class="modal-body" id="debrief-body"></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- LEFT: POOLS -->
+  <div class="pools-panel" id="pools-panel"></div>
+
+  <!-- CENTER -->
+  <div class="center-panel">
+    <div class="center-top" id="center-top">
+      <div class="empty-state" id="empty-gates" style="display:none;">No active decision gates today. Advance the day or check upcoming events.</div>
+    </div>
+    <div id="cascade-alerts"></div>
+    <div class="events-section">
+      <div class="section-label">Scenario Timeline</div>
+      <div class="events-list" id="events-list"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel">
+    <div class="right-tabs">
+      <div class="right-tab active" onclick="showTab('log')" id="tab-log">Decision Log</div>
+      <div class="right-tab" onclick="showTab('branches')" id="tab-branches">Branches</div>
+    </div>
+    <div class="right-content" id="right-log"></div>
+    <div class="right-content" id="right-branches" style="display:none;"></div>
+    <div class="ending-bar">
+      <div class="ending-title">Ending Probability</div>
+      <div class="ending-row"><span class="ending-letter ending-letter-a">A</span><div class="ending-track"><div class="ending-fill ending-fill-a" id="end-a-bar" style="width:12%"></div></div><span class="ending-pct" id="end-a-pct">12%</span></div>
+      <div class="ending-row"><span class="ending-letter ending-letter-b">B</span><div class="ending-track"><div class="ending-fill ending-fill-b" id="end-b-bar" style="width:55%"></div></div><span class="ending-pct" id="end-b-pct">55%</span></div>
+      <div class="ending-row"><span class="ending-letter ending-letter-c">C</span><div class="ending-track"><div class="ending-fill ending-fill-c" id="end-c-bar" style="width:33%"></div></div><span class="ending-pct" id="end-c-pct">33%</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// GAME DATA
+// ═══════════════════════════════════════════════════════════
+
+const POOL_DEFS = [
+  // id, name, tier, owner, start, min, max, inverted, decayPerDay, color
+  { id:'TIME',                      name:'Scenario Clock',           tier:'shared',   owner:'All',   start:100, min:0,   max:100, decayPerDay:5,  color:'var(--shared-col)' },
+  { id:'CAPACITY',                  name:'Response Capacity',        tier:'shared',   owner:'All',   start:75,  min:0,   max:100, decayPerDay:0,  color:'var(--shared-col)' },
+  { id:'REPUTATION',                name:'Public / Stakeholder Trust',tier:'shared',  owner:'All',   start:10,  min:-50, max:50,  decayPerDay:0,  color:'var(--shared-col)' },
+  { id:'REGULATORY_STANDING',       name:'Regulator Posture',        tier:'shared',   owner:'All',   start:5,   min:-50, max:50,  decayPerDay:0,  color:'var(--shared-col)' },
+  { id:'INTELLIGENCE_QUALITY',      name:'Threat Picture Accuracy',  tier:'shared',   owner:'All',   start:25,  min:0,   max:100, decayPerDay:2,  color:'var(--shared-col)' },
+
+  { id:'CISO.SECURITY_POSTURE',     name:'Security Posture',         tier:'domain',   owner:'CISO',  start:55,  min:0,   max:100, decayPerDay:0,  color:'var(--ciso-col)' },
+  { id:'CISO.CONTROL_FRAMEWORK',    name:'Control Framework',        tier:'domain',   owner:'CISO',  start:60,  min:0,   max:100, decayPerDay:0,  color:'var(--ciso-col)' },
+  { id:'CISO.AUDIT_READINESS',      name:'Audit Readiness',          tier:'domain',   owner:'CISO',  start:70,  min:0,   max:100, decayPerDay:0,  color:'var(--ciso-col)' },
+  { id:'CISO.TEAM_MORALE',          name:'Team Morale',              tier:'domain',   owner:'CISO',  start:65,  min:0,   max:100, decayPerDay:0,  color:'var(--ciso-col)' },
+  { id:'CISO.EXECUTIVE_TRUST',      name:'Executive Trust',          tier:'domain',   owner:'CISO',  start:45,  min:-50, max:50,  decayPerDay:0,  color:'var(--ciso-col)' },
+
+  { id:'CFO.LIQUIDITY',             name:'Cash / Liquidity',         tier:'domain',   owner:'CFO',   start:75,  min:0,   max:100, decayPerDay:0,  color:'var(--cfo-col)' },
+  { id:'CFO.BUDGET_INTEGRITY',      name:'Budget Integrity',         tier:'domain',   owner:'CFO',   start:80,  min:0,   max:100, decayPerDay:0,  color:'var(--cfo-col)' },
+  { id:'CFO.COST_OF_CAPITAL',       name:'Cost of Capital',          tier:'domain',   owner:'CFO',   start:75,  min:0,   max:100, inverted:true,  decayPerDay:0,  color:'var(--cfo-col)' },
+  { id:'CFO.FINANCIAL_RISK',        name:'Financial Reporting Risk', tier:'domain',   owner:'CFO',   start:25,  min:0,   max:100, inverted:true,  decayPerDay:0,  color:'var(--cfo-col)' },
+  { id:'CFO.VENDOR_RELATIONSHIPS',  name:'Vendor Relationships',     tier:'domain',   owner:'CFO',   start:20,  min:-50, max:50,  decayPerDay:0,  color:'var(--cfo-col)' },
+
+  { id:'LEGAL.LEGAL_EXPOSURE',      name:'Legal Exposure',           tier:'domain',   owner:'Legal', start:20,  min:0,   max:100, inverted:true,  decayPerDay:0,  color:'var(--legal-col)' },
+  { id:'LEGAL.PRIVILEGE_INTEGRITY', name:'Privilege Integrity',      tier:'domain',   owner:'Legal', start:90,  min:0,   max:100, decayPerDay:0,  color:'var(--legal-col)' },
+  { id:'LEGAL.REG_RELATIONSHIPS',   name:'Regulatory Relationships', tier:'domain',   owner:'Legal', start:15,  min:-50, max:50,  decayPerDay:0,  color:'var(--legal-col)' },
+  { id:'LEGAL.CONTRACT_POSITION',   name:'Contract Position',        tier:'domain',   owner:'Legal', start:70,  min:0,   max:100, decayPerDay:0,  color:'var(--legal-col)' },
+  { id:'LEGAL.ETHICAL_TENSION',     name:'Ethical Tension',          tier:'domain',   owner:'Legal', start:30,  min:0,   max:100, inverted:true,  decayPerDay:0,  color:'var(--legal-col)' },
+
+  { id:'COMMS.MESSAGE_CONTROL',     name:'Message Control',          tier:'domain',   owner:'Comms', start:70,  min:0,   max:100, decayPerDay:0,  color:'var(--comms-col)' },
+  { id:'COMMS.MEDIA_RELATIONSHIPS', name:'Media Relationships',      tier:'domain',   owner:'Comms', start:15,  min:-50, max:50,  decayPerDay:0,  color:'var(--comms-col)' },
+  { id:'COMMS.STAKEHOLDER_CONF',    name:'Stakeholder Confidence',   tier:'domain',   owner:'Comms', start:65,  min:0,   max:100, decayPerDay:0,  color:'var(--comms-col)' },
+  { id:'COMMS.NARRATIVE_COHERENCE', name:'Narrative Coherence',      tier:'domain',   owner:'Comms', start:85,  min:0,   max:100, decayPerDay:0,  color:'var(--comms-col)' },
+  { id:'COMMS.CRISIS_CAPACITY',     name:'Comms Capacity',           tier:'domain',   owner:'Comms', start:80,  min:0,   max:100, decayPerDay:0,  color:'var(--comms-col)' },
+
+  { id:'THIRD_PARTY_TRUST',         name:'NovaCare Trust',           tier:'scenario', owner:'All',   start:45,  min:0,   max:100, decayPerDay:0,  color:'var(--scenario-col)' },
+  { id:'PATIENT_CONFIDENCE',        name:'Patient Confidence',       tier:'scenario', owner:'All',   start:75,  min:0,   max:100, decayPerDay:0,  color:'var(--scenario-col)' },
+  { id:'RESEARCHER_GOODWILL',       name:'Researcher Goodwill',      tier:'scenario', owner:'All',   start:40,  min:0,   max:100, decayPerDay:0,  color:'var(--scenario-col)' },
+  { id:'DR_OBI_TRAJECTORY',         name:'Dr. Obi Trajectory',       tier:'scenario', owner:'All',   start:50,  min:0,   max:100, decayPerDay:0,  color:'var(--scenario-col)' },
+];
+
+// Pool ID alias map (spreadsheet uses some slightly different names)
+const POOL_ALIAS = {
+  'CISO.CONTROL_FRAMEWORK_INTEGRITY': 'CISO.CONTROL_FRAMEWORK',
+  'CISO.SECURITY_POSTURE': 'CISO.SECURITY_POSTURE',
+  'CFO.FINANCIAL_REPORTING_RISK': 'CFO.FINANCIAL_RISK',
+  'LEGAL.REGULATORY_RELATIONSHIPS': 'LEGAL.REG_RELATIONSHIPS',
+  'COMMS.STAKEHOLDER_CONFIDENCE': 'COMMS.STAKEHOLDER_CONF',
+};
+function resolvePool(id) { return POOL_ALIAS[id] || id; }
+
+// ─── DECISION GATES ───────────────────────────────────────
+const GATES = [
+  { id:'G1',  day:1,  act:1, roles:['CISO'], title:'Initial Response Posture',
+    desc:'CISO monitoring logs an unusual 4.3GB export from the NovaCare integration. Claire Ashworth (security researcher) emails CISO with a 40-record sample and a 48-hour publication deadline.',
+    choices: {
+      A: { label:'Activate Formal IR', desc:'Convene full IR team; notify CEO, CFO, Legal, and Comms; begin formal logging and evidence chain.' },
+      B: { label:'Investigation Only', desc:'Treat as ambiguous; CISO team works quietly; escalate only if confirmed. Preserve optionality.' },
+      C: { label:'Immediate Transparency', desc:'Brief full board same day; begin public-facing preparation; contact regulator informally before facts confirmed.' },
+    }, default:'A' },
+
+  { id:'G2',  day:2,  act:1, roles:['Legal'], title:'NDB Notification Clock',
+    desc:'CISO team has confirmed the 40-record sample is authentic Meridian data. Legal must now interpret the Notifiable Data Breach threshold — has "awareness" been triggered under s.26WE?',
+    choices: {
+      A: { label:'Start Clock Now', desc:'Formally notify OAIC; trigger the 30-day NDB clock based on current awareness. Clean, clear, high-risk.' },
+      B: { label:'Hold Pending Investigation', desc:'Legal position: threshold for "awareness" not yet met. Continue investigation; reassess daily. Preserves optionality.' },
+      C: { label:'Informal Heads-Up', desc:'Informal call to OAIC contact to flag the investigation without formally triggering the NDB clock.' },
+    }, default:'B' },
+
+  { id:'G3',  day:3,  act:1, roles:['CISO','CFO'], title:'External Forensics Engagement',
+    desc:'NovaCare has issued a formal denial. Internal investigation is producing limited intelligence. The team must decide whether to engage external forensics and at what investment level.',
+    choices: {
+      A: { label:'Top-Tier Firm ($150K)', desc:'Engage Mandiant or equivalent. Fastest, highest quality, definitive evidence. Significant liquidity event.' },
+      B: { label:'Mid-Tier Firm ($55K)', desc:'Engage domestic mid-tier firm. Adequate quality, moderate cost, 48hr onboarding lag.' },
+      C: { label:'In-House Only ($0)', desc:'Decline external engagement. CISO team runs investigation. Zero cost; thinnest capability; IQ ceiling capped.' },
+    }, default:'B' },
+
+  { id:'G4',  day:4,  act:1, roles:['CEO'], title:'Board Briefing Scope',
+    desc:'Board Chair Lisa Park has called asking for a briefing. CEO must decide how broadly to brief the board and with what level of detail on worst-case scenarios.',
+    choices: {
+      A: { label:'Full Briefing incl. Worst Case', desc:'Brief full board with scenarios including worst-case disclosure requirements. Maximum upward transparency.' },
+      B: { label:'Measured Briefing — Facts Only', desc:'Brief full board on confirmed facts only; defer scenario planning to next meeting. Standard approach.' },
+      C: { label:'Chair-Only Until Facts Clear', desc:'Brief Board Chair only; hold full board briefing until investigation progresses. Triggers Legal Fault Line if Chair pressures delay.' },
+    }, default:'B' },
+
+  { id:'G5',  day:6,  act:1, roles:['HR','CEO'], title:'Internal Notification incl. Dr. Obi',
+    desc:'Forensics has now identified potentially affected records. Dr. Sarah Obi — a senior physician at Meridian — is among those whose data may be in the exposed sample. Internal notification decision required.',
+    choices: {
+      A: { label:'Proactive to All Potentially Affected', desc:'Notify all staff whose records may be exposed with pastoral support. Includes Dr. Obi. Full transparency approach.' },
+      B: { label:'Targeted to Confirmed-Affected Only', desc:'Notify only those whose records are confirmed in the dark web sample. Includes Dr. Obi if confirmed.' },
+      C: { label:'Hold Until Public Announcement', desc:'Defer internal notification until public announcement. Staff learn from media. High trust cost.' },
+    }, default:'B' },
+
+  { id:'G6',  day:8,  act:2, roles:['Comms'], title:'Response to Researcher Publication',
+    desc:'Claire Ashworth\'s Substack post has gone live and been cross-posted to The Guardian AU. Media is picking up the story. Comms must issue a response.',
+    choices: {
+      A: { label:'Acknowledge Investigation', desc:'Statement acknowledges ongoing investigation, commits to transparency, thanks researcher for responsible disclosure.' },
+      B: { label:'Neutral Holding Statement', desc:'"Aware of reports, investigating." No commitment, no denial. Minimal exposure but cedes narrative.' },
+      C: { label:'Rebut Publicly', desc:'Challenge the researcher\'s findings; dispute the sample; position NovaCare cooperation as ongoing. High risk if rebuttal fails.' },
+    }, default:'B' },
+
+  { id:'G7',  day:10, act:2, roles:['CISO','Comms'], title:'Attribution Position',
+    desc:'Forensics evidence now points to a dark web aggregator using NovaCare API credentials. The team must determine what attribution position to take publicly.',
+    choices: {
+      A: { label:'Evidence-Led: Third-Party Aggregator', desc:'Accurate technical attribution — dark web aggregator with NovaCare API credentials. Correct and defensible.' },
+      B: { label:'Blame NovaCare', desc:'Commercial pressure: attribute publicly to NovaCare failure. Shifts blame but risks reversal if forensics contradicts.' },
+      C: { label:'Withhold Attribution', desc:'Public statement does not attribute. "Investigation ongoing." Preserves optionality at cost of narrative vacuum.' },
+    }, default:'A' },
+
+  { id:'G8',  day:11, act:2, roles:['CFO'], title:'Remediation Budget Authorisation',
+    desc:'Emergency board meeting requires CFO to authorise remediation spend: forensics completion, outside counsel, patient notification, credit monitoring, and system hardening.',
+    choices: {
+      A: { label:'Full Remediation ($1.8M)', desc:'Authorise full package: forensics, outside counsel, notification, credit monitoring, system hardening. Maximum response.' },
+      B: { label:'Phased ($600K now)', desc:'Authorise $600K immediately with tranches conditional on board approval. Balanced response.' },
+      C: { label:'Minimum Statutory Only ($200K)', desc:'Authorise statutory-minimum only: notification and mandatory disclosures. Defer all voluntary actions.' },
+    }, default:'B' },
+
+  { id:'G9',  day:13, act:2, roles:['Legal'], title:'Regulator Disclosure Scope',
+    desc:'OAIC has made formal contact. Legal must decide the scope of voluntary disclosure to the regulator — specifically whether to include the pre-incident control history and CISO\'s documented NovaCare warnings.',
+    choices: {
+      A: { label:'Full Voluntary Disclosure', desc:'Voluntary disclosure including pre-incident control history and CISO\'s NovaCare warnings. Maximum cooperation.' },
+      B: { label:'Responsive Disclosure', desc:'Answer only what is asked. Complete but not volunteered. Standard posture.' },
+      C: { label:'Formal Legal Response', desc:'Assert legal positions formally. Privilege claimed where possible. Adversarial posture with regulator.' },
+    }, default:'B' },
+
+  { id:'G10', day:14, act:2, roles:['CEO','Legal','CFO'], title:'Strategic Posture',
+    desc:'The shape of the crisis is now clear. The executive team must determine the organisation\'s strategic posture for the resolution phase: accountability, balance, or legal defence.',
+    choices: {
+      A: { label:'Remediation-First', desc:'Acknowledge failures, fix root causes, compensate affected patients, accept probable civil penalty. Accountability framing.' },
+      B: { label:'Balanced Defence', desc:'Remediate while preserving legal positions. Measured response. Standard corporate posture.' },
+      C: { label:'Litigation-Defensive', desc:'Harden positions against class action. Limit admissions. Litigation-led strategy. High reputational cost.' },
+    }, default:'B' },
+
+  { id:'G11', day:17, act:3, roles:['HR','Legal'], title:'Dr. Obi Support Response',
+    desc:'Dr. Sarah Obi\'s trajectory has now resolved. HR and Legal must determine what support response Meridian provides to her, and whether a confidential return pathway is offered.',
+    choices: {
+      A: { label:'Full Support, Confidential Return', desc:'Private return pathway with full occupational health support. Confidentiality assured with medical board.' },
+      B: { label:'Policy-Standard Support', desc:'Standard EAP access, public-facing neutral. No special provisions beyond policy.' },
+      C: { label:'Dispute Over Timing', desc:'Disagreement over disclosure timing escalates. Potential termination or resignation. Hostile trajectory.' },
+    }, default:'A' },
+
+  { id:'G12', day:18, act:3, roles:['Board','CEO'], title:'CEO Accountability Position',
+    desc:'The board accountability session has arrived. The CEO\'s position must be formally resolved. Options range from public accountability with retention to departure.',
+    choices: {
+      A: { label:'Public Accountability — CEO Retains', desc:'CEO publicly accepts accountability; stays in role with board confidence vote. Clean, risky, potentially powerful.' },
+      B: { label:'Defer Pending Review', desc:'Formal review commissioned; CEO position under review but unchanged pending outcome.' },
+      C: { label:'CEO Departure', desc:'CEO resigns or is removed. Board statement on change of leadership. Definitive but destabilising.' },
+    }, default:'A' },
+
+  { id:'G13', day:19, act:3, roles:['Comms','CEO'], title:'Final Public Narrative',
+    desc:'The final session. The team must determine the public narrative that will close the crisis. This is the last major consequential decision of the scenario.',
+    choices: {
+      A: { label:'Accountability-Led', desc:'"We failed. Here\'s how we fix it." Specific commitments with timelines. Named responsibility.' },
+      B: { label:'Learning-Led', desc:'"We\'ve learned from this." Growth framing. Commitments stated more generally. Softer landing.' },
+      C: { label:'Industry-Led', desc:'"This is a sector-wide issue; we\'re part of a pattern." Deflection framing. Rarely lands well in healthcare.' },
+    }, default:'A' },
+];
+
+// ─── CONSEQUENCES (all 173 rows from spreadsheet) ─────────
+const CONSEQUENCES = {
+  G1:{
+    A:[
+      {pool:'INTELLIGENCE_QUALITY',delta:8,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Formal IR surfaces more signal'},
+      {pool:'CAPACITY',delta:-10,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'IR consumes capacity across all roles'},
+      {pool:'CISO.SECURITY_POSTURE',delta:3,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Formal posture strengthens controls'},
+      {pool:'CISO.TEAM_MORALE',delta:-5,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Team under pressure'},
+      {pool:'LEGAL.PRIVILEGE_INTEGRITY',delta:5,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Legal in room from Day 1'},
+      {pool:'COMMS.MESSAGE_CONTROL',delta:3,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Comms in room early'},
+    ],
+    B:[
+      {pool:'INTELLIGENCE_QUALITY',delta:3,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Limited visibility small-team'},
+      {pool:'CAPACITY',delta:-3,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Light capacity draw'},
+      {pool:'CISO.SECURITY_POSTURE',delta:-2,vis:'NEXT_LOGIN',attr:'CAUSE_HIDDEN',note:'Informal posture weakens evidence chain'},
+      {pool:'LEGAL.PRIVILEGE_INTEGRITY',delta:-8,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Legal not looped in; privilege erosion'},
+    ],
+    C:[
+      {pool:'REGULATORY_STANDING',delta:8,vis:'NEXT_LOGIN',attr:'FULL_DISCLOSURE',note:'Proactive regulator contact earns points'},
+      {pool:'REPUTATION',delta:-3,vis:'NEXT_LOGIN',attr:'FULL_DISCLOSURE',note:'Early signalling before facts known'},
+      {pool:'COMMS.MESSAGE_CONTROL',delta:-15,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Going public without narrative structure'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:12,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Early public commitments create exposure'},
+      {pool:'THIRD_PARTY_TRUST',delta:-10,vis:'NEXT_LOGIN',attr:'CAUSE_HIDDEN',note:'NovaCare retrenches when Meridian goes first'},
+      {pool:'RESEARCHER_GOODWILL',delta:8,vis:'NEXT_LOGIN',attr:'CAUSE_HIDDEN',note:'Researcher values transparency'},
+    ],
+  },
+  G2:{
+    A:[
+      {pool:'REGULATORY_STANDING',delta:12,vis:'NEXT_LOGIN',attr:'FULL_DISCLOSURE',note:'Proactive notification earns regulator confidence'},
+      {pool:'LEGAL.REG_RELATIONSHIPS',delta:8,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'OAIC direct engagement'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:-5,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Notification discharges obligation'},
+      {pool:'COMMS.MESSAGE_CONTROL',delta:-8,vis:'NEXT_LOGIN',attr:'CAUSE_HIDDEN',note:'Notification likely becomes public'},
+      {pool:'CFO.FINANCIAL_RISK',delta:5,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Notification is materially disclosable'},
+      {pool:'THIRD_PARTY_TRUST',delta:-5,vis:'NEXT_LOGIN',attr:'CAUSE_HIDDEN',note:'NovaCare sees notification as commercial pressure'},
+      {pool:'LEGAL.ETHICAL_TENSION',delta:-8,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Legal aligned to obligation; pressure eases'},
+    ],
+    B:[
+      {pool:'REGULATORY_STANDING',delta:-3,vis:'NEXT_LOGIN',attr:'FULL_DISCLOSURE',note:'Delay risks regulator view of poor posture'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:8,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Unnotified breach risk accrues daily'},
+      {pool:'LEGAL.ETHICAL_TENSION',delta:12,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Holding the clock creates conscience pressure'},
+      {pool:'LEGAL.PRIVILEGE_INTEGRITY',delta:3,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Legal in driver\'s seat preserves privilege'},
+      {pool:'COMMS.MESSAGE_CONTROL',delta:8,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'No regulator trigger preserves narrative window'},
+      {pool:'INTELLIGENCE_QUALITY',delta:3,vis:'NEXT_LOGIN',attr:'CAUSE_HIDDEN',note:'Extra investigation window improves picture'},
+    ],
+    C:[
+      {pool:'REGULATORY_STANDING',delta:5,vis:'NEXT_LOGIN',attr:'FULL_DISCLOSURE',note:'Informal courtesy; smaller than formal'},
+      {pool:'LEGAL.REG_RELATIONSHIPS',delta:5,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Personal contact invested'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:0,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Neutral — no formal discharge or change'},
+      {pool:'LEGAL.ETHICAL_TENSION',delta:-2,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Partial discharge of conscience'},
+      {pool:'COMMS.MESSAGE_CONTROL',delta:3,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Informal channel preserves some control'},
+    ],
+  },
+  G3:{
+    A:[
+      {pool:'INTELLIGENCE_QUALITY',delta:25,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Top-tier forensics produces definitive picture by Day 7'},
+      {pool:'CFO.LIQUIDITY',delta:-12,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'$150K emergency spend'},
+      {pool:'CFO.BUDGET_INTEGRITY',delta:-8,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Unplanned major spend'},
+      {pool:'CISO.SECURITY_POSTURE',delta:8,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Findings enable rapid remediation'},
+      {pool:'CISO.EXECUTIVE_TRUST',delta:5,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Decisive action reads as competence'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:-5,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Strong forensics supports defensibility'},
+    ],
+    B:[
+      {pool:'INTELLIGENCE_QUALITY',delta:15,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Adequate but slower and less definitive'},
+      {pool:'CFO.LIQUIDITY',delta:-5,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'$55K emergency spend'},
+      {pool:'CFO.BUDGET_INTEGRITY',delta:-3,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Moderate unplanned spend'},
+      {pool:'CISO.SECURITY_POSTURE',delta:4,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Findings support remediation, less decisively'},
+    ],
+    C:[
+      {pool:'INTELLIGENCE_QUALITY',delta:5,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Small team; incomplete picture'},
+      {pool:'CFO.BUDGET_INTEGRITY',delta:3,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Discipline rewarded short-term'},
+      {pool:'CISO.TEAM_MORALE',delta:-12,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Team under unsustainable load'},
+      {pool:'CISO.EXECUTIVE_TRUST',delta:-3,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Board may view as under-resourcing'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:8,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Weak evidence chain is a defensibility problem'},
+    ],
+  },
+  G4:{
+    A:[
+      {pool:'CISO.EXECUTIVE_TRUST',delta:8,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'CISO in full briefing reads as seriousness'},
+      {pool:'LEGAL.PRIVILEGE_INTEGRITY',delta:-5,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'More directors weakens privilege envelope'},
+      {pool:'REPUTATION',delta:0,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Board briefing is internal; no reputation effect yet'},
+      {pool:'REGULATORY_STANDING',delta:3,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Board-engaged governance is regulator-friendly'},
+    ],
+    B:[
+      {pool:'CISO.EXECUTIVE_TRUST',delta:3,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Standard board engagement'},
+      {pool:'LEGAL.PRIVILEGE_INTEGRITY',delta:0,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Neutral'},
+    ],
+    C:[
+      {pool:'LEGAL.PRIVILEGE_INTEGRITY',delta:5,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Smaller envelope preserves privilege'},
+      {pool:'CISO.EXECUTIVE_TRUST',delta:-3,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Full board feels excluded when they learn'},
+      {pool:'LEGAL.ETHICAL_TENSION',delta:8,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Fault Line: Chair may pressure delay'},
+      {pool:'REGULATORY_STANDING',delta:-5,vis:'END',attr:'CAUSE_HIDDEN',note:'If regulator views board was kept in dark'},
+    ],
+  },
+  G5:{
+    A:[
+      {pool:'COMMS.STAKEHOLDER_CONF',delta:12,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Staff trust rises when treated as stakeholders'},
+      {pool:'REPUTATION',delta:-5,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Will leak to media; some early public concern'},
+      {pool:'DR_OBI_TRAJECTORY',delta:25,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Dr. Obi gets agency over her own disclosure'},
+      {pool:'PATIENT_CONFIDENCE',delta:8,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Early transparency builds patient trust'},
+      {pool:'COMMS.MESSAGE_CONTROL',delta:-10,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Wider internal notification harder to contain'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:-3,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Proactive disclosure reduces failure-to-notify exposure'},
+    ],
+    B:[
+      {pool:'COMMS.STAKEHOLDER_CONF',delta:3,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Moderate — affected people notified, others unaware'},
+      {pool:'DR_OBI_TRAJECTORY',delta:10,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Dr. Obi notified; less support envelope than G5-A'},
+      {pool:'PATIENT_CONFIDENCE',delta:3,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Modest — only directly-affected aware'},
+    ],
+    C:[
+      {pool:'COMMS.STAKEHOLDER_CONF',delta:-20,vis:'ACT_BOUNDARY',attr:'FULL_DISCLOSURE',note:'Staff learn from media — significant trust damage'},
+      {pool:'DR_OBI_TRAJECTORY',delta:-30,vis:'ACT_BOUNDARY',attr:'FULL_DISCLOSURE',note:'Dr. Obi learns from news; forecloses supportive endings'},
+      {pool:'PATIENT_CONFIDENCE',delta:-15,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Patient trust damage when concealment emerges'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:-15,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Gap between stated transparency and actual concealment'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:15,vis:'END',attr:'CAUSE_HIDDEN',note:'Failure-to-notify individuals exposure accumulates'},
+    ],
+  },
+  G6:{
+    A:[
+      {pool:'COMMS.MESSAGE_CONTROL',delta:12,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Owning narrative beats the story'},
+      {pool:'REPUTATION',delta:5,vis:'NEXT_LOGIN',attr:'FULL_DISCLOSURE',note:'Acknowledgement lands better than rebuttal'},
+      {pool:'RESEARCHER_GOODWILL',delta:15,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Thanking the researcher is rare and valued'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:5,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Public acknowledgement creates some liability surface'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:10,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Statement aligns with visible reality'},
+    ],
+    B:[
+      {pool:'COMMS.MESSAGE_CONTROL',delta:-5,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Holding statement cedes narrative ground'},
+      {pool:'REPUTATION',delta:-3,vis:'NEXT_LOGIN',attr:'FULL_DISCLOSURE',note:'Passive framing reads as uncertain'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:-2,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Minimal commitment = minimal exposure'},
+    ],
+    C:[
+      {pool:'COMMS.MESSAGE_CONTROL',delta:5,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Rebuttal is active stance'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:-25,vis:'NEXT_LOGIN',attr:'FULL_DISCLOSURE',note:'If rebuttal fails to match facts, narrative collapses'},
+      {pool:'REPUTATION',delta:-15,vis:'NEXT_LOGIN',attr:'FULL_DISCLOSURE',note:'Rebuttals rarely land in healthcare data breach'},
+      {pool:'RESEARCHER_GOODWILL',delta:-25,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Researcher becomes adversarial; follow-up publications likely'},
+      {pool:'COMMS.MEDIA_RELATIONSHIPS',delta:-10,vis:'NEXT_LOGIN',attr:'CAUSE_HIDDEN',note:'Journalists dislike rebuttals of competent research'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:12,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Public denials create defamation and misleading conduct exposure'},
+    ],
+  },
+  G7:{
+    A:[
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:8,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Evidence-led attribution survives scrutiny'},
+      {pool:'REGULATORY_STANDING',delta:5,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Regulator appreciates accurate characterisation'},
+      {pool:'THIRD_PARTY_TRUST',delta:12,vis:'NEXT_LOGIN',attr:'CAUSE_HIDDEN',note:'NovaCare sees Meridian as fair partner'},
+      {pool:'INTELLIGENCE_QUALITY',delta:5,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Correct attribution reinforces accurate picture'},
+    ],
+    B:[
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:-15,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'If forensics reveals credential theft, attribution reverses publicly'},
+      {pool:'THIRD_PARTY_TRUST',delta:-30,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'NovaCare becomes openly hostile; cooperation ends'},
+      {pool:'LEGAL.CONTRACT_POSITION',delta:-15,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'Public blame complicates contractual remedies'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:10,vis:'ACT_BOUNDARY',attr:'CAUSE_HIDDEN',note:'NovaCare counter-claim risk materialises'},
+    ],
+    C:[
+      {pool:'COMMS.MESSAGE_CONTROL',delta:-5,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Narrative vacuum filled by speculation'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:5,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'No specific claim = no inconsistency risk'},
+      {pool:'THIRD_PARTY_TRUST',delta:3,vis:'NEXT_LOGIN',attr:'CAUSE_HIDDEN',note:'NovaCare neutral on withheld attribution'},
+    ],
+  },
+  G8:{
+    A:[
+      {pool:'CFO.LIQUIDITY',delta:-25,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Major liquidity event — $1.8M'},
+      {pool:'CFO.BUDGET_INTEGRITY',delta:-18,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Material budget variance'},
+      {pool:'CFO.FINANCIAL_RISK',delta:10,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Spend becomes disclosable'},
+      {pool:'REPUTATION',delta:12,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Visible investment in response'},
+      {pool:'REGULATORY_STANDING',delta:10,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Full remediation is what regulators look for'},
+      {pool:'PATIENT_CONFIDENCE',delta:15,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Credit monitoring + visible action restores trust'},
+      {pool:'CISO.SECURITY_POSTURE',delta:12,vis:'END',attr:'CAUSE_VISIBLE',note:'Full hardening improves long-term posture'},
+    ],
+    B:[
+      {pool:'CFO.LIQUIDITY',delta:-8,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Manageable liquidity event — $600K'},
+      {pool:'CFO.BUDGET_INTEGRITY',delta:-6,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Moderate variance'},
+      {pool:'REPUTATION',delta:3,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Adequate visible response'},
+      {pool:'REGULATORY_STANDING',delta:3,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Phased approach viewed as reasonable'},
+      {pool:'PATIENT_CONFIDENCE',delta:5,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Some action visible'},
+    ],
+    C:[
+      {pool:'CFO.LIQUIDITY',delta:-3,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Minimal — $200K statutory only'},
+      {pool:'CFO.BUDGET_INTEGRITY',delta:-2,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Minor variance'},
+      {pool:'REPUTATION',delta:-12,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Inadequate response reads as minimisation'},
+      {pool:'REGULATORY_STANDING',delta:-15,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Regulator views as insufficient'},
+      {pool:'PATIENT_CONFIDENCE',delta:-20,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Patients feel minimised'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:18,vis:'END',attr:'CAUSE_HIDDEN',note:'Inadequate remediation increases civil exposure'},
+    ],
+  },
+  G9:{
+    A:[
+      {pool:'REGULATORY_STANDING',delta:18,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Voluntary disclosure of control history is rare'},
+      {pool:'LEGAL.REG_RELATIONSHIPS',delta:12,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'OAIC reads as full cooperation'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:8,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Voluntary disclosure creates evidence for enforcement decisions'},
+      {pool:'LEGAL.PRIVILEGE_INTEGRITY',delta:-10,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Privileged material may need to be waived'},
+      {pool:'CISO.EXECUTIVE_TRUST',delta:5,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'CISO documented concerns now vindicated'},
+    ],
+    B:[
+      {pool:'REGULATORY_STANDING',delta:3,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Standard posture; no bonus'},
+      {pool:'LEGAL.REG_RELATIONSHIPS',delta:2,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Neutral'},
+      {pool:'LEGAL.PRIVILEGE_INTEGRITY',delta:3,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Standard privilege preserved'},
+    ],
+    C:[
+      {pool:'REGULATORY_STANDING',delta:-20,vis:'NEXT_LOGIN',attr:'CAUSE_VISIBLE',note:'Adversarial posture hardens regulator stance'},
+      {pool:'LEGAL.REG_RELATIONSHIPS',delta:-18,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'OAIC relationship severely damaged'},
+      {pool:'LEGAL.PRIVILEGE_INTEGRITY',delta:8,vis:'IMMEDIATE',attr:'CAUSE_VISIBLE',note:'Privilege aggressively preserved'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:15,vis:'END',attr:'CAUSE_HIDDEN',note:'Enforcement action likely triggered'},
+      {pool:'REPUTATION',delta:-8,vis:'END',attr:'CAUSE_HIDDEN',note:'If enforcement becomes public, significant reputation damage'},
+    ],
+  },
+  G10:{
+    A:[
+      {pool:'REPUTATION',delta:15,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Accountability framing lands well'},
+      {pool:'REGULATORY_STANDING',delta:12,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Civil penalty likely but regulator satisfied'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:15,vis:'END',attr:'CAUSE_VISIBLE',note:'Exposure acknowledged; civil penalty likely'},
+      {pool:'CFO.LIQUIDITY',delta:-10,vis:'END',attr:'CAUSE_HIDDEN',note:'Compensation costs materialise'},
+      {pool:'PATIENT_CONFIDENCE',delta:20,vis:'END',attr:'CAUSE_VISIBLE',note:'Significant trust restoration'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:15,vis:'END',attr:'CAUSE_VISIBLE',note:'Clean narrative arc'},
+    ],
+    B:[
+      {pool:'REPUTATION',delta:5,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Standard approach, standard result'},
+      {pool:'REGULATORY_STANDING',delta:3,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Neutral'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:5,vis:'END',attr:'CAUSE_VISIBLE',note:'Moderate exposure'},
+    ],
+    C:[
+      {pool:'REPUTATION',delta:-18,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Defensive posture reads as uncaring'},
+      {pool:'REGULATORY_STANDING',delta:-12,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Regulator escalates'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:-10,vis:'END',attr:'CAUSE_VISIBLE',note:'Short-term exposure reduced'},
+      {pool:'PATIENT_CONFIDENCE',delta:-25,vis:'END',attr:'CAUSE_VISIBLE',note:'Patients alienated'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:-18,vis:'END',attr:'CAUSE_VISIBLE',note:'Defensive narrative does not reconcile'},
+    ],
+  },
+  G11:{
+    A:[
+      {pool:'DR_OBI_TRAJECTORY',delta:30,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Supportive resolution'},
+      {pool:'COMMS.STAKEHOLDER_CONF',delta:12,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Staff trust rises'},
+      {pool:'REPUTATION',delta:5,vis:'END',attr:'CAUSE_HIDDEN',note:'Humane handling visible to observers'},
+    ],
+    B:[
+      {pool:'DR_OBI_TRAJECTORY',delta:5,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Neutral resolution'},
+      {pool:'COMMS.STAKEHOLDER_CONF',delta:0,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Neutral staff signal'},
+    ],
+    C:[
+      {pool:'DR_OBI_TRAJECTORY',delta:-35,vis:'IMMEDIATE',attr:'FULL_DISCLOSURE',note:'Hostile resolution; possible media amplification'},
+      {pool:'COMMS.STAKEHOLDER_CONF',delta:-20,vis:'ACT_BOUNDARY',attr:'CAUSE_VISIBLE',note:'Staff morale collapses'},
+      {pool:'REPUTATION',delta:-15,vis:'END',attr:'CAUSE_VISIBLE',note:'If public, significant damage'},
+      {pool:'LEGAL.LEGAL_EXPOSURE',delta:12,vis:'END',attr:'CAUSE_VISIBLE',note:'Wrongful termination / privacy complaint'},
+    ],
+  },
+  G12:{
+    A:[
+      {pool:'REPUTATION',delta:8,vis:'END',attr:'CAUSE_VISIBLE',note:'Public accountability lands'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:10,vis:'END',attr:'CAUSE_VISIBLE',note:'Clean narrative'},
+    ],
+    B:[
+      {pool:'REPUTATION',delta:-3,vis:'END',attr:'CAUSE_VISIBLE',note:'Reads as equivocation'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:-5,vis:'END',attr:'CAUSE_VISIBLE',note:'Unresolved leadership question'},
+    ],
+    C:[
+      {pool:'REPUTATION',delta:12,vis:'END',attr:'CAUSE_VISIBLE',note:'Definitive response'},
+      {pool:'CFO.COST_OF_CAPITAL',delta:8,vis:'END',attr:'CAUSE_HIDDEN',note:'Leadership transition raises financing cost'},
+      {pool:'COMMS.STAKEHOLDER_CONF',delta:-8,vis:'END',attr:'CAUSE_VISIBLE',note:'Short-term leadership uncertainty'},
+    ],
+  },
+  G13:{
+    A:[
+      {pool:'REPUTATION',delta:10,vis:'END',attr:'CAUSE_VISIBLE',note:'Accountability closing'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:15,vis:'END',attr:'CAUSE_VISIBLE',note:'Coherent with Act 2 play'},
+      {pool:'PATIENT_CONFIDENCE',delta:10,vis:'END',attr:'CAUSE_VISIBLE',note:'Patient confidence rebuild begins'},
+    ],
+    B:[
+      {pool:'REPUTATION',delta:3,vis:'END',attr:'CAUSE_VISIBLE',note:'Soft positive'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:5,vis:'END',attr:'CAUSE_VISIBLE',note:'Generic but defensible'},
+    ],
+    C:[
+      {pool:'REPUTATION',delta:-10,vis:'END',attr:'CAUSE_VISIBLE',note:'Deflection reads poorly'},
+      {pool:'COMMS.NARRATIVE_COHERENCE',delta:-10,vis:'END',attr:'CAUSE_VISIBLE',note:'Doesn\'t reconcile with own failings'},
+      {pool:'PATIENT_CONFIDENCE',delta:-12,vis:'END',attr:'CAUSE_VISIBLE',note:'Patients hear deflection'},
+    ],
+  },
+};
+
+// ─── ESCALATION EVENTS ────────────────────────────────────
+const EVENTS = [
+  {id:'INJ-01', day:1,  overnight:false, desc:'Monitoring logs flag unusual 4.3GB export from NovaCare integration at 06:22.',
+    effects:[{pool:'INTELLIGENCE_QUALITY',delta:2}], condition:null, type:'time'},
+  {id:'INJ-02', day:1,  overnight:false, desc:'Claire Ashworth emails CISO at 09:47. 48-hour publication deadline. 40-record sample attached. RESEARCHER_GOODWILL visible at 40.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-03', day:1,  overnight:false, desc:'NovaCare security contact unresponsive — acknowledgement email only. Third-party trust signal negative.',
+    effects:[{pool:'THIRD_PARTY_TRUST',delta:-5}], condition:null, type:'time'},
+  {id:'INJ-04', day:2,  overnight:false, desc:'CISO team confirms: sample records are authentic Meridian data. Decision gate G2 activated.',
+    effects:[{pool:'INTELLIGENCE_QUALITY',delta:8}], condition:null, type:'time'},
+  {id:'INJ-05', day:3,  overnight:false, desc:'NovaCare issues formal denial of breach on their infrastructure at 14:30.',
+    effects:[{pool:'THIRD_PARTY_TRUST',delta:-8}], condition:null, type:'time'},
+  {id:'INJ-06', day:4,  overnight:false, desc:'Board Chair Lisa Park calls CEO asking for briefing. Legal Fault Line card activated.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-07', day:5,  overnight:false, desc:'Forensics firm delivers interim brief (if G3 = A or B engaged). Intelligence quality improves.',
+    effects:[], condition:'G3_AB', type:'conditional'},
+  {id:'INJ-08', day:7,  overnight:true,  desc:'MORNING EVENT — Ashworth sends reminder: "Publishing in 24h per my earlier commitment."',
+    effects:[], condition:null, type:'overnight'},
+  {id:'INJ-09', day:7,  overnight:false, desc:'ACT 1 CLOSE — Session 2 live checkpoint. Team regroups. Capacity refresh.',
+    effects:[{pool:'CAPACITY',delta:10}], condition:null, type:'time'},
+  {id:'INJ-10', day:8,  overnight:true,  desc:'MORNING EVENT — Claire Ashworth\'s Substack post goes live. Cross-posted to The Guardian AU at 09:30. Decision gate G6 activated.',
+    effects:[{pool:'REPUTATION',delta:-12},{pool:'COMMS.MESSAGE_CONTROL',delta:-15}], condition:null, type:'overnight'},
+  {id:'INJ-11', day:8,  overnight:false, desc:'Three major outlets pick up the story (if G6 = B or C response). Additional reputation damage.',
+    effects:[{pool:'REPUTATION',delta:-5},{pool:'COMMS.MEDIA_RELATIONSHIPS',delta:-3}], condition:'G6_BC', type:'conditional'},
+  {id:'INJ-12', day:9,  overnight:true,  desc:'MORNING EVENT — Dr. Obi reads article on the train; realises her data is in the sample (only fires if G5 = C — held notification).',
+    effects:[{pool:'DR_OBI_TRAJECTORY',delta:-20}], condition:'G5_C', type:'overnight'},
+  {id:'INJ-13', day:10, overnight:false, desc:'If REPUTATION below 0: patient advocacy group issues demand statement.',
+    effects:[{pool:'PATIENT_CONFIDENCE',delta:-8},{pool:'COMMS.MESSAGE_CONTROL',delta:-5}], condition:'REP_NEG', type:'state'},
+  {id:'INJ-14', day:10, overnight:false, desc:'Attribution Board minigame fires. Decision gate G7 activated. Forensics report supports aggregator attribution.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-15', day:11, overnight:false, desc:'Emergency board meeting. Budget decision required. Decision gate G8 activated.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-16', day:12, overnight:false, desc:'Dr. Obi\'s response materialises based on G5 choice: resignation, litigation, or cooperation.',
+    effects:[], condition:null, type:'conditional'},
+  {id:'INJ-17', day:13, overnight:false, desc:'OAIC formal contact at 10:00. Notification Clock minigame fires. Decision gate G9 activated.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-18', day:13, overnight:false, desc:'If G6 = C (rebuttal) or RESEARCHER_GOODWILL < 20: second researcher contacts media with additional findings.',
+    effects:[{pool:'REPUTATION',delta:-10},{pool:'INTELLIGENCE_QUALITY',delta:-5}], condition:'G6C_or_RG20', type:'state'},
+  {id:'INJ-19', day:14, overnight:false, desc:'If PATIENT_CONFIDENCE < 40: law firm announces investigation into potential class action.',
+    effects:[{pool:'LEGAL.LEGAL_EXPOSURE',delta:15}], condition:'PC_LOW', type:'state'},
+  {id:'INJ-20', day:14, overnight:false, desc:'Decision gate G10 activated. Strategic posture decision required.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-21', day:15, overnight:false, desc:'ACT 2 CLOSE — Session 4 live checkpoint. State shape becomes clear. Ending trajectory visible. Capacity reset.',
+    effects:[{pool:'CAPACITY',delta:5}], condition:null, type:'time'},
+  {id:'INJ-22', day:16, overnight:false, desc:'OAIC preliminary findings delivered. Regulatory standing shift per G9 state.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-23', day:17, overnight:false, desc:'Dr. Obi trajectory resolves. Decision gate G11 activated.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-24', day:18, overnight:false, desc:'Board accountability session. CEO position formally addressed. Decision gate G12 activated.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-25', day:19, overnight:false, desc:'ACT 3 — Session 5 live. Final public narrative decided. Decision gate G13 activated. Narrative branches lock.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-26', day:20, overnight:false, desc:'RESOLUTION — Ending-specific events fire. Press coverage, regulator statement, stakeholder responses. Ending state finalised.',
+    effects:[], condition:null, type:'time'},
+  {id:'INJ-27', day:21, overnight:false, desc:'DEBRIEF — Session 6 (90 min). State log released. Replay enabled. Scenario ends.',
+    effects:[], condition:null, type:'time'},
+];
+
+// ─── NARRATIVE BRANCHES ───────────────────────────────────
+const BRANCHES = [
+  {id:'B-01', name:'Formal IR Activated',        type:'Trunk',       condition:'G1=A', endingWeight:'Required for Ending A'},
+  {id:'B-02', name:'Quiet Investigation',         type:'Trunk',       condition:'G1=B', endingWeight:'Ending B/C weighting'},
+  {id:'B-03', name:'Early External Transparency', type:'Trunk',       condition:'G1=C', endingWeight:'Ending A possible if handled well'},
+  {id:'B-04', name:'Formal NDB Clock Active',     type:'Investigation',condition:'G2=A', endingWeight:'Ending A enabling'},
+  {id:'B-05', name:'Clock Held Pending',          type:'Investigation',condition:'G2=B', endingWeight:'Ending B or C depending on G9'},
+  {id:'B-06', name:'Informal OAIC Contact',       type:'Investigation',condition:'G2=C', endingWeight:'Ending A or B possible'},
+  {id:'B-07', name:'Top-Tier Forensics',          type:'Investigation',condition:'G3=A', endingWeight:'Ending A enabling'},
+  {id:'B-08', name:'Mid-Tier Forensics',          type:'Investigation',condition:'G3=B', endingWeight:'Ending B'},
+  {id:'B-09', name:'In-House Only',               type:'Investigation',condition:'G3=C', endingWeight:'Forecloses Ending A unless IQ recovered'},
+  {id:'B-10', name:'Board Fully Engaged',         type:'Political',   condition:'G4=A', endingWeight:'Ending A enabling'},
+  {id:'B-11', name:'Measured Board Posture',      type:'Political',   condition:'G4=B', endingWeight:'Ending B'},
+  {id:'B-12', name:'Chair-Only Briefing',         type:'Political',   condition:'G4=C', endingWeight:'Ending B or C'},
+  {id:'B-13', name:'Dr. Obi Proactively Notified',type:'Consequence', condition:'G5=A', endingWeight:'Required for Ending A'},
+  {id:'B-14', name:'Dr. Obi Targeted Notification',type:'Consequence',condition:'G5=B', endingWeight:'Ending B enabling'},
+  {id:'B-15', name:'Dr. Obi Learns from Media',  type:'Consequence', condition:'G5=C', endingWeight:'Forecloses Ending A; heavy C weighting'},
+  {id:'B-16', name:'Narrative Ownership',         type:'Political',   condition:'G6=A', endingWeight:'Ending A or B enabling'},
+  {id:'B-17', name:'Neutral Holding Posture',     type:'Political',   condition:'G6=B', endingWeight:'Ending B'},
+  {id:'B-18', name:'Rebuttal Track',              type:'Political',   condition:'G6=C', endingWeight:'Heavy Ending C weighting'},
+  {id:'B-19', name:'Evidence-Led Attribution',    type:'Investigation',condition:'G7=A', endingWeight:'Ending A enabling'},
+  {id:'B-20', name:'NovaCare Publicly Blamed',    type:'Political',   condition:'G7=B', endingWeight:'Ending C risk if attribution reverses'},
+  {id:'B-22', name:'Attribution Withheld',        type:'Political',   condition:'G7=C', endingWeight:'Ending B'},
+  {id:'B-23', name:'Full Remediation Funded',     type:'Consequence', condition:'G8=A', endingWeight:'Ending A enabling'},
+  {id:'B-24', name:'Phased Remediation',          type:'Consequence', condition:'G8=B', endingWeight:'Ending B'},
+  {id:'B-25', name:'Minimum Remediation Only',    type:'Consequence', condition:'G8=C', endingWeight:'Heavy Ending C weighting'},
+  {id:'B-26', name:'Full Voluntary Disclosure',   type:'Political',   condition:'G9=A', endingWeight:'Ending A strong enabling'},
+  {id:'B-27', name:'Responsive Disclosure',       type:'Political',   condition:'G9=B', endingWeight:'Ending B'},
+  {id:'B-28', name:'Adversarial Legal Posture',   type:'Political',   condition:'G9=C', endingWeight:'Forecloses Ending A; Ending C strong'},
+  {id:'B-29', name:'Remediation-First Path',      type:'Trunk',       condition:'G10=A',endingWeight:'Required for Ending A'},
+  {id:'B-30', name:'Balanced Defence Path',       type:'Trunk',       condition:'G10=B',endingWeight:'Ending B'},
+  {id:'B-31', name:'Defensive Path',              type:'Trunk',       condition:'G10=C',endingWeight:'Heavy Ending C weighting'},
+  {id:'B-32', name:'Dr. Obi Supported Return',    type:'Ending',      condition:'G11=A',endingWeight:'Ending A component'},
+  {id:'B-33', name:'Dr. Obi Neutral Resolution',  type:'Ending',      condition:'G11=B',endingWeight:'Ending B component'},
+  {id:'B-34', name:'Dr. Obi Departs in Dispute',  type:'Ending',      condition:'G11=C',endingWeight:'Ending C component'},
+  {id:'B-35', name:'CEO Retains with Accountability',type:'Ending',  condition:'G12=A',endingWeight:'Ending A component'},
+  {id:'B-36', name:'CEO Under Review',            type:'Ending',      condition:'G12=B',endingWeight:'Ending B component'},
+  {id:'B-37', name:'CEO Departs',                 type:'Ending',      condition:'G12=C',endingWeight:'Ending A or B depending on context'},
+  {id:'B-38', name:'Accountability-Led Close',    type:'Ending',      condition:'G13=A',endingWeight:'Ending A requires'},
+  {id:'B-39', name:'Learning-Led Close',          type:'Ending',      condition:'G13=B',endingWeight:'Ending B component'},
+  {id:'B-40', name:'Industry-Led Close',          type:'Ending',      condition:'G13=C',endingWeight:'Ending C component'},
+];
+
+// ═══════════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════════
+
+let state = {};
+let day = 1;
+let decisions = {};   // { G1: 'A', G2: 'B', ... }
+let eventLog = [];    // array of log entries
+let firedEvents = new Set();
+let activeTab = 'log';
+
+function initState() {
+  state = {};
+  POOL_DEFS.forEach(p => { state[p.id] = p.start; });
+  day = 1;
+  decisions = {};
+  eventLog = [];
+  firedEvents = new Set();
+  // Fire day 1 events immediately
+  fireEventsForDay(1);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONSEQUENCE ENGINE
+// ═══════════════════════════════════════════════════════════
+
+function applyDelta(poolId, delta, note, gateId, choice, vis, attr) {
+  poolId = resolvePool(poolId);
+  const def = POOL_DEFS.find(p => p.id === poolId);
+  if (!def) return;
+  const before = state[poolId];
+  state[poolId] = Math.max(def.min, Math.min(def.max, state[poolId] + delta));
+  const actual = state[poolId] - before;
+  if (actual !== 0 || delta === 0) {
+    addLog({
+      day, gate: gateId, choice,
+      pool: poolId, poolName: def.name,
+      delta: actual, vis, attr, note,
+    });
+  }
+}
+
+function commitDecision(gateId, choice) {
+  decisions[gateId] = choice;
+  const effects = CONSEQUENCES[gateId]?.[choice] || [];
+  const showHidden = document.getElementById('show-hidden').checked;
+  effects.forEach(e => {
+    applyDelta(resolvePool(e.pool), e.delta, e.note, gateId, choice, e.vis, e.attr);
+  });
+  checkCascades();
+  renderAll();
+}
+
+// ─── CASCADE RULES ────────────────────────────────────────
+function checkCascades() {
+  const alerts = [];
+  if (state['TIME'] < 25) {
+    // TIME < 25%: accelerated drain
+    if (!firedEvents.has('cascade-time-low')) {
+      firedEvents.add('cascade-time-low');
+      applyDelta('CAPACITY', -5, 'CASCADE: TIME < 25 — time pressure consumes capacity', 'CASCADE', '-', 'IMMEDIATE', 'FULL_DISCLOSURE');
+      applyDelta('INTELLIGENCE_QUALITY', -3, 'CASCADE: TIME < 25 — hurried analysis loses quality', 'CASCADE', '-', 'IMMEDIATE', 'FULL_DISCLOSURE');
+      alerts.push('⚠ TIME CRITICAL: Accelerated capacity and intelligence drain triggered.');
+    }
+  }
+  if (state['REPUTATION'] <= -20) {
+    if (!firedEvents.has('cascade-rep-low')) {
+      firedEvents.add('cascade-rep-low');
+      applyDelta('REGULATORY_STANDING', -5, 'CASCADE: REPUTATION ≤ -20 — regulator less forgiving', 'CASCADE', '-', 'NEXT_LOGIN', 'FULL_DISCLOSURE');
+      alerts.push('⚠ REPUTATION CRITICAL: Regulatory Standing cascade triggered.');
+    }
+  }
+  if (state['REGULATORY_STANDING'] <= -20) {
+    if (!firedEvents.has('cascade-reg-low')) {
+      firedEvents.add('cascade-reg-low');
+      applyDelta('CAPACITY', -8, 'CASCADE: REGULATORY_STANDING ≤ -20 — Legal capacity consumed by proceedings', 'CASCADE', '-', 'NEXT_LOGIN', 'FULL_DISCLOSURE');
+      alerts.push('⚠ REGULATORY STANDING CRITICAL: Legal capacity cascade triggered.');
+    }
+  }
+  // IQ < 30: note only (modulates decision quality — noted in log)
+  if (state['INTELLIGENCE_QUALITY'] < 30) {
+    if (!firedEvents.has('cascade-iq-low')) {
+      firedEvents.add('cascade-iq-low');
+      addLog({day, gate:'CASCADE', choice:'-', pool:'INTELLIGENCE_QUALITY', poolName:'Threat Picture Accuracy',
+        delta:0, vis:'IMMEDIATE', attr:'FULL_DISCLOSURE',
+        note:'CASCADE: IQ < 30 — decision outcomes now modulated ±20% noise band. Decisions feel "unlucky".'});
+      alerts.push('⚠ INTELLIGENCE QUALITY LOW: Decision outcomes now subject to noise. Predictions less reliable.');
+    }
+  }
+  return alerts;
+}
+
+// ─── DAY ADVANCE ──────────────────────────────────────────
+function nextDay() {
+  if (day >= 21) return;
+  // Apply passive decay
+  POOL_DEFS.forEach(p => {
+    if (p.decayPerDay) {
+      applyDelta(p.id, -p.decayPerDay, `Day ${day+1} passive decay`, 'DECAY', '-', 'IMMEDIATE', 'FULL_DISCLOSURE');
+    }
+  });
+  day++;
+  fireEventsForDay(day);
+  checkCascades();
+  renderAll();
+}
+
+function prevDay() {
+  if (day <= 1) return;
+  // Simple day back — doesn't undo effects but allows reviewing layout
+  day--;
+  renderAll();
+}
+
+function fireEventsForDay(d) {
+  EVENTS.filter(e => e.day === d && !firedEvents.has(e.id)).forEach(ev => {
+    let shouldFire = true;
+    // Check conditions
+    if (ev.condition === 'G3_AB') shouldFire = decisions['G3'] === 'A' || decisions['G3'] === 'B';
+    if (ev.condition === 'G6_BC') shouldFire = decisions['G6'] === 'B' || decisions['G6'] === 'C';
+    if (ev.condition === 'G5_C') shouldFire = decisions['G5'] === 'C';
+    if (ev.condition === 'REP_NEG') shouldFire = state['REPUTATION'] < 0;
+    if (ev.condition === 'G6C_or_RG20') shouldFire = decisions['G6'] === 'C' || state['RESEARCHER_GOODWILL'] < 20;
+    if (ev.condition === 'PC_LOW') shouldFire = state['PATIENT_CONFIDENCE'] < 40;
+    if (shouldFire) {
+      firedEvents.add(ev.id);
+      ev.effects.forEach(e => {
+        applyDelta(resolvePool(e.pool), e.delta, ev.desc.substring(0,50), 'EVENT', ev.id, 'IMMEDIATE', 'FULL_DISCLOSURE');
+      });
+      addLog({day: d, gate: 'EVENT', choice: ev.id, pool:'-', poolName:'Scenario Event',
+        delta: 0, vis:'IMMEDIATE', attr:'FULL_DISCLOSURE', note: ev.desc.substring(0,100)});
+    }
+  });
+}
+
+function addLog(entry) {
+  eventLog.unshift(entry); // newest first
+}
+
+// ═══════════════════════════════════════════════════════════
+// ENDING PROBABILITY
+// ═══════════════════════════════════════════════════════════
+
+function calcEndingProb() {
+  let scoreA = 0, scoreB = 0, scoreC = 0;
+  // Ending A requirements (from narrative branches)
+  const endingAReqs = ['G1=A','G5=A','G10=A','G13=A'];
+  const endingCTriggers = ['G5=C','G6=C','G8=C','G9=C','G10=C'];
+  endingAReqs.forEach(r => {
+    const [g,c] = r.split('=');
+    if (decisions[g] === c) scoreA += 15;
+    else scoreA -= 5;
+  });
+  const bonusA = ['G3=A','G6=A','G7=A','G9=A','G11=A','G12=A'];
+  bonusA.forEach(r => {
+    const [g,c] = r.split('=');
+    if (decisions[g] === c) scoreA += 5;
+  });
+  endingCTriggers.forEach(r => {
+    const [g,c] = r.split('=');
+    if (decisions[g] === c) scoreC += 20;
+  });
+  if (state['REPUTATION'] >= 0) scoreA += 10;
+  if (state['REPUTATION'] <= -25) scoreC += 20;
+  if (state['REGULATORY_STANDING'] >= 10) scoreA += 10;
+  if (state['REGULATORY_STANDING'] <= -20) scoreC += 20;
+  scoreB = 100 - scoreA - scoreC;
+  // Normalise
+  scoreA = Math.max(5, Math.min(scoreA, 85));
+  scoreC = Math.max(5, Math.min(scoreC, 85));
+  scoreB = Math.max(10, 100 - scoreA - scoreC);
+  const total = scoreA + scoreB + scoreC;
+  return {
+    A: Math.round(scoreA / total * 100),
+    B: Math.round(scoreB / total * 100),
+    C: Math.round(scoreC / total * 100),
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════════════
+
+const ROLE_COLORS = {
+  CISO:'var(--ciso-col)', CFO:'var(--cfo-col)', Legal:'var(--legal-col)',
+  Comms:'var(--comms-col)', CEO:'var(--scenario-col)', HR:'#7dd3c8',
+  Board:'#b3b3b3', All:'var(--shared-col)',
+};
+
+function barColor(def, value) {
+  const pct = (value - def.min) / (def.max - def.min);
+  if (def.inverted) {
+    // inverted: high = bad
+    if (pct > 0.65) return 'var(--red)';
+    if (pct > 0.35) return 'var(--yellow)';
+    return 'var(--green)';
+  }
+  if (def.min < 0) {
+    // -50 to +50 range: positive = green, negative = red
+    return value >= 0 ? 'var(--green)' : 'var(--red)';
+  }
+  if (pct < 0.3) return 'var(--red)';
+  if (pct < 0.6) return 'var(--yellow)';
+  return 'var(--green)';
+}
+
+function barWidth(def, value) {
+  const range = def.max - def.min;
+  if (def.min < 0) {
+    // center-relative
+    return Math.abs(value) / (range / 2) * 50;
+  }
+  return (value - def.min) / range * 100;
+}
+
+function barLeft(def, value) {
+  if (def.min < 0) {
+    return value >= 0 ? 50 : 50 - Math.abs(value) / 50 * 50;
+  }
+  return 0;
+}
+
+function renderPools() {
+  const groups = [
+    { label:'SHARED', color:'var(--shared-col)', owner:'All', tier:'shared' },
+    { label:'CISO', color:'var(--ciso-col)', owner:'CISO', tier:'domain' },
+    { label:'CFO', color:'var(--cfo-col)', owner:'CFO', tier:'domain' },
+    { label:'LEGAL', color:'var(--legal-col)', owner:'Legal', tier:'domain' },
+    { label:'COMMS', color:'var(--comms-col)', owner:'Comms', tier:'domain' },
+    { label:'SCENARIO', color:'var(--scenario-col)', owner:'All', tier:'scenario' },
+  ];
+  const panel = document.getElementById('pools-panel');
+  panel.innerHTML = groups.map(g => {
+    const pools = POOL_DEFS.filter(p => p.tier === g.tier && (g.tier === 'shared' || g.tier === 'scenario' ? true : p.owner === g.owner));
+    const items = pools.map(p => {
+      const val = state[p.id];
+      const bw = barWidth(p, val);
+      const bl = barLeft(p, val);
+      const bc = barColor(p, val);
+      const displayVal = p.min < 0 ? (val >= 0 ? '+'+val : ''+val) : Math.round(val);
+      const invTag = p.inverted ? ' <span style="color:var(--muted);font-size:9px">INV</span>' : '';
+      return `
+        <div class="pool-item" id="pool-${p.id.replace(/\./g,'_')}">
+          <div class="pool-row">
+            <span class="pool-name">${p.name}${invTag}</span>
+            <span class="pool-value" style="color:${bc}">${displayVal}</span>
+          </div>
+          <div class="pool-bar-track">
+            ${p.min < 0 ? '<div class="pool-bar-center"></div>' : ''}
+            <div class="pool-bar-fill" style="width:${bw}%;margin-left:${bl}%;background:${bc}"></div>
+          </div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="pool-group">
+        <div class="pool-group-header" style="color:${g.color}">
+          <div class="color-dot" style="background:${g.color}"></div>
+          ${g.label}
+        </div>
+        ${items}
+      </div>`;
+  }).join('');
+}
+
+function renderGates() {
+  const center = document.getElementById('center-top');
+  // Clear existing gate cards
+  center.querySelectorAll('.gate-card').forEach(el => el.remove());
+
+  // Show gates that are active today or already decided, within range
+  const visibleGates = GATES.filter(g => g.day <= day + 2); // show next 2 upcoming
+  const activeGates = GATES.filter(g => g.day === day && !decisions[g.id]);
+  const emptyEl = document.getElementById('empty-gates');
+  emptyEl.style.display = activeGates.length === 0 && visibleGates.length === 0 ? 'block' : 'none';
+
+  // Build gate cards
+  const cards = visibleGates.map(g => {
+    const isDone = !!decisions[g.id];
+    const isToday = g.day === day;
+    const isUpcoming = g.day > day;
+    const choiceKeys = Object.keys(g.choices);
+    const roleColors = g.roles.map(r => `<span class="gate-role-tag" style="background:${ROLE_COLORS[r]}22;color:${ROLE_COLORS[r]};border:1px solid ${ROLE_COLORS[r]}44">${r}</span>`).join('');
+    const actNum = g.act;
+    const actClass = `act-${actNum}`;
+    const choicesHtml = choiceKeys.map(ck => {
+      const ch = g.choices[ck];
+      const effects = CONSEQUENCES[g.id]?.[ck] || [];
+      const isSelected = decisions[g.id] === ck;
+      const showHidden = document.getElementById('show-hidden').checked;
+      const previewEffects = effects.filter(e => showHidden || e.attr !== 'CAUSE_HIDDEN').map(e => {
+        const d = e.delta;
+        const dc = d > 0 ? 'delta-pos' : (d < 0 ? 'delta-neg' : 'delta-zero');
+        const ds = d > 0 ? '+'+d : ''+d;
+        const hidTag = e.attr === 'CAUSE_HIDDEN' ? '<span class="attr-hidden">●HIDDEN</span>' : '';
+        const poolDef = POOL_DEFS.find(p => p.id === resolvePool(e.pool));
+        const pname = poolDef ? poolDef.name.substring(0,22) : e.pool;
+        return `<div class="preview-effect">
+          <span class="delta ${dc}">${ds}</span>
+          <span>${pname}</span>
+          <span class="preview-vis">${e.vis}</span>
+          ${hidTag}
+        </div>`;
+      }).join('');
+      return `
+        <div class="choice-btn ${isSelected ? 'selected' : ''}" onclick="selectChoice('${g.id}','${ck}',this)">
+          <div class="choice-label">${ck}. ${ch.label}</div>
+          <div class="choice-desc">${ch.desc}</div>
+          <div class="choice-preview">${previewEffects || '<div style="color:var(--muted);font-size:10px">No effects preview</div>'}</div>
+          ${!isDone && isToday ? `<div class="choice-btn-row"><button class="commit-btn" onclick="event.stopPropagation();commitDecision('${g.id}','${ck}')">Commit ${ck} ▶</button></div>` : ''}
+        </div>`;
+    }).join('');
+    const statusIcon = isDone ? '✓' : (isToday ? '⬤' : '○');
+    const cardClass = isDone ? 'completed' : (isToday ? 'active' : 'upcoming');
+    return `
+      <div class="gate-card ${cardClass}" id="gate-${g.id}">
+        <div class="gate-header">
+          <span class="gate-id">${g.id}</span>
+          <span class="gate-day">Day ${g.day}</span>
+          <span class="gate-status-icon" style="color:${isDone?'var(--green)':(isToday?'var(--accent)':'var(--muted)')}">${statusIcon}</span>
+          ${roleColors}
+          <span class="gate-title">${g.title}</span>
+          ${isDone ? `<span style="font-size:11px;color:var(--green);font-weight:700">→ ${g.choices[decisions[g.id]].label}</span>` : ''}
+        </div>
+        ${!isDone || isToday ? `<div class="gate-body">
+          ${!isDone ? `<div class="gate-desc">${g.desc}</div>` : ''}
+          <div class="gate-choices">${choicesHtml}</div>
+        </div>` : ''}
+      </div>`;
+  }).join('');
+  center.insertAdjacentHTML('afterbegin', cards);
+}
+
+function selectChoice(gateId, choice, el) {
+  const gate = document.getElementById(`gate-${gateId}`);
+  gate.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('previewing'));
+  el.classList.add('previewing');
+}
+
+function renderEvents() {
+  const list = document.getElementById('events-list');
+  const visEvents = EVENTS.filter(e => Math.abs(e.day - day) <= 5).sort((a,b) => a.day - b.day);
+  list.innerHTML = visEvents.map(ev => {
+    const isFired = firedEvents.has(ev.id);
+    const isPast = ev.day < day;
+    const isToday = ev.day === day;
+    let cls = isFired ? 'fired' : (ev.day > day ? 'upcoming' : '');
+    if (ev.overnight) cls = 'overnight';
+    if (ev.type === 'state' && !isFired) cls = 'warning';
+    return `<div class="event-item ${cls}">
+      <span class="event-day">D${ev.day}${ev.overnight?'🌙':''}</span>
+      <span class="event-desc">${ev.desc.substring(0,90)}</span>
+    </div>`;
+  }).join('') || '<div class="empty-state" style="font-size:11px;">No events in range</div>';
+}
+
+function renderLog() {
+  const el = document.getElementById('right-log');
+  if (activeTab !== 'log') return;
+  if (!eventLog.length) {
+    el.innerHTML = '<div class="empty-state">No decisions yet. Make a choice on an active gate.</div>';
+    return;
+  }
+  el.innerHTML = eventLog.slice(0,60).map(e => {
+    const sign = e.delta > 0 ? '+' : '';
+    const cls = e.delta > 0 ? 'log-effect-pos' : (e.delta < 0 ? 'log-effect-neg' : 'log-effect');
+    const hidCls = e.attr === 'CAUSE_HIDDEN' ? 'log-hidden' : '';
+    const gateLabel = e.gate === 'EVENT' ? e.choice : (e.gate === 'CASCADE' ? '⚠ CASCADE' : (e.gate === 'DECAY' ? '⏱ DECAY' : `${e.gate}→${e.choice}`));
+    return `<div class="log-entry">
+      <div class="log-time">Day ${e.day} · ${gateLabel} · <span class="preview-vis">${e.vis||''}</span></div>
+      ${e.delta !== 0 ? `<div class="${cls} ${hidCls}">${sign}${e.delta} ${e.poolName}</div>` : ''}
+      <div class="log-effect">${e.note || ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderBranches() {
+  const el = document.getElementById('right-branches');
+  if (activeTab !== 'branches') return;
+  el.innerHTML = BRANCHES.map(b => {
+    const [gId, cId] = b.condition.split('=');
+    let status = '○'; let cls = 'branch-neutral';
+    if (decisions[gId]) {
+      if (decisions[gId] === cId) { status = '✓'; cls = 'branch-open'; }
+      else { status = '✗'; cls = 'branch-closed'; }
+    }
+    return `<div class="branch-item">
+      <span class="branch-status ${cls}">${status}</span>
+      <div>
+        <div class="branch-name ${cls}">${b.name}</div>
+        <div class="branch-type" style="font-size:9px">${b.type} · ${b.condition}</div>
+        <div class="branch-type">${b.endingWeight}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderEnding() {
+  const p = calcEndingProb();
+  document.getElementById('end-a-bar').style.width = p.A + '%';
+  document.getElementById('end-b-bar').style.width = p.B + '%';
+  document.getElementById('end-c-bar').style.width = p.C + '%';
+  document.getElementById('end-a-pct').textContent = p.A + '%';
+  document.getElementById('end-b-pct').textContent = p.B + '%';
+  document.getElementById('end-c-pct').textContent = p.C + '%';
+}
+
+function renderHeader() {
+  const actNum = day <= 7 ? 1 : (day <= 15 ? 2 : 3);
+  const actNames = {1:'ACT 1 — EXPOSURE', 2:'ACT 2 — ESCALATION', 3:'ACT 3 — RESOLUTION'};
+  document.getElementById('day-badge').textContent = `Day ${day} of 21`;
+  const badge = document.getElementById('act-badge');
+  badge.textContent = actNames[actNum];
+  badge.className = `act-badge act-${actNum}`;
+  document.getElementById('btn-prev').disabled = day <= 1;
+  document.getElementById('btn-next').disabled = day >= 21;
+}
+
+function renderAll() {
+  renderHeader();
+  renderPools();
+  renderGates();
+  renderEvents();
+  renderLog();
+  renderBranches();
+  renderEnding();
+}
+
+function showTab(tab) {
+  activeTab = tab;
+  document.getElementById('tab-log').classList.toggle('active', tab === 'log');
+  document.getElementById('tab-branches').classList.toggle('active', tab === 'branches');
+  document.getElementById('right-log').style.display = tab === 'log' ? '' : 'none';
+  document.getElementById('right-branches').style.display = tab === 'branches' ? '' : 'none';
+  if (tab === 'log') renderLog();
+  if (tab === 'branches') renderBranches();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DEBRIEF ENGINE
+// ═══════════════════════════════════════════════════════════
+
+function openDebrief() {
+  document.getElementById('debrief-body').innerHTML = generateDebriefHTML();
+  document.getElementById('debrief-modal').classList.add('open');
+}
+function closeDebrief() {
+  document.getElementById('debrief-modal').classList.remove('open');
+}
+
+// Net change for a pool from its starting value
+function netDelta(poolId) {
+  const def = POOL_DEFS.find(p => p.id === poolId);
+  return def ? Math.round(state[poolId] - def.start) : 0;
+}
+
+// Pool health label
+function poolHealth(poolId) {
+  const def = POOL_DEFS.find(p => p.id === poolId);
+  if (!def) return 'neutral';
+  const val = state[poolId];
+  const pct = (val - def.min) / (def.max - def.min);
+  if (def.inverted) return pct > 0.6 ? 'poor' : pct > 0.35 ? 'mixed' : 'strong';
+  if (def.min < 0) return val >= 10 ? 'strong' : val >= -10 ? 'mixed' : 'poor';
+  return pct >= 0.6 ? 'strong' : pct >= 0.35 ? 'mixed' : 'poor';
+}
+
+// How many decisions has this role made
+function roleDecisions(roleIds) {
+  return GATES.filter(g => g.roles.some(r => roleIds.includes(r)) && decisions[g.id]);
+}
+
+// Chip HTML for a pool delta
+function deltaChip(poolId, label) {
+  const d = netDelta(poolId);
+  const sign = d > 0 ? '+' : '';
+  const cls = d > 0 ? 'chip-pos' : d < 0 ? 'chip-neg' : 'chip-neu';
+  return `<span class="pool-chip ${cls}"><span>${label || poolId}</span><strong>${sign}${d}</strong></span>`;
+}
+
+// Sentence helpers
+function choiceLabel(gId) {
+  if (!decisions[gId]) return null;
+  const g = GATES.find(g => g.id === gId);
+  return g ? g.choices[decisions[gId]].label : null;
+}
+function chose(gId, c) { return decisions[gId] === c; }
+function decided(gId) { return !!decisions[gId]; }
+
+// ── ROLE NARRATIVES ──────────────────────────────────────
+
+function narrativeCISO() {
+  const parts = [];
+  const d = decisions;
+
+  // G1
+  if (chose('G1','A')) parts.push(`The CISO's first call was decisive: <em>formal IR was activated on Day 1</em>, pulling Legal and Comms into the room early. This established a proper evidence chain and preserved legal privilege from the outset — a foundation that paid dividends throughout Act 1.`);
+  else if (chose('G1','B')) parts.push(`The CISO opened with a <neg>quiet investigation posture</neg>, keeping the response small and private. This preserved optionality but left Legal outside the privilege envelope and gave Comms no early foothold on narrative control.`);
+  else if (chose('G1','C')) parts.push(`The CISO opted for <neg>immediate external transparency</neg> before the facts were confirmed. Regulators appreciated the proactive contact, but the public signal ahead of a coherent narrative cost Comms significant message control and alarmed NovaCare.`);
+
+  // G3
+  if (chose('G3','A')) parts.push(`The forensics call was a <pos>significant strength</pos>: a top-tier firm delivered a definitive picture by Act 2, giving the team accurate attribution and a defensible evidence base. The $150K spend hit CFO liquidity hard but proved its worth in intelligence quality.`);
+  else if (chose('G3','B')) parts.push(`Mid-tier forensics produced an adequate — if incomplete — picture. The cost was manageable, but the 48-hour onboarding lag and thinner tooling meant the team entered Act 2 with some uncertainty in their threat picture.`);
+  else if (chose('G3','C')) parts.push(`The decision to run the investigation <neg>entirely in-house</neg> placed the CISO's small team under unsustainable load. Team morale dropped sharply, intelligence quality was capped, and the weak evidence chain created defensibility problems that Legal had to manage throughout Act 2.`);
+
+  // Pool summary
+  const sp = state['CISO.SECURITY_POSTURE'];
+  const tm = state['CISO.TEAM_MORALE'];
+  const et = state['CISO.EXECUTIVE_TRUST'];
+  if (et > 50) parts.push(`Executive trust in the CISO <pos>finished strongly</pos> — the board read the CISO's conduct as competent and measured throughout the crisis.`);
+  else if (et < 30) parts.push(`Executive trust in the CISO <neg>deteriorated</neg> during the scenario. The board's confidence was shaken, likely by resourcing decisions or the visibility of operational gaps.`);
+  if (tm < 40) parts.push(`Security team morale is a concern at close: the team carried sustained pressure and there are burnout indicators that will need addressing before the next cycle.`);
+
+  const verdict = (() => {
+    const health = [poolHealth('CISO.SECURITY_POSTURE'), poolHealth('CISO.TEAM_MORALE'), poolHealth('CISO.EXECUTIVE_TRUST')];
+    const goods = health.filter(h => h === 'strong').length;
+    return goods >= 2 ? 'strong' : goods >= 1 ? 'mixed' : 'poor';
+  })();
+
+  return { narrative: parts.join(' '), verdict };
+}
+
+function narrativeCFO() {
+  const parts = [];
+
+  if (chose('G8','A')) parts.push(`The CFO authorised <em>full remediation at $1.8M</em> — a decisive financial commitment that sent a clear signal to regulators and patients. Liquidity took a major hit and budget integrity declined sharply, but the reputational dividend and regulatory goodwill were substantial.`);
+  else if (chose('G8','B')) parts.push(`The CFO's phased $600K authorisation was a <em>balanced call</em>: adequate visible response without catastrophic liquidity exposure. It preserved board confidence while signalling seriousness to the regulator.`);
+  else if (chose('G8','C')) parts.push(`The minimum-only $200K authorisation <neg>drew immediate criticism</neg>. Patients felt minimised, the regulator flagged the response as insufficient, and the reputational damage from the perception of cost-cutting during a data breach will take months to recover from.`);
+
+  // Financial narrative based on pool state
+  const liq = state['CFO.LIQUIDITY'];
+  const bi = state['CFO.BUDGET_INTEGRITY'];
+  if (liq < 40) parts.push(`Liquidity is <neg>under pressure</neg> at scenario close — emergency spend across the run has consumed significant cash reserves. The payroll obligations and supplier cycles will need careful management in the weeks ahead.`);
+  else if (liq > 65) parts.push(`Despite the crisis, <pos>liquidity remained manageable</pos> — a reflection of disciplined spend authorisation and prioritised remediation phasing.`);
+
+  if (bi < 50) parts.push(`Budget integrity diverged significantly from the FY plan. The volume of unplanned emergency spend will require a board-level explanation and a revised financial forecast.`);
+
+  // Cross-role note
+  if (chose('G3','A')) parts.push(`The CISO's forensics decision at G3 created the largest single liquidity event of Act 1 — a $150K draw the CFO absorbed without being directly consulted. This surfaced a design gap in the spend-authorisation protocol that the team should address post-scenario.`);
+
+  const verdict = (() => {
+    const health = [poolHealth('CFO.LIQUIDITY'), poolHealth('CFO.BUDGET_INTEGRITY'), poolHealth('CFO.FINANCIAL_RISK')];
+    const goods = health.filter(h => h === 'strong').length;
+    return goods >= 2 ? 'strong' : goods >= 1 ? 'mixed' : 'poor';
+  })();
+
+  return { narrative: parts.join(' '), verdict };
+}
+
+function narrativeLegal() {
+  const parts = [];
+
+  if (chose('G2','A')) parts.push(`Legal's call to <em>start the NDB clock on Day 2</em> was the clean, compliant position. It discharged the notification obligation early, reduced legal exposure, and lifted regulatory standing. The ethical tension that would have accumulated under a delayed strategy was avoided.`);
+  else if (chose('G2','B')) parts.push(`Legal elected to <neg>hold the clock</neg> pending further investigation — a defensible legal interpretation under s.26WE but one that created mounting ethical tension and daily accumulating exposure. The decision conditioned the severity of the G9 regulator engagement.`);
+  else if (chose('G2','C')) parts.push(`The informal OAIC heads-up was a <em>nuanced middle path</em> — it invested relational capital with the regulator without formally triggering the clock. Privilege was partially preserved and the OAIC contact appreciated the courtesy.`);
+
+  if (chose('G9','A')) parts.push(`Full voluntary disclosure to the OAIC at G9 — including the CISO's pre-incident NovaCare warnings — was a <pos>bold and ultimately rewarding posture</pos>. Regulatory standing improved substantially, and the CISO's documented concerns being placed on the record vindicated their earlier risk identification.`);
+  else if (chose('G9','C')) parts.push(`The <neg>adversarial legal posture at G9</neg> hardened the regulator's stance significantly. Regulatory relationships took a severe hit that will be difficult to repair, and enforcement action is now a material risk on the horizon.`);
+
+  const et = state['LEGAL.ETHICAL_TENSION'];
+  const pi = state['LEGAL.PRIVILEGE_INTEGRITY'];
+  if (et > 60) parts.push(`<neg>Ethical tension for the Legal role finished high</neg> — the accumulated weight of conflicting obligations (notification timing, board pressure, privilege management) is a debrief conversation worth having. This is a realistic indicator of the pressure real General Counsels carry.`);
+  if (pi < 50) parts.push(`Privilege integrity was eroded across the run — often by communication decisions made by other roles without Legal review. The pattern of Legal being bypassed on material communications is a governance finding worth surfacing.`);
+  else if (pi > 75) parts.push(`<pos>Privilege was well-managed</pos> throughout, reflecting careful channel discipline by Legal and consistent early involvement in key decisions.`);
+
+  const verdict = (() => {
+    const health = [poolHealth('LEGAL.LEGAL_EXPOSURE'), poolHealth('LEGAL.PRIVILEGE_INTEGRITY'), poolHealth('LEGAL.REG_RELATIONSHIPS')];
+    const goods = health.filter(h => h === 'strong').length;
+    return goods >= 2 ? 'strong' : goods >= 1 ? 'mixed' : 'poor';
+  })();
+
+  return { narrative: parts.join(' '), verdict };
+}
+
+function narrativeComms() {
+  const parts = [];
+
+  if (chose('G6','A')) parts.push(`Comms' response to the Ashworth publication was the <em>right call at the right moment</em>: acknowledging the investigation, committing to transparency, and explicitly thanking the researcher. This recovered narrative control that the publication had threatened to strip entirely, and Ashworth's goodwill shifted from conditional to cooperative.`);
+  else if (chose('G6','B')) parts.push(`The holding statement bought time but <neg>ceded the narrative</neg>. The organisation was reacting rather than leading, and the media filled the vacuum with speculation. Three outlets picked up the story and the framing was not Meridian's.`);
+  else if (chose('G6','C')) parts.push(`The <neg>rebuttal of Ashworth's research was a significant misjudgement</neg>. Rebuttals of competent security research in the healthcare space almost never land — they signal defensiveness, alienate journalists, and transform a cooperative researcher into an adversarial one. Narrative coherence was severely damaged.`);
+
+  if (chose('G13','A')) parts.push(`The accountability-led final narrative at G13 was a <pos>strong close</pos> — specific commitments, named responsibility, and a coherent arc that aligned with the visible reality of the scenario. Patients and stakeholders had a clear account of what happened and what changes.`);
+  else if (chose('G13','C')) parts.push(`The industry-deflection close at G13 <neg>did not land</neg>. Patients and the public heard the deflection, and the narrative ended on a note that felt inconsistent with a healthcare organisation's obligations to those whose data was exposed.`);
+
+  const mc = state['COMMS.MESSAGE_CONTROL'];
+  const nc = state['COMMS.NARRATIVE_COHERENCE'];
+  if (mc < 40) parts.push(`Message control finished <neg>below critical threshold</neg> — by Act 3 the organisation was responding to external framing rather than setting it. This is the communications equivalent of losing the room.`);
+  if (nc < 55) parts.push(`<neg>Narrative coherence degraded</neg> significantly across the run, suggesting that public statements diverged from visible reality at key points. The debrief communication log will show exactly where the gaps appeared.`);
+  else if (nc > 75) parts.push(`<pos>Narrative coherence held strong</pos> throughout — statements tracked the visible reality of the scenario, and the team did not issue claims that later required reversal.`);
+
+  const verdict = (() => {
+    const health = [poolHealth('COMMS.MESSAGE_CONTROL'), poolHealth('COMMS.NARRATIVE_COHERENCE'), poolHealth('COMMS.STAKEHOLDER_CONF')];
+    const goods = health.filter(h => h === 'strong').length;
+    return goods >= 2 ? 'strong' : goods >= 1 ? 'mixed' : 'poor';
+  })();
+
+  return { narrative: parts.join(' '), verdict };
+}
+
+function narrativeCEO() {
+  const parts = [];
+
+  if (chose('G4','A')) parts.push(`The board briefing decision at G4 — <em>full disclosure including worst-case scenarios</em> — was an act of upward transparency that the board rewarded with strong engagement. The CISO's trust with the executive team improved, and the governance posture read well to the regulator.`);
+  else if (chose('G4','C')) parts.push(`The chair-only briefing at G4 <neg>created downstream problems</neg>. When the full board learned the scope of the incident, the sense of being excluded reduced confidence in the CEO's judgment. The Legal Fault Line risk — the Chair using limited information to pressure notification delay — was live throughout Act 1.`);
+
+  if (chose('G10','A')) parts.push(`The strategic posture at G10 — <em>remediation-first, accepting probable civil penalty</em> — defined the organisation's identity in this crisis. It required courage to accept accountability before the legal outcome was known, but regulators, patients, and staff all read it as the mark of an organisation worth trusting again.`);
+  else if (chose('G10','C')) parts.push(`The <neg>litigation-defensive posture at G10</neg> hardened every subsequent interaction. Patients felt the organisation was protecting itself rather than them, the regulator escalated, and the narrative close became almost impossible to manage credibly.`);
+
+  if (chose('G12','A')) parts.push(`The CEO retaining with a public accountability statement was a <pos>clean and credible close</pos> — personal responsibility named, board confidence affirmed, and a leadership foundation for recovery.`);
+  else if (chose('G12','C')) parts.push(`CEO departure is a definitive signal, not always negative. It can represent accountability in action — but the short-term uncertainty it creates in staff confidence and financing cost is a real consequence that the incoming leadership will inherit.`);
+
+  if (chose('G5','A')) parts.push(`The early internal notification decision — <pos>proactively reaching Dr. Obi and all potentially affected staff</pos> — was the decision that most distinguished this organisation's conduct from the sector norm. Treating staff as stakeholders rather than liabilities is rare in crisis response, and the Dr. Obi trajectory reflects it.`);
+  else if (chose('G5','C')) parts.push(`Holding internal notification until the public announcement was the decision that <neg>most damaged the organisation's relationship with its own people</neg>. Dr. Obi learning from the news rather than from her employer was a foreseeable failure that the debrief should spend real time on.`);
+
+  const verdict = (() => {
+    const repH = poolHealth('REPUTATION');
+    const regH = poolHealth('REGULATORY_STANDING');
+    if (repH === 'strong' && regH === 'strong') return 'strong';
+    if (repH === 'poor' || regH === 'poor') return 'poor';
+    return 'mixed';
+  })();
+
+  return { narrative: parts.join(' '), verdict };
+}
+
+// ── CROSS-ROLE EFFECTS ───────────────────────────────────
+
+function crossRoleAnalysis() {
+  const items = [];
+
+  // CISO → CFO via forensics
+  if (decided('G3')) {
+    const label = choiceLabel('G3');
+    const liqD = netDelta('CFO.LIQUIDITY');
+    items.push({
+      source:'CISO', target:'CFO',
+      text: `The CISO's forensics decision (<em>${label}</em>) was the primary driver of CFO liquidity movement in Act 1 — a spend authorisation made without CFO involvement that the CFO only saw as a pool movement. This is a <strong>classic information-asymmetry finding</strong>: the CISO solved their intelligence problem; the CFO absorbed the financial consequence without context until the next log-in.`,
+    });
+  }
+
+  // Legal → Comms via notification clock
+  if (decided('G2')) {
+    const label = choiceLabel('G2');
+    const mc = netDelta('COMMS.MESSAGE_CONTROL');
+    if (chose('G2','A')) items.push({
+      source:'Legal', target:'Comms',
+      text:`Legal's decision to formally start the NDB clock (<em>${label}</em>) had a hidden downstream effect on Comms: once notification was filed, the regulator's disclosure schedule threatened to control the public timing. Comms lost message control they did not know they had lost — this is the kind of cross-role invisible consequence FLASHPOINT is designed to surface.`,
+    });
+    else if (chose('G2','B')) items.push({
+      source:'Legal', target:'Comms',
+      text:`Legal holding the clock (<em>${label}</em>) gave Comms a longer window of narrative control — an effect Comms may not have known they were benefiting from. The coordination gap between Legal's clock strategy and Comms' statement timing is worth examining in debrief.`,
+    });
+  }
+
+  // Comms → Legal via external statements
+  if (decided('G6') || decided('G13')) {
+    items.push({
+      source:'Comms', target:'Legal',
+      text:`Every external statement Comms issued created a legal exposure surface — public commitments that Legal must now defend, claims that could be tested in subsequent proceedings. The degree to which Comms sought Legal review before committing statements is a key debrief thread: where was the review loop strong, and where did it break down?`,
+    });
+  }
+
+  // G7 attribution → NovaCare trust
+  if (decided('G7')) {
+    const label = choiceLabel('G7');
+    const tpt = netDelta('THIRD_PARTY_TRUST');
+    if (chose('G7','B')) items.push({
+      source:'CISO+Comms', target:'Third Party',
+      text:`The decision to publicly attribute the breach to NovaCare (<em>${label}</em>) collapsed third-party trust immediately and terminally. NovaCare became openly hostile; cooperation ended. This created a counter-claim risk for Legal and removed any possibility of joint remediation. The short-term reputational benefit of blame-shifting did not survive the scenario.`,
+    });
+    else if (chose('G7','A')) items.push({
+      source:'CISO+Comms', target:'Third Party',
+      text:`Evidence-led attribution to the dark web aggregator preserved NovaCare's willingness to cooperate — a cross-role effect invisible to the attributing roles at the time but critical for third-party trust. This decision bought goodwill the team may not have realised they had acquired.`,
+    });
+  }
+
+  // Dr. Obi trajectory
+  const obi = state['DR_OBI_TRAJECTORY'];
+  items.push({
+    source:'HR+CEO+Legal', target:'Narrative',
+    text:`Dr. Sarah Obi's trajectory — ending at <strong>${obi}/100</strong> — is the human consequence thread that runs through the entire scenario. Her experience of this crisis (notified or not, supported or not, heard or not) is what the organisation's conduct actually meant to an individual. Every role made decisions that touched her outcome. The debrief should ask: did anyone in the room have her specifically in mind when they were deciding?`,
+  });
+
+  return items;
+}
+
+// ── TURNING POINTS ──────────────────────────────────────
+
+function turningPoints() {
+  const points = [];
+  if (decided('G1')) {
+    const good = chose('G1','A');
+    points.push({
+      day:1, gate:'G1', choice: decisions['G1'],
+      text: `Initial Response Posture: <strong>${choiceLabel('G1')}</strong>. ${good ? 'Formal IR established the organisational discipline that shaped Act 1.' : 'The quieter opening limited the team\'s options in the weeks that followed.'}`,
+      impact: good ? 'good' : chose('G1','C') ? 'mixed' : 'bad',
+    });
+  }
+  if (decided('G3')) {
+    const good = chose('G3','A');
+    const bad = chose('G3','C');
+    points.push({
+      day:3, gate:'G3', choice: decisions['G3'],
+      text:`External Forensics: <strong>${choiceLabel('G3')}</strong>. ${good ? 'Top-tier engagement delivered the definitive evidence base that underpinned every subsequent attribution and legal decision.' : bad ? 'In-house only capped intelligence quality and strained the team beyond sustainable limits.' : 'Mid-tier forensics provided an adequate but bounded picture.'}`,
+      impact: good ? 'good' : bad ? 'bad' : 'mixed',
+    });
+  }
+  if (decided('G5')) {
+    const good = chose('G5','A');
+    const bad = chose('G5','C');
+    points.push({
+      day:6, gate:'G5', choice: decisions['G5'],
+      text:`Internal Notification (Dr. Obi): <strong>${choiceLabel('G5')}</strong>. ${good ? 'Proactive notification gave Dr. Obi agency over her own disclosure — the single decision most likely to be remembered by participants months later.' : bad ? 'Holding notification until the public announcement is the decision that most damaged trust inside the organisation.' : 'Targeted notification reached affected individuals but left many others to learn from media.'}`,
+      impact: good ? 'good' : bad ? 'bad' : 'mixed',
+    });
+  }
+  if (decided('G6')) {
+    const good = chose('G6','A');
+    const bad = chose('G6','C');
+    points.push({
+      day:8, gate:'G6', choice: decisions['G6'],
+      text:`Researcher Publication Response: <strong>${choiceLabel('G6')}</strong>. ${good ? 'Owning the narrative after Ashworth published was the moment Comms turned a reactive situation into a managed one.' : bad ? 'The rebuttal was the scenario\'s most consequential single communications error — it turned a cooperative researcher adversarial and damaged narrative coherence permanently.' : 'The neutral holding statement was safe but left the narrative field open to others.'}`,
+      impact: good ? 'good' : bad ? 'bad' : 'mixed',
+    });
+  }
+  if (decided('G9')) {
+    const good = chose('G9','A');
+    const bad = chose('G9','C');
+    points.push({
+      day:13, gate:'G9', choice: decisions['G9'],
+      text:`Regulator Disclosure Scope: <strong>${choiceLabel('G9')}</strong>. ${good ? 'Voluntary disclosure including the CISO\'s documented NovaCare warnings was the legal decision with the highest reputational return — it reframed the narrative from negligence to diligence.' : bad ? 'The adversarial legal posture with the OAIC is the decision most likely to define regulatory relationships for years — and not favourably.' : 'Responsive disclosure kept positions intact without either gaining or losing significant regulatory capital.'}`,
+      impact: good ? 'good' : bad ? 'bad' : 'mixed',
+    });
+  }
+  if (decided('G10')) {
+    const good = chose('G10','A');
+    const bad = chose('G10','C');
+    points.push({
+      day:14, gate:'G10', choice: decisions['G10'],
+      text:`Strategic Posture: <strong>${choiceLabel('G10')}</strong>. ${good ? 'Remediation-first was the decision that determined the ending. It cost money and accepted probable civil penalty — but it produced the organisational character the story needed.' : bad ? 'Litigation-defensive strategy is a legally coherent but humanly corrosive choice. Every subsequent decision was made harder by it.' : 'Balanced defence is the most common corporate choice. Defensible but rarely memorable.'}`,
+      impact: good ? 'good' : bad ? 'bad' : 'mixed',
+    });
+  }
+  return points;
+}
+
+// ── MAIN GENERATOR ──────────────────────────────────────
+
+function generateDebriefHTML() {
+  const prob = calcEndingProb();
+  const endLetter = prob.A >= prob.B && prob.A >= prob.C ? 'A' : prob.B >= prob.C ? 'B' : 'C';
+  const endDescriptions = {
+    A: { title:'Ending A — Resolved Well', desc:'Resource pools at or above critical thresholds. Narrative state aligned with best-case branch. Cross-role damage minimised. Achieved by approximately 10–15% of runs.', color:'a' },
+    B: { title:'Ending B — Resolved with Cost', desc:'Significant resource depletion but scenario contained. Narrative state in middle branch. Cross-role damage substantial but survivable. 12+ months of elevated scrutiny ahead. Achieved by approximately 50–60% of runs.', color:'b' },
+    C: { title:'Ending C — Resolved Poorly', desc:'Critical resource depletion. Narrative state in worst branch. Compounding damage with long-tail consequences. Enforcement action, litigation, or leadership change likely. Achieved by approximately 25–40% of runs.', color:'c' },
+  };
+  const end = endDescriptions[endLetter];
+
+  const decidedCount = Object.keys(decisions).length;
+  const totalGates = GATES.length;
+  const preamble = decidedCount === 0
+    ? `No decisions have been committed yet. Advance through the scenario days and commit choices at each gate — then return here for a full narrative analysis of what the run produced.`
+    : decidedCount < 6
+    ? `${decidedCount} of ${totalGates} decision gates have been committed. This debrief reflects the partial run to date. Complete the remaining gates for a full organisational picture.`
+    : `${decidedCount} of ${totalGates} decision gates committed. This is the narrative account of what this run of the scenario produced — what decisions were made, what they caused, and what the organisation looks like at close.`;
+
+  const ciso = narrativeCISO();
+  const cfo = narrativeCFO();
+  const legal = narrativeLegal();
+  const comms = narrativeComms();
+  const ceo = narrativeCEO();
+
+  const roleCards = [
+    { role:'CISO — Chief Information Security Officer', color:'var(--ciso-col)', data: ciso,
+      pools: [['CISO.SECURITY_POSTURE','Security Posture'],['CISO.TEAM_MORALE','Team Morale'],['CISO.EXECUTIVE_TRUST','Exec Trust'],['CISO.AUDIT_READINESS','Audit Readiness']] },
+    { role:'CFO — Chief Financial Officer', color:'var(--cfo-col)', data: cfo,
+      pools: [['CFO.LIQUIDITY','Liquidity'],['CFO.BUDGET_INTEGRITY','Budget Integrity'],['CFO.FINANCIAL_RISK','Reporting Risk'],['CFO.COST_OF_CAPITAL','Cost of Capital']] },
+    { role:'Legal — General Counsel', color:'var(--legal-col)', data: legal,
+      pools: [['LEGAL.LEGAL_EXPOSURE','Legal Exposure'],['LEGAL.PRIVILEGE_INTEGRITY','Privilege'],['LEGAL.REG_RELATIONSHIPS','Reg Relations'],['LEGAL.ETHICAL_TENSION','Ethical Tension']] },
+    { role:'Communications / PR Lead', color:'var(--comms-col)', data: comms,
+      pools: [['COMMS.MESSAGE_CONTROL','Message Control'],['COMMS.NARRATIVE_COHERENCE','Coherence'],['COMMS.STAKEHOLDER_CONF','Stakeholder Conf'],['COMMS.MEDIA_RELATIONSHIPS','Media Rel']] },
+    { role:'CEO + HR — Executive and People', color:'var(--scenario-col)', data: ceo,
+      pools: [['REPUTATION','Reputation'],['REGULATORY_STANDING','Reg Standing'],['PATIENT_CONFIDENCE','Patient Conf'],['DR_OBI_TRAJECTORY','Dr. Obi']] },
+  ].map(rc => {
+    const vClass = { strong:'verdict-strong', mixed:'verdict-mixed', poor:'verdict-poor' }[rc.data.verdict];
+    const vLabel = { strong:'Strong', mixed:'Mixed', poor:'Needs Work' }[rc.data.verdict];
+    const chips = rc.pools.map(([pid, lbl]) => deltaChip(pid, lbl)).join('');
+    return `<div class="role-card">
+      <div class="role-card-header">
+        <div style="width:10px;height:10px;border-radius:50%;background:${rc.color};flex-shrink:0"></div>
+        <span class="role-card-name">${rc.role}</span>
+        <span class="role-verdict ${vClass}">${vLabel}</span>
+      </div>
+      <div class="role-card-body">
+        <div class="role-narrative">${rc.data.narrative || '<span style="color:var(--muted)">No decisions made for this role yet.</span>'}</div>
+        <div class="pool-delta-summary">${chips}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const crossItems = crossRoleAnalysis().map(item =>
+    `<div class="cross-role-item">
+      <span class="source">${item.source}</span> → <span class="target">${item.target}</span><br>
+      <span style="color:var(--muted);font-size:12px">${item.text}</span>
+    </div>`).join('');
+
+  const tpItems = turningPoints().map(tp =>
+    `<div class="turning-point">
+      <div class="turning-day">Day ${tp.day}<br><span style="font-size:9px">${tp.gate}→${tp.choice}</span></div>
+      <div><div class="turning-text">${tp.text}</div>
+      <span class="turning-impact impact-${tp.impact === 'good' ? 'good' : tp.impact === 'bad' ? 'bad' : 'mixed'}">${tp.impact === 'good' ? '↑ Positive' : tp.impact === 'bad' ? '↓ Negative' : '↔ Mixed'}</span></div>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px;padding:8px 0">No decisions committed yet.</div>';
+
+  // Organisational summary sentence
+  const rep = state['REPUTATION'];
+  const reg = state['REGULATORY_STANDING'];
+  const orgSummary = (() => {
+    if (rep >= 10 && reg >= 10) return `Meridian Health exits this scenario with <strong>both reputation and regulatory standing in positive territory</strong>. The organisation demonstrated that a well-managed response — even to a serious breach — can preserve and even enhance stakeholder trust.`;
+    if (rep < -20 || reg < -20) return `Meridian Health exits this scenario under <strong>significant organisational stress</strong>. The combination of reputational damage and regulatory exposure creates a multi-year recovery challenge. The debrief question is not what should have been done differently — it is whether the team understands <em>why</em> each compounding decision was made.`;
+    return `Meridian Health exits this scenario with <strong>mixed signals</strong>. The organisation survived the crisis but carries visible damage — in regulatory relationships, in patient trust, or in internal cohesion. A thorough debrief will identify which specific decision junctions drove the outcomes that most surprised the team.`;
+  })();
+
+  return `
+    <div class="debrief-preamble">${preamble}</div>
+
+    <div class="ending-verdict ending-verdict-${end.color}">
+      <div class="ending-letter-big ending-letter-${end.color}">${endLetter}</div>
+      <div class="ending-verdict-text">
+        <h2>${end.title}</h2>
+        <p>${end.desc}</p>
+        <p style="margin-top:6px">${orgSummary}</p>
+      </div>
+    </div>
+
+    <div class="debrief-section">
+      <div class="debrief-section-title">Key Turning Points</div>
+      ${tpItems}
+    </div>
+
+    <div class="debrief-section">
+      <div class="debrief-section-title">Role-by-Role Analysis</div>
+      ${roleCards}
+    </div>
+
+    <div class="debrief-section">
+      <div class="debrief-section-title">Cross-Role Effects — What One Role Did to Another</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">These are the effects that players in real play would not immediately see — the hidden propagations from one domain into another. In a full run, these become discoverable through communication and debrief.</div>
+      ${crossItems}
+    </div>
+
+    <div class="debrief-section">
+      <div class="debrief-section-title">Final Pool State vs. Starting Values</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Shared pools — the external scoreboard. Delta shown against Day 0 starting values.</div>
+      <div class="pool-delta-summary" style="gap:8px">
+        ${['TIME','CAPACITY','REPUTATION','REGULATORY_STANDING','INTELLIGENCE_QUALITY'].map(pid => {
+          const def = POOL_DEFS.find(p=>p.id===pid);
+          const val = state[pid];
+          const d = netDelta(pid);
+          const sign = d>=0?'+':'';
+          const cls = d>0?'chip-pos':d<0?'chip-neg':'chip-neu';
+          return `<span class="pool-chip ${cls}" style="padding:4px 10px;font-size:11px"><span>${def.name}</span><strong>${val} (${sign}${d})</strong></span>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ─── INTRO / BOOT ─────────────────────────────────────────
+function beginScenario() {
+  document.getElementById('intro-overlay').style.display = 'none';
+}
+
+function resetGame() {
+  if (!confirm('Reset the scenario to Day 1? All decisions and state changes will be lost.')) return;
+  initState();
+  renderAll();
+  document.getElementById('intro-overlay').style.display = 'flex';
+}
+
+initState();
+renderAll();
+</script>
+</body>
+</html>
