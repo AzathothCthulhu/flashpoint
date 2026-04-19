@@ -44,6 +44,9 @@ export function dispatch(action) {
     case 'MARK_READY':      _handleMarkReady(action.role);                 break;
     case 'SWITCH_ROLE':     _handleSwitchRole(action.role);                break;
     case 'RESET':           _handleReset();                                break;
+    case 'RESTORE':         _handleRestore(action.snapshot);               break;
+    case 'MARK_ALL_READY':  _handleMarkAllReady();                         break;
+    case 'COMMIT_ALL':      _handleCommitAll(action.choice);               break;
     default: console.warn('Unknown action:', action.type);
   }
 }
@@ -60,6 +63,29 @@ function _handleReset() {
   _state = createInitialState();
   _fireEventsForDay(1);
   EventBus.emit('state:changed', { reason: 'RESET', state: _state });
+}
+
+function _handleRestore(snapshot) {
+  _state = { ...snapshot, firedEvents: new Set(snapshot.firedEvents) };
+  EventBus.emit('state:changed', { reason: 'RESTORE', state: _state });
+}
+
+function _handleMarkAllReady() {
+  ROLES.forEach(r => { _state.roleReady[r] = true; });
+  EventBus.emit('state:changed', { reason: 'MARK_READY', state: _state });
+}
+
+function _handleCommitAll(choice) {
+  GATES.forEach(g => {
+    if (!_state.decisions[g.id]) {
+      const validChoice = g.choices[choice] ? choice : Object.keys(g.choices)[0];
+      _state.decisions[g.id] = validChoice;
+      const effects = CONSEQUENCES[g.id]?.[validChoice] ?? [];
+      effects.forEach(e => _applyDelta(e.pool, e.delta, e.note, g.id, validChoice, e.vis, e.attr));
+    }
+  });
+  _checkCascades();
+  EventBus.emit('state:changed', { reason: 'DECISION', state: _state });
 }
 
 function _handleCommitDecision(gateId, choice) {
@@ -281,4 +307,13 @@ export function currentAct() {
 
 export function readyCount() {
   return Object.values(_state.roleReady).filter(Boolean).length;
+}
+
+export function serializeState() {
+  return JSON.stringify({ ..._state, firedEvents: [..._state.firedEvents] });
+}
+
+export function deserializeState(json) {
+  const s = JSON.parse(json);
+  return { ...s, firedEvents: new Set(s.firedEvents) };
 }

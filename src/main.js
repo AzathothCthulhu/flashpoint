@@ -6,10 +6,12 @@ import './styles/stage2.css';
 import './styles/stage3.css';
 import './styles/stage4.css';
 import './styles/stage5.css';
+import './styles/stage6.css';
 
 import gsap from 'gsap';
 
-import { dispatch, getState, calcEndingProbability, currentAct, readyCount } from './engine/state.js';
+import { dispatch, getState, calcEndingProbability, currentAct, readyCount,
+         serializeState, deserializeState } from './engine/state.js';
 import { EventBus } from './engine/eventBus.js';
 
 import { PoolBar }        from './components/PoolBar.js';
@@ -22,10 +24,23 @@ import { EventsTimeline } from './components/EventsTimeline.js';
 import { Debrief }        from './components/Debrief.js';
 import { WarRoom }        from './components/WarRoom.js';
 import { Atmosphere }     from './components/Atmosphere.js';
+import { Facilitator }    from './components/Facilitator.js';
 
 // ─── INIT ENGINE ─────────────────────────────────────────────────────────────
 dispatch({ type: 'INIT' });
 const state = getState();
+
+// ─── SMALL SCREEN WARNING ─────────────────────────────────────────────────────
+const warning = document.createElement('div');
+warning.className = 'fp-screen-warning';
+warning.innerHTML = `
+  <div class="fp-screen-warning-icon">🖥️</div>
+  <div class="fp-screen-warning-title">Desktop Required</div>
+  <div class="fp-screen-warning-desc">
+    FLASHPOINT is designed for facilitated workshop use on a widescreen display.
+    Please use a screen at least 1024px wide.
+  </div>`;
+document.body.appendChild(warning);
 
 // ─── BUILD SHELL ─────────────────────────────────────────────────────────────
 const app = document.getElementById('app');
@@ -48,6 +63,7 @@ app.innerHTML = `
     <button class="fp-btn fp-btn-war" id="fp-btn-warroom">⚑ War Room</button>
     <button class="fp-btn fp-btn-debrief" id="fp-btn-debrief">⬡ Debrief</button>
     <button class="fp-btn fp-btn-danger" id="fp-btn-reset">↺ Reset</button>
+    <button class="fp-btn fp-btn-facilitator" id="fp-btn-facilitator" title="Facilitator controls (Shift+F)">⚙</button>
   </header>
 
   <!-- MAIN -->
@@ -109,9 +125,112 @@ const logPanel = LogPanel(state);
 document.getElementById('fp-log-tabs-mount').appendChild(logPanel._tabs);
 document.getElementById('fp-log-content-mount').appendChild(logPanel._content);
 
-const debrief  = Debrief();
-const warRoom  = WarRoom();
+const debrief     = Debrief();
+const warRoom     = WarRoom();
+const facilitator = Facilitator();
 Atmosphere();
+
+// ─── SCENARIO COMPLETE OVERLAY ───────────────────────────────────────────────
+const completeOverlay = document.createElement('div');
+completeOverlay.className = 'fp-complete-overlay';
+completeOverlay.id = 'fp-complete-overlay';
+completeOverlay.innerHTML = `
+  <div class="fp-complete-modal">
+    <div class="fp-complete-label">Meridian Health · Day 21 of 21</div>
+    <div class="fp-complete-title">SCENARIO COMPLETE</div>
+    <div class="fp-complete-desc">
+      The 21-day crisis window has closed. Review how decisions across all five
+      roles shaped the outcome for Meridian Health.
+    </div>
+    <div class="fp-complete-stats" id="fp-complete-stats"></div>
+    <div style="display:flex;gap:var(--sp-3);justify-content:center">
+      <button class="fp-btn fp-btn-primary" id="fp-complete-debrief">Open Debrief ⬡</button>
+      <button class="fp-btn" id="fp-complete-close">Continue</button>
+    </div>
+  </div>`;
+document.body.appendChild(completeOverlay);
+
+completeOverlay.querySelector('#fp-complete-debrief').addEventListener('click', () => {
+  completeOverlay.classList.remove('open');
+  debrief.open();
+});
+completeOverlay.querySelector('#fp-complete-close').addEventListener('click', () => {
+  completeOverlay.classList.remove('open');
+});
+
+function showCompleteScreen() {
+  const s    = getState();
+  const prob = calcEndingProbability();
+  const committed = Object.keys(s.decisions).length;
+  const cascades  = [...s.firedEvents].filter(id => id.startsWith('cascade-')).length;
+  document.getElementById('fp-complete-stats').innerHTML = `
+    <div class="fp-complete-stat">
+      <div class="fp-complete-stat-val">${committed}</div>
+      <div class="fp-complete-stat-label">Gates Committed</div>
+    </div>
+    <div class="fp-complete-stat">
+      <div class="fp-complete-stat-val" style="color:var(--green)">${prob.A}%</div>
+      <div class="fp-complete-stat-label">Ending A</div>
+    </div>
+    <div class="fp-complete-stat">
+      <div class="fp-complete-stat-val" style="color:var(--red)">${prob.C}%</div>
+      <div class="fp-complete-stat-label">Ending C</div>
+    </div>
+    <div class="fp-complete-stat">
+      <div class="fp-complete-stat-val" style="color:${cascades > 0 ? 'var(--red)' : 'var(--green)'}">${cascades}</div>
+      <div class="fp-complete-stat-label">Cascades</div>
+    </div>`;
+  completeOverlay.classList.add('open');
+  gsap.from('.fp-complete-modal', { scale: 0.95, opacity: 0, duration: 0.4, ease: 'back.out(1.5)' });
+}
+
+// ─── KEYBOARD SHORTCUTS ──────────────────────────────────────────────────────
+const ROLE_KEYS = { '1':'CISO', '2':'CFO', '3':'Legal', '4':'Comms', '5':'CEO' };
+
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+  const s = getState();
+
+  // Shift+F: facilitator panel
+  if (e.shiftKey && e.key === 'F') { e.preventDefault(); facilitator.toggle(); return; }
+
+  // Escape: close open modals
+  if (e.key === 'Escape') {
+    if (document.getElementById('fp-debrief-overlay')?.classList.contains('open'))
+      debrief.close();
+    else if (document.getElementById('fp-warroom-overlay')?.classList.contains('open'))
+      warRoom.close();
+    else if (completeOverlay.classList.contains('open'))
+      completeOverlay.classList.remove('open');
+    else if (document.getElementById('fp-facilitator-panel')?.classList.contains('open'))
+      facilitator.close();
+    return;
+  }
+
+  // Skip if any overlay is open
+  const anyOpen = ['fp-debrief-overlay','fp-warroom-overlay'].some(
+    id => document.getElementById(id)?.classList.contains('open')
+  ) || completeOverlay.classList.contains('open');
+  if (anyOpen) return;
+
+  // 1-5: switch role
+  if (ROLE_KEYS[e.key]) { dispatch({ type: 'SWITCH_ROLE', role: ROLE_KEYS[e.key] }); return; }
+
+  // Space: advance day
+  if (e.key === ' ') {
+    e.preventDefault();
+    if (s.day < 21) animateDayAdvance(() => dispatch({ type: 'NEXT_DAY' }));
+    return;
+  }
+
+  // W: war room
+  if (e.key === 'w' || e.key === 'W') { warRoom.open(); return; }
+
+  // D: debrief
+  if (e.key === 'd' || e.key === 'D') { debrief.open(); return; }
+});
 
 // ─── ROLE CONTEXT BAR ────────────────────────────────────────────────────────
 const ROLE_CONTEXT = {
@@ -161,10 +280,6 @@ document.getElementById('fp-show-hidden').addEventListener('change', e => {
   gateCtrl.setShowHidden(e.target.checked);
 });
 
-document.getElementById('fp-btn-next').addEventListener('click', () => {
-  animateDayAdvance(() => dispatch({ type: 'NEXT_DAY' }));
-});
-
 document.getElementById('fp-btn-prev').addEventListener('click', () => {
   dispatch({ type: 'PREV_DAY' });
 });
@@ -175,11 +290,14 @@ document.getElementById('fp-btn-reset').addEventListener('click', () => {
 });
 
 document.getElementById('fp-btn-debrief').addEventListener('click', () => debrief.open());
+document.getElementById('fp-btn-facilitator').addEventListener('click', () => facilitator.toggle());
 
 // ─── WAR ROOM ────────────────────────────────────────────────────────────────
 document.getElementById('fp-btn-warroom').addEventListener('click', () => warRoom.open());
 
 // ─── HEADER STATE SYNC ────────────────────────────────────────────────────────
+let _shownComplete = false;
+
 EventBus.on('state:changed', ({ state: s, reason }) => {
   if (reason === 'SWITCH_ROLE' || reason === 'TOGGLE_ACTION') return;
 
@@ -195,10 +313,21 @@ EventBus.on('state:changed', ({ state: s, reason }) => {
   const btn = document.getElementById('fp-btn-next');
   if (btn) {
     const ready = readyCount();
-    btn.textContent = s.day >= 21 ? 'Complete'
+    btn.textContent = s.day >= 21 ? '⬡ View Debrief'
       : ready === 5 ? 'Advance Day ▶ (All Ready)'
       : ready > 0   ? `Advance Day ▶ (${ready}/5)`
       : 'Advance Day ▶';
+  }
+
+  // Day 21 complete screen
+  if (s.day >= 21 && !_shownComplete) {
+    _shownComplete = true;
+    setTimeout(() => showCompleteScreen(), 800);
+  }
+  // Reset flag when game resets
+  if (reason === 'RESET' || reason === 'RESTORE') {
+    _shownComplete = false;
+    completeOverlay.classList.remove('open');
   }
 
   // Cascade alerts
@@ -217,7 +346,35 @@ EventBus.on('state:changed', ({ state: s, reason }) => {
         : '';
     }).join('');
   }
+
+  // Auto-save (throttled: skip TOGGLE_ACTION already filtered above)
+  try {
+    const ser = JSON.parse(serializeState());
+    ser._savedAt = Date.now();
+    localStorage.setItem('fp-autosave', JSON.stringify(ser));
+  } catch (_) {}
 });
+
+// Advance button at Day 21 opens debrief
+document.getElementById('fp-btn-next').addEventListener('click', () => {
+  if (getState().day >= 21) { debrief.open(); return; }
+  animateDayAdvance(() => dispatch({ type: 'NEXT_DAY' }));
+});
+
+// ─── RESTORE AUTO-SAVE ON LOAD ────────────────────────────────────────────────
+(function tryRestore() {
+  const raw = localStorage.getItem('fp-autosave');
+  if (!raw) return;
+  try {
+    const snapshot = JSON.parse(raw);
+    if (!snapshot.day || snapshot.day <= 1) return;
+    const d = new Date(snapshot._savedAt || 0);
+    const msg = `Resume saved session from Day ${snapshot.day} (saved ${d.toLocaleTimeString()})?`;
+    if (confirm(msg)) {
+      dispatch({ type: 'RESTORE', snapshot });
+    }
+  } catch (_) {}
+})();
 
 // ─── ACT TRANSITION BANNER ────────────────────────────────────────────────────
 const actBanner = document.createElement('div');
