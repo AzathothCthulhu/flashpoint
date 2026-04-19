@@ -3,6 +3,7 @@ import './styles/reset.css';
 import './styles/shell.css';
 import './styles/components.css';
 import './styles/stage2.css';
+import './styles/stage3.css';
 
 import gsap from 'gsap';
 
@@ -72,7 +73,15 @@ app.innerHTML = `
     <!-- CENTER -->
     <div class="fp-center-panel">
       <div id="fp-role-tabs-mount"></div>
+      <div id="fp-role-context-mount"></div>
       <div id="fp-action-panel-mount"></div>
+      <div id="fp-gate-filter-bar" class="fp-gate-filter-bar">
+        <span class="fp-gate-filter-label" id="fp-gate-filter-label">CISO gates</span>
+        <label class="fp-gate-filter-toggle">
+          <input type="checkbox" id="fp-filter-role" checked>
+          Filter by role
+        </label>
+      </div>
       <div class="fp-center-content" id="fp-gate-container">
         <div id="fp-empty-gates" class="fp-empty" style="display:none">
           No active decision gates today. Advance the day.
@@ -103,11 +112,60 @@ const gateCtrl = GateCards(
   document.getElementById('fp-show-hidden').checked
 );
 
+document.getElementById('fp-filter-role').addEventListener('change', e => {
+  gateCtrl.setRoleFilter(e.target.checked);
+  document.getElementById('fp-gate-filter-label').textContent =
+    e.target.checked ? `${state.activeRole} gates` : 'All gates';
+});
+
 const logPanel = LogPanel(state);
 document.getElementById('fp-log-tabs-mount').appendChild(logPanel._tabs);
 document.getElementById('fp-log-content-mount').appendChild(logPanel._content);
 
 const debrief = Debrief();
+
+// ─── ROLE CONTEXT BAR ────────────────────────────────────────────────────────
+const ROLE_CONTEXT = {
+  CISO:  'Security posture · Forensics workstream · Team management · Executive trust',
+  CFO:   'Budget integrity · Liquidity · Financial risk · Vendor relationships',
+  Legal: 'Privilege protection · Regulator engagement · Contract position · Ethics',
+  Comms: 'Narrative control · Media relationships · Stakeholder confidence · Capacity',
+  CEO:   'Board confidence · Reputation · Staff morale · Strategic posture',
+};
+
+const ROLE_COLORS_MAIN = {
+  CISO:'var(--col-ciso)', CFO:'var(--col-cfo)', Legal:'var(--col-legal)',
+  Comms:'var(--col-comms)', CEO:'var(--col-ceo)',
+};
+
+function buildRoleContextBar(role) {
+  const el = document.createElement('div');
+  el.className = 'fp-role-context';
+  el.style.color = ROLE_COLORS_MAIN[role];
+  el.textContent = ROLE_CONTEXT[role] ?? '';
+  return el;
+}
+
+const roleContextMount = document.getElementById('fp-role-context-mount');
+let roleContextEl = buildRoleContextBar(state.activeRole);
+roleContextMount.appendChild(roleContextEl);
+
+EventBus.on('state:changed', ({ reason, state: s }) => {
+  if (reason !== 'SWITCH_ROLE') return;
+  gsap.to(roleContextEl, {
+    opacity: 0, duration: 0.1,
+    onComplete: () => {
+      roleContextEl.style.color  = ROLE_COLORS_MAIN[s.activeRole];
+      roleContextEl.textContent  = ROLE_CONTEXT[s.activeRole] ?? '';
+      gsap.to(roleContextEl, { opacity: 1, duration: 0.2 });
+    },
+  });
+  const filterLabel = document.getElementById('fp-gate-filter-label');
+  const filterCheck = document.getElementById('fp-filter-role');
+  if (filterLabel && filterCheck?.checked) {
+    filterLabel.textContent = `${s.activeRole} gates`;
+  }
+});
 
 // ─── HEADER WIRING ───────────────────────────────────────────────────────────
 document.getElementById('fp-show-hidden').addEventListener('change', e => {

@@ -1,0 +1,161 @@
+/* ── STAGE 3: MULTI-ROLE FM LAYER ─────────────────────────────── */
+
+/* Role context bar below tabs */
+.fp-role-context {
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--dur-base);
+}
+
+/* AP badge on role tabs */
+.fp-tab-ap {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: var(--weight-med);
+  padding: 0px 4px;
+  border-radius: var(--r-sm);
+  margin-left: 3px;
+  vertical-align: middle;
+  opacity: 0.7;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+}
+.fp-role-tab.active .fp-tab-ap {
+  opacity: 1;
+  background: transparent;
+  border-color: currentColor;
+}
+
+/* Gate card role filter info bar */
+.fp-gate-filter-bar {
+  padding: var(--sp-1) var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.fp-gate-filter-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.fp-gate-filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Gate card — role match highlight */
+.fp-gate-card.role-match {
+  border-color: var(--role-accent, var(--border));
+}
+
+.fp-gate-card.role-match .fp-gate-header {
+  background: var(--role-accent-dim, transparent);
+}
+
+/* CEO leadership metrics panel */
+.fp-leadership-panel {
+  margin-top: var(--sp-3);
+}
+
+.fp-leadership-metric {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 4px 0;
+}
+
+.fp-leadership-metric-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  min-width: 110px;
+}
+
+.fp-leadership-metric-track {
+  flex: 1;
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.fp-leadership-metric-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+.fp-leadership-metric-val {
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Workstream compact (CEO view) */
+.fp-ws-compact {
+  margin-top: var(--sp-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+
+.fp-ws-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 9px;
+}
+
+.fp-ws-chip-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+/* Role ready summary in advance area */
+.fp-ready-summary {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0;
+  flex-wrap: wrap;
+}
+
+.fp-ready-pip-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.fp-ready-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background var(--dur-base);
+}
+.fp-ready-dot.active { background: var(--green); }

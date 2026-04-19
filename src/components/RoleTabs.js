@@ -1,5 +1,5 @@
 import gsap from 'gsap';
-import { ROLES } from '../engine/fm.js';
+import { ROLES, AP_BUDGETS } from '../engine/fm.js';
 import { dispatch } from '../engine/state.js';
 import { EventBus } from '../engine/eventBus.js';
 
@@ -18,11 +18,14 @@ export function RoleTabs(state) {
       const isActive = r === activeRole;
       const isReady  = roleReady[r];
       const spent    = roleAPSpent[r];
+      const budget   = AP_BUDGETS[r];
+      const apLabel  = spent > 0 ? `${spent}/${budget}` : `${budget}`;
       return `
         <div class="fp-role-tab ${isActive ? 'active' : ''} ${isReady ? 'ready' : ''}"
           style="color:${isActive ? ROLE_COLORS[r] : 'var(--text-muted)'}"
           data-role="${r}">
           ${r.toUpperCase()}
+          <span class="fp-tab-ap" style="color:${isReady ? 'var(--green)' : 'inherit'}">${isReady ? '✓' : apLabel}</span>
           <span class="fp-ready-pip"></span>
         </div>`;
     }).join('');
