@@ -1,0 +1,359 @@
+================================================================================
+  FLASHPOINT — How to Run the Application
+  Plain-English Guide for Non-Technical Users
+================================================================================
+
+This guide walks you through everything you need to do to get FLASHPOINT
+running on your computer. Read it top to bottom before you start.
+
+Estimated time to set up for the first time: 10–15 minutes.
+After the first time: less than one minute.
+
+
+--------------------------------------------------------------------------------
+  PART 1 — WHAT YOU NEED BEFORE YOU START
+--------------------------------------------------------------------------------
+
+FLASHPOINT needs one piece of free software called Node.js to be installed on
+your computer. Node.js is not the game itself — it is a tool that lets your
+computer run the game. You only install it once.
+
+You also need Google Chrome (recommended) or Microsoft Edge. Any modern browser
+will work, but Chrome gives the best experience on a projector.
+
+
+--------------------------------------------------------------------------------
+  PART 2 — INSTALLING NODE.JS (first time only)
+--------------------------------------------------------------------------------
+
+Step 1 — Check if Node.js is already installed
+
+  Open Command Prompt:
+    • Click the Windows Start button (bottom-left of screen)
+    • Type the words:  cmd
+    • Press Enter
+    • A black window will open — this is Command Prompt
+
+  In the black window, type exactly this and press Enter:
+    node --version
+
+  If you see something like  v20.11.0  (any number is fine), Node.js is already
+  installed. Skip to PART 3.
+
+  If you see "not recognized" or nothing useful, continue with Step 2.
+
+
+Step 2 — Download Node.js
+
+  Open your web browser and go to:
+    https://nodejs.org
+
+  You will see two big green buttons. Click the one that says "LTS" (it will
+  have a number like 20.x.x LTS). LTS stands for Long Term Support — it is the
+  stable version recommended for most people.
+
+  A file will download. It will be named something like:
+    node-v20.11.0-x64.msi
+
+
+Step 3 — Install Node.js
+
+  IMPORTANT: You need administrator rights on your computer to install software.
+  If your work computer restricts software installation, contact your IT team
+  and ask them to install "Node.js LTS" for you. Show them this guide.
+
+  If you have administrator rights:
+    • Find the downloaded file (usually in your Downloads folder)
+    • Double-click it to open the installer
+    • Click "Next" on each screen, accepting the defaults
+    • If Windows asks "Do you want to allow this app to make changes?" click Yes
+    • Wait for it to finish, then click Finish
+
+
+Step 4 — Confirm the installation worked
+
+  Close any Command Prompt windows that are open, then open a new one:
+    • Windows Start button → type cmd → press Enter
+
+  Type this and press Enter:
+    node --version
+
+  You should now see a version number like v20.11.0.
+  If you do, Node.js is installed correctly.
+
+
+--------------------------------------------------------------------------------
+  PART 3 — SETTING UP FLASHPOINT (first time only)
+--------------------------------------------------------------------------------
+
+You only do this section once. After this, starting the app takes one command.
+
+Step 5 — Open Command Prompt in the Flashpoint folder
+
+  You need to open Command Prompt pointing at the FLASHPOINT folder on your
+  computer. There are two ways to do this:
+
+  Easy way (Windows Explorer):
+    • Open File Explorer (the folder icon on your taskbar)
+    • Navigate to the Flashpoint folder
+    • In the address bar at the top of the window (where it shows the folder
+      path), click once so the text is highlighted
+    • Type the word:  cmd
+    • Press Enter
+    • A Command Prompt window opens already inside the Flashpoint folder
+
+  Alternative way (type the path):
+    • Open Command Prompt normally (Start → cmd → Enter)
+    • Type:  cd "
+    • Then drag the Flashpoint folder from File Explorer into the Command Prompt
+      window — this pastes the folder path automatically
+    • Type a closing:  "
+    • Press Enter
+    • Example of what it will look like:
+        cd "D:\OneDrive\Desktop\Flashpoint"
+
+  You should now see the folder path at the start of the command line, like:
+    D:\OneDrive\Desktop\Flashpoint>
+
+
+Step 6 — Install the application's components
+
+  In the Command Prompt window (inside the Flashpoint folder), type exactly this
+  and press Enter:
+
+    npm install
+
+  You will see a lot of text scroll past. This is normal. It is downloading the
+  libraries the application uses. It takes about 30–60 seconds depending on your
+  internet connection.
+
+  When it finishes, you will see your folder path again at the bottom, like:
+    D:\OneDrive\Desktop\Flashpoint>
+
+  If you see any lines with the word "error" in red, something went wrong.
+  See the Troubleshooting section at the end of this guide.
+
+  You will NOT need to run npm install again unless you move the folder to a
+  different computer.
+
+
+--------------------------------------------------------------------------------
+  PART 4 — RUNNING FLASHPOINT
+--------------------------------------------------------------------------------
+
+Do this every time you want to run the application.
+
+Step 7 — Open Command Prompt in the Flashpoint folder
+
+  (Same as Step 5 — navigate to the Flashpoint folder and open Command Prompt
+  there. If the window is still open from before, you can skip this.)
+
+
+Step 8 — Start the application
+
+  In the Command Prompt window, type exactly this and press Enter:
+
+    npm run dev
+
+  You will see some text appear, including a line that looks like:
+
+    Local:   http://localhost:5173/
+
+  This means the application is running. Do not close this window.
+  The application stops if you close this window.
+
+
+Step 9 — Open FLASHPOINT in your browser
+
+  Open Google Chrome (or Edge).
+
+  In the address bar at the very top of the browser, click once, then type:
+
+    http://localhost:5173
+
+  Press Enter. The FLASHPOINT application should load.
+
+  If it does not load, wait 5 seconds and try again.
+
+
+Step 10 — Use the application
+
+  FLASHPOINT is now running. You can use it normally.
+
+  The tab with the Command Prompt window must stay open the whole time.
+  You can minimise it — just do not close it.
+
+
+Step 11 — Stop the application when you are done
+
+  When you want to turn FLASHPOINT off:
+    • Click on the Command Prompt window
+    • Hold Ctrl and press C at the same time
+    • The application stops
+
+  Then close the Command Prompt window.
+  You can close the browser tab.
+
+
+--------------------------------------------------------------------------------
+  PART 5 — QUICK START CHECKLIST (for subsequent sessions)
+--------------------------------------------------------------------------------
+
+Once you have done Parts 2 and 3, starting the app is just these three steps:
+
+  [ ] Open Command Prompt in the Flashpoint folder
+  [ ] Type:  npm run dev  and press Enter
+  [ ] Open Chrome and go to:  http://localhost:5173
+
+That is it.
+
+
+--------------------------------------------------------------------------------
+  PART 6 — SHARING WITH OTHERS ON THE SAME NETWORK
+--------------------------------------------------------------------------------
+
+If you want participants in the same room to view FLASHPOINT on their own
+laptops or tablets (connected to the same Wi-Fi), follow these steps.
+
+Note: Participants cannot control the application — they can only view it.
+The facilitator controls everything from the main computer.
+
+Step A — Find your computer's IP address
+
+  Open Command Prompt and type:
+    ipconfig
+
+  Press Enter. Look for a section called "Wireless LAN adapter Wi-Fi" (if on
+  Wi-Fi) or "Ethernet adapter" (if on a cable).
+
+  Look for the line that says:
+    IPv4 Address . . . . . . : 192.168.x.x
+
+  Write down that number. It will look something like 192.168.1.42.
+  (Your number will be different.)
+
+Step B — Start the application with network access
+
+  Instead of the usual start command, use this one:
+    npm run dev -- --host
+
+  You will see TWO addresses in the output, like:
+
+    Local:   http://localhost:5173/
+    Network: http://192.168.1.42:5173/
+
+  The Network address is what you share with participants.
+
+Step C — Share the address
+
+  Tell participants to open their browser and go to:
+    http://192.168.1.42:5173
+
+  (Using your actual IP number from Step A.)
+
+  They should see FLASHPOINT load on their screen.
+
+IMPORTANT: If participants cannot connect, it is usually because Windows
+Firewall is blocking the connection. To fix this:
+  • When Windows shows a firewall popup asking if you want to allow access,
+    click "Allow access"
+  • If no popup appeared, contact your IT team and ask them to allow
+    port 5173 through Windows Defender Firewall
+
+
+--------------------------------------------------------------------------------
+  PART 7 — TROUBLESHOOTING
+--------------------------------------------------------------------------------
+
+Problem: "npm is not recognized as an internal or external command"
+
+  Node.js is not installed, or the installation did not finish correctly.
+  Go back to Part 2 and install Node.js again.
+  After installing, close all Command Prompt windows and open a new one.
+
+
+Problem: npm install shows errors in red
+
+  Try running it again — sometimes a slow internet connection causes a failure:
+    npm install
+
+  If it still fails, delete the folder called "node_modules" inside the
+  Flashpoint folder (select it, press Delete), then run npm install again.
+
+
+Problem: The browser shows "This site can't be reached" or "localhost refused"
+
+  The application is not running.
+  Check that the Command Prompt window is still open and shows the
+  "Local: http://localhost:5173/" message.
+  If not, run npm run dev again.
+
+
+Problem: I closed the Command Prompt window by accident
+
+  The application has stopped. Open Command Prompt in the Flashpoint folder
+  again and run:  npm run dev
+
+
+Problem: The application loads but looks broken or shows errors
+
+  Try pressing Ctrl+Shift+R in Chrome (hard refresh, clears the cache).
+  If that does not help, stop the application (Ctrl+C in Command Prompt),
+  then run it again with npm run dev.
+
+
+Problem: I get a Windows security / firewall popup
+
+  Click "Allow access". This is safe — it only applies to connections on
+  your local network. It will not expose your computer to the internet.
+
+
+Problem: I need to move the Flashpoint folder to another computer
+
+  Copy the entire Flashpoint folder to the new computer.
+  Then run npm install again on the new computer (Part 3, Step 6).
+  The "node_modules" folder inside Flashpoint does not need to be copied —
+  npm install will recreate it.
+
+
+Problem: I cannot install Node.js because my work computer blocks it
+
+  Contact your IT helpdesk and ask them to install "Node.js LTS version 20"
+  on your computer. Show them this guide if helpful. Once Node.js is installed,
+  you can run the rest of the steps yourself without administrator rights.
+
+
+--------------------------------------------------------------------------------
+  QUICK REFERENCE CARD
+--------------------------------------------------------------------------------
+
+FIRST TIME SETUP:
+  1. Install Node.js from https://nodejs.org (download the LTS version)
+  2. Open Command Prompt in the Flashpoint folder
+  3. Type:  npm install   and press Enter
+  4. Wait for it to finish
+
+EVERY TIME YOU RUN:
+  1. Open Command Prompt in the Flashpoint folder
+  2. Type:  npm run dev   and press Enter
+  3. Open Chrome, go to:  http://localhost:5173
+  4. When done: Ctrl+C in Command Prompt to stop
+
+KEYBOARD SHORTCUTS IN THE APP:
+  1 2 3 4 5   = Switch between roles (CISO, CFO, Legal, Comms, CEO)
+  Space       = Advance to the next day
+  W           = Open War Room
+  D           = Open Debrief
+  Shift + F   = Open Facilitator controls
+  Escape      = Close any open window
+
+
+--------------------------------------------------------------------------------
+  NEED HELP?
+--------------------------------------------------------------------------------
+
+If you are stuck and this guide has not solved the problem, take a photo of
+the error message on screen (or copy the text) and send it to whoever provided
+you with FLASHPOINT. Include which step you were on when the error appeared.
+
+================================================================================
