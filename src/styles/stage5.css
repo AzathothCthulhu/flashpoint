@@ -1,0 +1,163 @@
+/* ── STAGE 5: ATMOSPHERIC LAYER ──────────────────────────────────── */
+
+/* ── Tension header glow ──────────────────────────────────────────── */
+@keyframes tensionPulse {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50%       { box-shadow: 0 2px 16px 0 var(--tension-color, transparent); }
+}
+
+.fp-header {
+  --tension-color: transparent;
+  transition: border-color var(--dur-slow) var(--ease-out);
+}
+
+.fp-header.tension-elevated {
+  --tension-color: rgba(210,153,34,0.25);
+  border-bottom-color: rgba(210,153,34,0.4);
+  animation: tensionPulse 3s ease-in-out infinite;
+}
+
+.fp-header.tension-critical {
+  --tension-color: rgba(224,92,43,0.3);
+  border-bottom-color: rgba(224,92,43,0.5);
+  animation: tensionPulse 2s ease-in-out infinite;
+}
+
+.fp-header.tension-severe {
+  --tension-color: rgba(248,81,73,0.4);
+  border-bottom-color: rgba(248,81,73,0.6);
+  animation: tensionPulse 1.2s ease-in-out infinite;
+}
+
+/* ── Pool bar danger glow ─────────────────────────────────────────── */
+@keyframes poolDanger {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.fp-pool-item.danger .fp-pool-fill {
+  animation: poolDanger 1.5s ease-in-out infinite;
+}
+
+.fp-pool-item.danger .fp-pool-val {
+  color: var(--red) !important;
+}
+
+/* ── Cascade alert pulse ──────────────────────────────────────────── */
+@keyframes cascadeAlertPulse {
+  0%, 100% { border-color: rgba(248,81,73,0.3); }
+  50%       { border-color: rgba(248,81,73,0.7); }
+}
+
+.fp-cascade-alert {
+  animation: cascadeAlertPulse 1.8s ease-in-out infinite;
+}
+
+/* ── Day transition screen flash ─────────────────────────────────── */
+@keyframes screenFlash {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.fp-day-flash-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+  background: rgba(224,92,43,0.06);
+  opacity: 0;
+}
+
+/* ── Act boundary colour shift ────────────────────────────────────── */
+body.act-2 { --accent: #ff7b72; --accent-hover: #e06060; }
+body.act-3 { --accent: #bc8cff; --accent-hover: #a070e0; }
+
+/* ── Pool item flash animations ──────────────────────────────────── */
+@keyframes poolFlashGreen {
+  0%   { background: rgba(63,185,80,0.15); }
+  100% { background: transparent; }
+}
+@keyframes poolFlashRed {
+  0%   { background: rgba(248,81,73,0.15); }
+  100% { background: transparent; }
+}
+
+.fp-pool-item.flash-up   { animation: poolFlashGreen 1s var(--ease-out) forwards; }
+.fp-pool-item.flash-down { animation: poolFlashRed   1s var(--ease-out) forwards; }
+
+/* ── Ending tracker tension tint ─────────────────────────────────── */
+.fp-ending-bar.high-c {
+  background: rgba(248,81,73,0.06);
+  border-top-color: rgba(248,81,73,0.2);
+}
+
+/* ── Ready button shimmer (when all roles ready) ─────────────────── */
+@keyframes readyShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+#fp-btn-next.all-ready {
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--green) 40%,
+    var(--accent) 80%,
+    var(--green) 100%
+  );
+  background-size: 200% auto;
+  animation: readyShimmer 2.5s linear infinite;
+  border-color: var(--green);
+  color: #fff;
+}
+
+/* ── Gate card upcoming pulse (gate due today) ───────────────────── */
+@keyframes gateDuePulse {
+  0%, 100% { border-color: var(--accent); }
+  50%       { border-color: rgba(224,92,43,0.3); }
+}
+
+.fp-gate-card.due-today {
+  animation: gateDuePulse 2.5s ease-in-out infinite;
+}
+
+/* ── Ambient vignette overlay ────────────────────────────────────── */
+.fp-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%);
+}
+
+/* ── Scenario scenario event toast ───────────────────────────────── */
+.fp-event-toast {
+  position: fixed;
+  top: calc(var(--header-h) + var(--sp-4));
+  right: var(--sp-4);
+  max-width: 280px;
+  background: var(--surface-3);
+  border: 1px solid var(--purple);
+  border-radius: var(--r-lg);
+  padding: var(--sp-3) var(--sp-4);
+  z-index: 200;
+  opacity: 0;
+  transform: translateX(20px);
+  box-shadow: var(--shadow-md);
+}
+
+.fp-event-toast-label {
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--purple);
+  margin-bottom: var(--sp-1);
+}
+
+.fp-event-toast-text {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  line-height: var(--leading-loose);
+}
