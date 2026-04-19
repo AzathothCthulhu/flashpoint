@@ -1,0 +1,99 @@
+:root {
+  /* ── Palette ─────────────────────────────────────────── */
+  --bg:           #0d1117;
+  --surface:      #161b22;
+  --surface-2:    #1c2128;
+  --surface-3:    #21262d;
+  --border:       #30363d;
+  --border-subtle:#21262d;
+  --text:         #e6edf3;
+  --text-muted:   #7d8590;
+  --text-dim:     #484f58;
+
+  /* ── Brand ───────────────────────────────────────────── */
+  --accent:       #e05c2b;
+  --accent-dim:   rgba(224, 92, 43, 0.15);
+  --accent-hover: #c5511f;
+  --accent-2:     #58a6ff;
+  --accent-2-dim: rgba(88, 166, 255, 0.12);
+
+  /* ── Semantic ────────────────────────────────────────── */
+  --green:        #3fb950;
+  --green-dim:    rgba(63, 185, 80, 0.12);
+  --yellow:       #d29922;
+  --yellow-dim:   rgba(210, 153, 34, 0.12);
+  --red:          #f85149;
+  --red-dim:      rgba(248, 81, 73, 0.12);
+  --purple:       #bc8cff;
+  --purple-dim:   rgba(188, 140, 255, 0.12);
+  --teal:         #39d353;
+
+  /* ── Role colours ────────────────────────────────────── */
+  --col-shared:   #58a6ff;
+  --col-ciso:     #ff7b72;
+  --col-cfo:      #79c0ff;
+  --col-legal:    #bc8cff;
+  --col-comms:    #56d364;
+  --col-ceo:      #ffa657;
+  --col-scenario: #ffa657;
+
+  /* ── Typography ──────────────────────────────────────── */
+  --font-sans:    'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono:    'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  --text-xs:      10px;
+  --text-sm:      11px;
+  --text-base:    13px;
+  --text-md:      15px;
+  --text-lg:      18px;
+  --text-xl:      24px;
+  --text-2xl:     32px;
+  --weight-normal:400;
+  --weight-med:   600;
+  --weight-bold:  700;
+  --weight-black: 900;
+  --leading-tight:1.3;
+  --leading-base: 1.5;
+  --leading-loose:1.75;
+
+  /* ── Spacing ─────────────────────────────────────────── */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+
+  /* ── Radii ───────────────────────────────────────────── */
+  --r-sm:  4px;
+  --r-md:  6px;
+  --r-lg:  8px;
+  --r-xl:  12px;
+  --r-pill:999px;
+
+  /* ── Shadows ─────────────────────────────────────────── */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.6);
+  --shadow-glow-accent: 0 0 12px rgba(224,92,43,0.3);
+  --shadow-glow-red:    0 0 12px rgba(248,81,73,0.3);
+
+  /* ── Layout ──────────────────────────────────────────── */
+  --header-h:     52px;
+  --pools-w:      256px;
+  --right-w:      272px;
+
+  /* ── Animation ───────────────────────────────────────── */
+  --dur-fast:     0.15s;
+  --dur-base:     0.25s;
+  --dur-slow:     0.45s;
+  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out:  cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Pool bar ────────────────────────────────────────── */
+  --bar-h:        5px;
+  --bar-h-lg:     8px;
+  --bar-radius:   3px;
+}

@@ -1,107 +1,261 @@
-import { dispatch, getState, calcEndingProbability, currentAct } from './engine/state.js';
+import './styles/tokens.css';
+import './styles/reset.css';
+import './styles/shell.css';
+import './styles/components.css';
+
+import gsap from 'gsap';
+
+import { dispatch, getState, calcEndingProbability, currentAct, readyCount } from './engine/state.js';
 import { EventBus } from './engine/eventBus.js';
+import { activeEscalations } from './engine/warroom.js';
+import { EVENTS } from './engine/events.js';
+import { POOL_DEFS } from './engine/pools.js';
 
-// Stage 0: engine wired, minimal shell to prove all modules load cleanly
+import { PoolBar }        from './components/PoolBar.js';
+import { GateCards }      from './components/GateCard.js';
+import { ActionPanel }    from './components/ActionPanel.js';
+import { RoleTabs }       from './components/RoleTabs.js';
+import { EndingTracker }  from './components/EndingTracker.js';
+import { LogPanel }       from './components/LogPanel.js';
+import { EventsTimeline } from './components/EventsTimeline.js';
+
+// ─── INIT ENGINE ─────────────────────────────────────────────────────────────
 dispatch({ type: 'INIT' });
+const state = getState();
 
-EventBus.on('state:changed', ({ reason, state }) => {
-  const prob = calcEndingProbability();
-  document.getElementById('app').innerHTML = `
-    <div style="font-family:monospace;padding:24px;background:#0d1117;color:#e6edf3;min-height:100vh">
-      <h1 style="color:#e05c2b;letter-spacing:4px;margin-bottom:4px">FLASHPOINT</h1>
-      <p style="color:#7d8590;margin-bottom:24px">Stage 0 Engine — Production Foundation</p>
+// ─── BUILD SHELL ─────────────────────────────────────────────────────────────
+const app = document.getElementById('app');
 
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px">
-        <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px">
-          <div style="color:#7d8590;font-size:11px;letter-spacing:2px;margin-bottom:8px">DAY / ACT</div>
-          <div style="font-size:28px;font-weight:700">Day ${state.day}</div>
-          <div style="color:#58a6ff;font-size:12px">ACT ${currentAct()}</div>
-        </div>
-        <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px">
-          <div style="color:#7d8590;font-size:11px;letter-spacing:2px;margin-bottom:8px">KEY POOLS</div>
-          <div style="font-size:12px;line-height:1.8">
-            TIME: <span style="color:#58a6ff">${state.pools['TIME']}</span> |
-            REPUTATION: <span style="color:${state.pools['REPUTATION'] >= 0 ? '#3fb950' : '#f85149'}">${state.pools['REPUTATION']}</span> |
-            IQ: <span style="color:#58a6ff">${state.pools['INTELLIGENCE_QUALITY']}</span>
-          </div>
-          <div style="font-size:12px;line-height:1.8">
-            REG: <span style="color:${state.pools['REGULATORY_STANDING'] >= 0 ? '#3fb950' : '#f85149'}">${state.pools['REGULATORY_STANDING']}</span> |
-            CAPACITY: <span style="color:#3fb950">${state.pools['CAPACITY']}</span>
-          </div>
-        </div>
-        <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px">
-          <div style="color:#7d8590;font-size:11px;letter-spacing:2px;margin-bottom:8px">ENDING PROBABILITY</div>
-          <div style="font-size:12px;line-height:1.8">
-            <span style="color:#3fb950">A: ${prob.A}%</span> |
-            <span style="color:#d29922">B: ${prob.B}%</span> |
-            <span style="color:#f85149">C: ${prob.C}%</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;margin-bottom:16px">
-        <div style="color:#7d8590;font-size:11px;letter-spacing:2px;margin-bottom:12px">ACTIVE ROLE: ${state.activeRole}</div>
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          ${['CISO','CFO','Legal','Comms','CEO'].map(r =>
-            `<button onclick="window.__dispatch({type:'SWITCH_ROLE',role:'${r}'})"
-              style="padding:4px 12px;border-radius:4px;border:1px solid #30363d;background:${state.activeRole===r?'#e05c2b':'#1c2128'};color:#e6edf3;cursor:pointer;font-family:monospace">
-              ${r}${state.roleReady[r]?' ✓':''}
-            </button>`
-          ).join('')}
-        </div>
-        <div style="font-size:12px;color:#7d8590">
-          AP Spent: ${state.roleAPSpent[state.activeRole]} / ${[{CISO:30,CFO:25,Legal:25,Comms:25,CEO:30}][0][state.activeRole]}
-          &nbsp;|&nbsp;
-          Actions selected: ${state.dailyActions[state.activeRole].join(', ') || 'none'}
-        </div>
-      </div>
-
-      <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;margin-bottom:16px">
-        <div style="color:#7d8590;font-size:11px;letter-spacing:2px;margin-bottom:12px">WORKSTREAMS</div>
-        <div style="display:flex;gap:16px;font-size:12px">
-          ${Object.entries(state.workstreams).map(([k,v]) =>
-            `<span>${k}: <span style="color:#bc8cff">${v}%</span></span>`
-          ).join('')}
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px;margin-bottom:16px">
-        <button onclick="window.__dispatch({type:'NEXT_DAY'})"
-          style="padding:8px 20px;border-radius:5px;border:none;background:#e05c2b;color:#fff;cursor:pointer;font-weight:700;font-family:monospace">
-          Advance Day ▶
-        </button>
-        <button onclick="window.__dispatch({type:'MARK_READY',role:'${state.activeRole}'})"
-          style="padding:8px 20px;border-radius:5px;border:1px solid #30363d;background:#1c2128;color:#e6edf3;cursor:pointer;font-family:monospace">
-          Mark ${state.activeRole} Ready
-        </button>
-        <button onclick="window.__dispatch({type:'RESET'})"
-          style="padding:8px 20px;border-radius:5px;border:1px solid rgba(248,81,73,0.4);background:rgba(248,81,73,0.1);color:#f85149;cursor:pointer;font-family:monospace">
-          ↺ Reset
-        </button>
-      </div>
-
-      <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px">
-        <div style="color:#7d8590;font-size:11px;letter-spacing:2px;margin-bottom:8px">
-          ACTIVITY LOG (last ${Math.min(state.log.length, 8)} entries)
-        </div>
-        ${state.log.slice(0,8).map(e => `
-          <div style="padding:4px 0;border-bottom:1px solid rgba(48,54,61,0.5);font-size:11px">
-            <span style="color:#7d8590">D${e.day} [${e.source}]</span>
-            ${e.delta !== 0 ? `<span style="color:${e.delta > 0 ? '#3fb950' : '#f85149'};margin:0 6px">${e.delta > 0 ? '+' : ''}${e.delta} ${e.poolName}</span>` : ''}
-            <span style="color:#7d8590">${(e.note||'').substring(0,60)}</span>
-          </div>
-        `).join('') || '<div style="color:#7d8590">No entries yet.</div>'}
-      </div>
-
-      <div style="margin-top:12px;color:#7d8590;font-size:10px">
-        Stage 0 engine shell — all modules loaded. EventBus: active. Last event: <strong style="color:#e6edf3">${reason}</strong>
-      </div>
+app.innerHTML = `
+  <!-- HEADER -->
+  <header class="fp-header">
+    <div>
+      <div class="fp-logo">Flashpoint</div>
+      <div class="fp-logo-sub">Third Party · Meridian Health</div>
     </div>
-  `;
+    <div id="fp-day-badge" class="fp-day-badge">Day 1 of 21</div>
+    <div id="fp-act-badge" class="fp-act-badge act-1">ACT 1 — EXPOSURE</div>
+    <div class="fp-header-spacer"></div>
+    <label style="font-size:var(--text-xs);color:var(--text-muted);display:flex;align-items:center;gap:var(--sp-1);cursor:pointer">
+      <input type="checkbox" id="fp-show-hidden" checked> Show hidden effects
+    </label>
+    <button class="fp-btn" id="fp-btn-prev">◀ Day</button>
+    <button class="fp-btn fp-btn-primary" id="fp-btn-next">Advance Day ▶</button>
+    <button class="fp-btn fp-btn-war" id="fp-btn-warroom">⚑ War Room</button>
+    <button class="fp-btn fp-btn-debrief" id="fp-btn-debrief">⬡ Debrief</button>
+    <button class="fp-btn fp-btn-danger" id="fp-btn-reset">↺ Reset</button>
+  </header>
+
+  <!-- WAR ROOM OVERLAY -->
+  <div class="fp-wr-overlay" id="fp-warroom-overlay">
+    <div class="fp-wr-modal">
+      <div class="fp-wr-header">
+        <div>
+          <div class="fp-wr-title">⚑ WAR ROOM</div>
+          <div class="fp-wr-subtitle">Shared situational awareness · Escalation queue · Cross-role conflicts</div>
+        </div>
+        <button class="fp-btn" id="fp-wr-close">✕ Close</button>
+      </div>
+      <div class="fp-wr-body" id="fp-warroom-body"></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="fp-main">
+    <!-- LEFT: POOLS -->
+    <div class="fp-pools-panel">
+      <div id="fp-pools-mount"></div>
+    </div>
+
+    <!-- CENTER -->
+    <div class="fp-center-panel">
+      <div id="fp-role-tabs-mount"></div>
+      <div id="fp-action-panel-mount"></div>
+      <div class="fp-center-content" id="fp-gate-container">
+        <div id="fp-empty-gates" class="fp-empty" style="display:none">
+          No active decision gates today. Advance the day.
+        </div>
+      </div>
+      <div id="fp-cascade-alerts"></div>
+      <div id="fp-events-mount"></div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="fp-right-panel">
+      <div id="fp-log-tabs-mount"></div>
+      <div id="fp-log-content-mount" style="flex:1;overflow-y:auto"></div>
+      <div id="fp-ending-mount"></div>
+    </div>
+  </div>`;
+
+// ─── MOUNT COMPONENTS ────────────────────────────────────────────────────────
+document.getElementById('fp-pools-mount').appendChild(PoolBar(state));
+document.getElementById('fp-role-tabs-mount').appendChild(RoleTabs(state));
+document.getElementById('fp-action-panel-mount').appendChild(ActionPanel(state));
+document.getElementById('fp-events-mount').appendChild(EventsTimeline(state));
+document.getElementById('fp-ending-mount').appendChild(EndingTracker());
+
+const gateCtrl = GateCards(
+  document.getElementById('fp-gate-container'),
+  state,
+  document.getElementById('fp-show-hidden').checked
+);
+
+const logPanel = LogPanel(state);
+document.getElementById('fp-log-tabs-mount').appendChild(logPanel._tabs);
+document.getElementById('fp-log-content-mount').appendChild(logPanel._content);
+
+// ─── HEADER WIRING ───────────────────────────────────────────────────────────
+document.getElementById('fp-show-hidden').addEventListener('change', e => {
+  gateCtrl.setShowHidden(e.target.checked);
 });
 
-// Expose dispatch globally for inline button handlers in the shell
-window.__dispatch = dispatch;
+document.getElementById('fp-btn-next').addEventListener('click', () => {
+  animateDayAdvance(() => dispatch({ type: 'NEXT_DAY' }));
+});
 
-// Trigger initial render
-EventBus.emit('state:changed', { reason: 'BOOT', state: getState() });
+document.getElementById('fp-btn-prev').addEventListener('click', () => {
+  dispatch({ type: 'PREV_DAY' });
+});
+
+document.getElementById('fp-btn-reset').addEventListener('click', () => {
+  dispatch({ type: 'RESET' });
+  dispatch({ type: 'INIT' });
+});
+
+// ─── WAR ROOM ────────────────────────────────────────────────────────────────
+document.getElementById('fp-btn-warroom').addEventListener('click', openWarRoom);
+document.getElementById('fp-wr-close').addEventListener('click', closeWarRoom);
+document.getElementById('fp-warroom-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('fp-warroom-overlay')) closeWarRoom();
+});
+
+function openWarRoom() {
+  const s = getState();
+  const escs = activeEscalations(s.pools, s.decisions, s.day);
+  document.getElementById('fp-warroom-body').innerHTML = warRoomHTML(s, escs);
+  document.getElementById('fp-warroom-overlay').classList.add('open');
+}
+
+function closeWarRoom() {
+  document.getElementById('fp-warroom-overlay').classList.remove('open');
+}
+
+function warRoomHTML(s, escs) {
+  const sharedPools = POOL_DEFS.filter(p => p.tier === 'shared');
+  const stripItems = sharedPools.map(p => {
+    const pct = ((s.pools[p.id] - p.min) / (p.max - p.min) * 100).toFixed(0);
+    const col = s.pools[p.id] > (p.max - p.min) * 0.4 + p.min ? 'var(--green)' : 'var(--red)';
+    return `<div style="text-align:center;padding:var(--sp-2) var(--sp-3)">
+      <div style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:4px">${p.name.substring(0,14)}</div>
+      <div style="font-size:var(--text-lg);font-weight:700;color:${col}">${p.min < 0 ? (s.pools[p.id] >= 0 ? '+' : '') : ''}${Math.round(s.pools[p.id])}</div>
+    </div>`;
+  }).join('');
+
+  const escHtml = escs.length === 0
+    ? '<div class="fp-empty">No active escalations</div>'
+    : escs.map(e => {
+        const urgCol = e.urgency === 'high' ? 'var(--red)' : (e.urgency === 'medium' ? 'var(--yellow)' : 'var(--accent-2)');
+        return `<div style="padding:var(--sp-2) var(--sp-3);border:1px solid ${urgCol}44;border-radius:var(--r-md);background:${urgCol}11;margin-bottom:var(--sp-2)">
+          <div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:4px">
+            <span>${e.icon}</span>
+            <span style="font-size:var(--text-sm);font-weight:700;color:${urgCol}">${e.title}</span>
+            <span style="font-size:var(--text-xs);padding:1px 6px;border-radius:var(--r-sm);background:${urgCol}22;color:${urgCol};margin-left:auto">${e.urgency.toUpperCase()}</span>
+          </div>
+          <div style="font-size:var(--text-xs);color:var(--text-muted)">${e.from} → ${e.to}: ${e.desc}</div>
+        </div>`;
+      }).join('');
+
+  const feedHtml = s.activityFeed.slice(0, 12).map(e => {
+    const col = e.delta > 0 ? 'var(--green)' : (e.delta < 0 ? 'var(--red)' : 'var(--text-muted)');
+    return `<div style="padding:var(--sp-1) 0;border-bottom:1px solid var(--border-subtle);font-size:var(--text-xs)">
+      <span style="color:var(--text-muted)">D${e.day} [${e.source}]</span>
+      ${e.delta !== 0 ? `<span style="color:${col};font-weight:600;margin:0 6px">${e.delta > 0 ? '+' : ''}${e.delta} ${e.poolName}</span>` : ''}
+      <span style="color:var(--text-muted)">${(e.note||'').substring(0,50)}</span>
+    </div>`;
+  }).join('');
+
+  return `
+    <div style="background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;margin:-var(--sp-4) -var(--sp-4) var(--sp-4)">${stripItems}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)">
+      <div>
+        <div class="fp-section-label">Escalation Queue (${escs.length} active)</div>
+        ${escHtml}
+      </div>
+      <div>
+        <div class="fp-section-label">Cross-Role Activity Feed</div>
+        ${feedHtml || '<div class="fp-empty">No activity yet</div>'}
+      </div>
+    </div>`;
+}
+
+// ─── HEADER STATE SYNC ────────────────────────────────────────────────────────
+EventBus.on('state:changed', ({ state: s, reason }) => {
+  if (reason === 'SWITCH_ROLE' || reason === 'TOGGLE_ACTION') return;
+
+  // Day + act badges
+  const act = currentAct();
+  document.getElementById('fp-day-badge').textContent = `Day ${s.day} of 21`;
+  const actEl = document.getElementById('fp-act-badge');
+  actEl.className = `fp-act-badge act-${act}`;
+  const actLabels = { 1:'ACT 1 — EXPOSURE', 2:'ACT 2 — ESCALATION', 3:'ACT 3 — RESOLUTION' };
+  actEl.textContent = actLabels[act];
+
+  // Advance button
+  const btn = document.getElementById('fp-btn-next');
+  if (btn) {
+    const ready = readyCount();
+    btn.textContent = s.day >= 21 ? 'Complete'
+      : ready === 5 ? 'Advance Day ▶ (All Ready)'
+      : ready > 0   ? `Advance Day ▶ (${ready}/5)`
+      : 'Advance Day ▶';
+  }
+
+  // Cascade alerts
+  const alertsEl = document.getElementById('fp-cascade-alerts');
+  if (alertsEl) {
+    const triggered = [...s.firedEvents].filter(id => id.startsWith('cascade-'));
+    alertsEl.innerHTML = triggered.map(id => {
+      const labels = {
+        'cascade-time-low': 'TIME CRITICAL — Accelerated capacity and intelligence drain.',
+        'cascade-rep-low':  'REPUTATION CRITICAL — Regulatory Standing cascade triggered.',
+        'cascade-reg-low':  'REGULATORY STANDING CRITICAL — Legal capacity cascade triggered.',
+        'cascade-iq-low':   'INTELLIGENCE LOW — Decision outcomes subject to ±20% noise band.',
+      };
+      return labels[id]
+        ? `<div class="fp-cascade-alert"><strong>⚠ CASCADE:</strong> ${labels[id]}</div>`
+        : '';
+    }).join('');
+  }
+});
+
+// ─── PAYOFF TOAST ─────────────────────────────────────────────────────────────
+EventBus.on('workstream:payoff', ({ wsId, payoff }) => {
+  const toast = document.createElement('div');
+  toast.className = 'fp-payoff-toast';
+  toast.textContent = `⬡ ${wsId}: ${payoff.label}`;
+  document.body.appendChild(toast);
+  gsap.timeline()
+    .to(toast, { opacity: 1, y: 0, duration: 0.4, ease: 'back.out(1.5)' })
+    .to(toast, { opacity: 0, y: -10, duration: 0.4, ease: 'power2.in', delay: 2.2, onComplete: () => toast.remove() });
+});
+
+// ─── INTRO ANIMATION ─────────────────────────────────────────────────────────
+gsap.from('.fp-header', { y: -10, opacity: 0, duration: 0.5, ease: 'power2.out' });
+gsap.from('.fp-pools-panel', { x: -20, opacity: 0, duration: 0.5, ease: 'power2.out', delay: 0.1 });
+gsap.from('.fp-right-panel', { x: 20, opacity: 0, duration: 0.5, ease: 'power2.out', delay: 0.15 });
+gsap.from('.fp-center-panel', { opacity: 0, duration: 0.5, ease: 'power2.out', delay: 0.2 });
+
+// ─── DAY ADVANCE ANIMATION ───────────────────────────────────────────────────
+function animateDayAdvance(callback) {
+  const btn = document.getElementById('fp-btn-next');
+  gsap.timeline()
+    .to(btn, { scale: 0.95, duration: 0.1 })
+    .to(btn, { scale: 1, duration: 0.15, ease: 'back.out(2)', onComplete: callback });
+
+  // Brief flash on the center panel
+  gsap.fromTo('.fp-center-panel',
+    { background: 'rgba(224,92,43,0.06)' },
+    { background: 'transparent', duration: 0.8, ease: 'power2.out' }
+  );
+}
