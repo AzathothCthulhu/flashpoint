@@ -4,14 +4,12 @@ import './styles/shell.css';
 import './styles/components.css';
 import './styles/stage2.css';
 import './styles/stage3.css';
+import './styles/stage4.css';
 
 import gsap from 'gsap';
 
 import { dispatch, getState, calcEndingProbability, currentAct, readyCount } from './engine/state.js';
 import { EventBus } from './engine/eventBus.js';
-import { activeEscalations } from './engine/warroom.js';
-import { EVENTS } from './engine/events.js';
-import { POOL_DEFS } from './engine/pools.js';
 
 import { PoolBar }        from './components/PoolBar.js';
 import { GateCards }      from './components/GateCard.js';
@@ -21,6 +19,7 @@ import { EndingTracker }  from './components/EndingTracker.js';
 import { LogPanel }       from './components/LogPanel.js';
 import { EventsTimeline } from './components/EventsTimeline.js';
 import { Debrief }        from './components/Debrief.js';
+import { WarRoom }        from './components/WarRoom.js';
 
 // ─── INIT ENGINE ─────────────────────────────────────────────────────────────
 dispatch({ type: 'INIT' });
@@ -48,20 +47,6 @@ app.innerHTML = `
     <button class="fp-btn fp-btn-debrief" id="fp-btn-debrief">⬡ Debrief</button>
     <button class="fp-btn fp-btn-danger" id="fp-btn-reset">↺ Reset</button>
   </header>
-
-  <!-- WAR ROOM OVERLAY -->
-  <div class="fp-wr-overlay" id="fp-warroom-overlay">
-    <div class="fp-wr-modal">
-      <div class="fp-wr-header">
-        <div>
-          <div class="fp-wr-title">⚑ WAR ROOM</div>
-          <div class="fp-wr-subtitle">Shared situational awareness · Escalation queue · Cross-role conflicts</div>
-        </div>
-        <button class="fp-btn" id="fp-wr-close">✕ Close</button>
-      </div>
-      <div class="fp-wr-body" id="fp-warroom-body"></div>
-    </div>
-  </div>
 
   <!-- MAIN -->
   <div class="fp-main">
@@ -122,7 +107,8 @@ const logPanel = LogPanel(state);
 document.getElementById('fp-log-tabs-mount').appendChild(logPanel._tabs);
 document.getElementById('fp-log-content-mount').appendChild(logPanel._content);
 
-const debrief = Debrief();
+const debrief  = Debrief();
+const warRoom  = WarRoom();
 
 // ─── ROLE CONTEXT BAR ────────────────────────────────────────────────────────
 const ROLE_CONTEXT = {
@@ -188,70 +174,7 @@ document.getElementById('fp-btn-reset').addEventListener('click', () => {
 document.getElementById('fp-btn-debrief').addEventListener('click', () => debrief.open());
 
 // ─── WAR ROOM ────────────────────────────────────────────────────────────────
-document.getElementById('fp-btn-warroom').addEventListener('click', openWarRoom);
-document.getElementById('fp-wr-close').addEventListener('click', closeWarRoom);
-document.getElementById('fp-warroom-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('fp-warroom-overlay')) closeWarRoom();
-});
-
-function openWarRoom() {
-  const s = getState();
-  const escs = activeEscalations(s.pools, s.decisions, s.day);
-  document.getElementById('fp-warroom-body').innerHTML = warRoomHTML(s, escs);
-  document.getElementById('fp-warroom-overlay').classList.add('open');
-}
-
-function closeWarRoom() {
-  document.getElementById('fp-warroom-overlay').classList.remove('open');
-}
-
-function warRoomHTML(s, escs) {
-  const sharedPools = POOL_DEFS.filter(p => p.tier === 'shared');
-  const stripItems = sharedPools.map(p => {
-    const pct = ((s.pools[p.id] - p.min) / (p.max - p.min) * 100).toFixed(0);
-    const col = s.pools[p.id] > (p.max - p.min) * 0.4 + p.min ? 'var(--green)' : 'var(--red)';
-    return `<div style="text-align:center;padding:var(--sp-2) var(--sp-3)">
-      <div style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:4px">${p.name.substring(0,14)}</div>
-      <div style="font-size:var(--text-lg);font-weight:700;color:${col}">${p.min < 0 ? (s.pools[p.id] >= 0 ? '+' : '') : ''}${Math.round(s.pools[p.id])}</div>
-    </div>`;
-  }).join('');
-
-  const escHtml = escs.length === 0
-    ? '<div class="fp-empty">No active escalations</div>'
-    : escs.map(e => {
-        const urgCol = e.urgency === 'high' ? 'var(--red)' : (e.urgency === 'medium' ? 'var(--yellow)' : 'var(--accent-2)');
-        return `<div style="padding:var(--sp-2) var(--sp-3);border:1px solid ${urgCol}44;border-radius:var(--r-md);background:${urgCol}11;margin-bottom:var(--sp-2)">
-          <div style="display:flex;align-items:center;gap:var(--sp-2);margin-bottom:4px">
-            <span>${e.icon}</span>
-            <span style="font-size:var(--text-sm);font-weight:700;color:${urgCol}">${e.title}</span>
-            <span style="font-size:var(--text-xs);padding:1px 6px;border-radius:var(--r-sm);background:${urgCol}22;color:${urgCol};margin-left:auto">${e.urgency.toUpperCase()}</span>
-          </div>
-          <div style="font-size:var(--text-xs);color:var(--text-muted)">${e.from} → ${e.to}: ${e.desc}</div>
-        </div>`;
-      }).join('');
-
-  const feedHtml = s.activityFeed.slice(0, 12).map(e => {
-    const col = e.delta > 0 ? 'var(--green)' : (e.delta < 0 ? 'var(--red)' : 'var(--text-muted)');
-    return `<div style="padding:var(--sp-1) 0;border-bottom:1px solid var(--border-subtle);font-size:var(--text-xs)">
-      <span style="color:var(--text-muted)">D${e.day} [${e.source}]</span>
-      ${e.delta !== 0 ? `<span style="color:${col};font-weight:600;margin:0 6px">${e.delta > 0 ? '+' : ''}${e.delta} ${e.poolName}</span>` : ''}
-      <span style="color:var(--text-muted)">${(e.note||'').substring(0,50)}</span>
-    </div>`;
-  }).join('');
-
-  return `
-    <div style="background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;margin:-var(--sp-4) -var(--sp-4) var(--sp-4)">${stripItems}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)">
-      <div>
-        <div class="fp-section-label">Escalation Queue (${escs.length} active)</div>
-        ${escHtml}
-      </div>
-      <div>
-        <div class="fp-section-label">Cross-Role Activity Feed</div>
-        ${feedHtml || '<div class="fp-empty">No activity yet</div>'}
-      </div>
-    </div>`;
-}
+document.getElementById('fp-btn-warroom').addEventListener('click', () => warRoom.open());
 
 // ─── HEADER STATE SYNC ────────────────────────────────────────────────────────
 EventBus.on('state:changed', ({ state: s, reason }) => {

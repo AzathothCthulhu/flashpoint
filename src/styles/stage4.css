@@ -1,0 +1,328 @@
+/* ── STAGE 4: WAR ROOM DEPTH ──────────────────────────────────── */
+
+/* ── Threat gauge ──────────────────────────────────────────────── */
+.fp-threat-gauge {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-6);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.fp-threat-label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  min-width: 90px;
+}
+
+.fp-threat-track {
+  flex: 1;
+  height: 8px;
+  background: var(--surface-3);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.fp-threat-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width var(--dur-slow) var(--ease-out),
+              background var(--dur-slow) var(--ease-out);
+}
+
+.fp-threat-value {
+  font-size: var(--text-md);
+  font-weight: var(--weight-black);
+  min-width: 48px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur-slow);
+}
+
+.fp-threat-word {
+  font-size: var(--text-xs);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  min-width: 72px;
+  font-weight: var(--weight-bold);
+  transition: color var(--dur-slow);
+}
+
+/* ── Role readiness strip ──────────────────────────────────────── */
+.fp-wr-readiness {
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.fp-wr-role-cell {
+  flex: 1;
+  padding: var(--sp-2) var(--sp-2);
+  background: var(--surface-2);
+  text-align: center;
+  transition: background var(--dur-base);
+}
+.fp-wr-role-cell.ready {
+  background: rgba(63, 185, 80, 0.08);
+}
+
+.fp-wr-role-name {
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.fp-wr-role-ap {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.fp-wr-role-status {
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  margin-top: 2px;
+}
+
+/* ── War room grid layout ──────────────────────────────────────── */
+.fp-wr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+}
+
+.fp-wr-grid-full {
+  grid-column: 1 / -1;
+}
+
+/* ── Section header ────────────────────────────────────────────── */
+.fp-wr-section-title {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-bottom: var(--sp-1);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--sp-2);
+}
+
+/* ── Shared pool strip ─────────────────────────────────────────── */
+.fp-wr-pool-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.fp-wr-pool-cell {
+  background: var(--surface-2);
+  padding: var(--sp-2) var(--sp-2);
+  text-align: center;
+}
+
+.fp-wr-pool-name {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fp-wr-pool-val {
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 2px;
+}
+
+.fp-wr-pool-trend {
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+}
+
+.fp-wr-pool-bar {
+  height: 3px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.fp-wr-pool-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+/* ── Escalation cards ──────────────────────────────────────────── */
+.fp-esc-card {
+  border-radius: var(--r-md);
+  border: 1px solid;
+  margin-bottom: var(--sp-2);
+  overflow: hidden;
+}
+
+.fp-esc-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.fp-esc-icon {
+  font-size: var(--text-md);
+  line-height: 1;
+}
+
+.fp-esc-title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  flex: 1;
+}
+
+.fp-esc-urgency-badge {
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 1px;
+  padding: 1px 6px;
+  border-radius: var(--r-sm);
+}
+
+.fp-esc-body {
+  padding: var(--sp-1) var(--sp-3) var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  line-height: var(--leading-loose);
+}
+
+.fp-esc-path {
+  font-size: 9px;
+  color: var(--text-dim);
+  margin-top: 3px;
+  font-family: var(--font-mono);
+}
+
+/* ── Pending gates ─────────────────────────────────────────────── */
+.fp-pending-gate {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--text-xs);
+}
+.fp-pending-gate:last-child { border-bottom: none; }
+
+.fp-pending-gate-id {
+  font-family: var(--font-mono);
+  color: var(--accent-2);
+  min-width: 28px;
+}
+
+.fp-pending-gate-day {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: var(--r-sm);
+  font-weight: var(--weight-bold);
+}
+
+.fp-pending-overdue {
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(248,81,73,0.35);
+}
+
+.fp-pending-today {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border: 1px solid rgba(210,153,34,0.35);
+}
+
+.fp-pending-upcoming {
+  background: var(--surface-3);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.fp-pending-gate-title {
+  flex: 1;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fp-pending-gate-roles {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* ── Activity feed ─────────────────────────────────────────────── */
+.fp-feed-entry {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--text-xs);
+  line-height: var(--leading-base);
+}
+.fp-feed-entry:last-child { border-bottom: none; }
+
+.fp-feed-day {
+  color: var(--text-dim);
+  min-width: 20px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.fp-feed-source {
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  padding: 1px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.fp-feed-delta {
+  font-weight: var(--weight-bold);
+  min-width: 36px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.fp-feed-pool {
+  color: var(--text-muted);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Fired cascades ────────────────────────────────────────────── */
+.fp-cascade-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(248,81,73,0.4);
+  background: var(--red-dim);
+  color: var(--red);
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  margin: 2px;
+}
