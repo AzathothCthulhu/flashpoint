@@ -126,17 +126,44 @@ function animateCommit(cardEl, callback) {
     .to(cardEl, { borderColor: 'var(--green)', duration: 0.3 });
 }
 
+// HR and Board gates are surfaced under the CEO tab
+const CEO_PROXY_ROLES = new Set(['HR', 'Board']);
+
+function effectiveRoles(gate) {
+  if (gate.roles.some(r => CEO_PROXY_ROLES.has(r))) {
+    return [...gate.roles, 'CEO'];
+  }
+  return gate.roles;
+}
+
 export function GateCards(container, state, showHidden = true) {
-  let _showHidden = showHidden;
+  let _showHidden  = showHidden;
+  let _filterRole  = true;
 
   function render() {
-    const { decisions, day } = state;
+    const { decisions, day, activeRole } = state;
     container.querySelectorAll('.fp-gate-card').forEach(el => el.remove());
 
-    const visible = GATES.filter(g => g.day <= day + 1);
+    const visible = GATES.filter(g => {
+      if (g.day > day + 1) return false;
+      if (_filterRole) return effectiveRoles(g).includes(activeRole);
+      return true;
+    });
+
+    const filterBar = container.querySelector('#fp-gate-filter-bar');
+    if (filterBar) {
+      filterBar.querySelector('#fp-gate-filter-label').textContent =
+        _filterRole ? `${activeRole} gates` : 'All gates';
+    }
+
     if (visible.length === 0) {
       const empty = container.querySelector('#fp-empty-gates');
-      if (empty) empty.style.display = 'block';
+      if (empty) {
+        empty.style.display = 'block';
+        empty.textContent = _filterRole
+          ? `No ${activeRole} gates active yet. Advance the day or switch to All.`
+          : 'No active decision gates today. Advance the day.';
+      }
       return;
     }
     const empty = container.querySelector('#fp-empty-gates');
@@ -144,6 +171,17 @@ export function GateCards(container, state, showHidden = true) {
 
     visible.forEach(gate => {
       const card = buildCard(gate, decisions, _showHidden);
+      const isMatch = effectiveRoles(gate).includes(activeRole);
+      if (isMatch) {
+        card.classList.add('role-match');
+        const ROLE_RGBA = {
+          CISO:'255,123,114', CFO:'121,192,255', Legal:'188,140,255',
+          Comms:'86,211,100', CEO:'255,166,87',
+        };
+        const rgb = ROLE_RGBA[activeRole] || '88,166,255';
+        card.style.setProperty('--role-accent', ROLE_COLORS[activeRole] || 'var(--accent-2)');
+        card.style.setProperty('--role-accent-dim', `rgba(${rgb}, 0.07)`);
+      }
       container.appendChild(card);
     });
   }
@@ -151,13 +189,14 @@ export function GateCards(container, state, showHidden = true) {
   render();
 
   const unsub = EventBus.on('state:changed', ({ reason, state: newState }) => {
-    if (reason === 'SWITCH_ROLE' || reason === 'TOGGLE_ACTION' || reason === 'MARK_READY') return;
+    if (reason === 'TOGGLE_ACTION' || reason === 'MARK_READY') return;
     Object.assign(state, newState);
     render();
   });
 
   return {
     setShowHidden: v => { _showHidden = v; render(); },
+    setRoleFilter: v => { _filterRole = v; render(); },
     destroy: unsub,
   };
 }
