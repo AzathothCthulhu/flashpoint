@@ -1,0 +1,312 @@
+/* ── STAGE 6: PRODUCTION POLISH ──────────────────────────────────── */
+
+/* ── Facilitator panel ────────────────────────────────────────────── */
+.fp-facilitator-panel {
+  position: fixed;
+  top: var(--header-h);
+  right: 0;
+  width: 240px;
+  height: calc(100dvh - var(--header-h));
+  background: var(--surface-2);
+  border-left: 1px solid var(--border);
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--dur-slow) var(--ease-out);
+  box-shadow: var(--shadow-lg);
+}
+
+.fp-facilitator-panel.open {
+  transform: translateX(0);
+}
+
+.fp-fac-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.fp-fac-title {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.fp-fac-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-3);
+}
+
+.fp-fac-section {
+  margin-bottom: var(--sp-4);
+}
+
+.fp-fac-section-label {
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: var(--sp-2);
+}
+
+.fp-fac-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+
+.fp-fac-input {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text);
+  padding: 4px var(--sp-2);
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  outline: none;
+}
+.fp-fac-input:focus { border-color: var(--accent-2); }
+
+.fp-fac-state-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+.fp-fac-state-summary strong { color: var(--text); }
+
+/* Facilitator badge in header */
+.fp-btn-facilitator {
+  background: rgba(88,166,255,0.08);
+  border-color: rgba(88,166,255,0.2);
+  color: var(--text-dim);
+  font-size: 10px;
+}
+.fp-btn-facilitator:hover { color: var(--accent-2); border-color: rgba(88,166,255,0.4); }
+
+/* ── Day 21 / Scenario complete screen ───────────────────────────── */
+.fp-complete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-base);
+}
+
+.fp-complete-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.fp-complete-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: var(--sp-10) var(--sp-8);
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+}
+
+.fp-complete-label {
+  font-size: var(--text-xs);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--sp-4);
+}
+
+.fp-complete-title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-black);
+  letter-spacing: 3px;
+  margin-bottom: var(--sp-4);
+  color: var(--accent);
+}
+
+.fp-complete-desc {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: var(--leading-loose);
+  margin-bottom: var(--sp-6);
+}
+
+.fp-complete-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-8);
+  margin-bottom: var(--sp-8);
+}
+
+.fp-complete-stat {
+  text-align: center;
+}
+
+.fp-complete-stat-val {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-black);
+  color: var(--text);
+}
+
+.fp-complete-stat-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ── Keyboard shortcut hint bar ───────────────────────────────────── */
+.fp-kbd-hint {
+  position: fixed;
+  bottom: var(--sp-3);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--sp-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 5px var(--sp-4);
+  font-size: 9px;
+  color: var(--text-dim);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-slow);
+  z-index: 80;
+}
+
+.fp-kbd-hint.visible { opacity: 1; }
+
+.fp-kbd-hint kbd {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+/* ── Small screen warning ─────────────────────────────────────────── */
+.fp-screen-warning {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: var(--bg);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-8);
+  text-align: center;
+}
+
+@media (max-width: 1023px) {
+  .fp-screen-warning { display: flex; }
+  #app { display: none; }
+}
+
+.fp-screen-warning-icon {
+  font-size: 48px;
+  margin-bottom: var(--sp-2);
+}
+
+.fp-screen-warning-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  margin-bottom: var(--sp-2);
+}
+
+.fp-screen-warning-desc {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: var(--leading-loose);
+  max-width: 320px;
+}
+
+/* ── Print stylesheet for debrief ─────────────────────────────────── */
+@media print {
+  body { background: #fff; color: #000; overflow: auto; height: auto; }
+  .fp-header, .fp-main, .fp-vignette,
+  .fp-wr-overlay, .fp-act-banner,
+  .fp-complete-overlay, .fp-facilitator-panel,
+  .fp-kbd-hint, .fp-screen-warning { display: none !important; }
+  .fp-debrief-overlay {
+    position: static !important;
+    opacity: 1 !important;
+    pointer-events: all !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  .fp-debrief-modal {
+    box-shadow: none !important;
+    transform: none !important;
+    max-width: 100% !important;
+    border: none !important;
+  }
+  .fp-debrief-body { padding: 12px !important; }
+  * { color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+
+/* ── Tooltip for action descriptions ─────────────────────────────── */
+.fp-action-item {
+  position: relative;
+}
+
+.fp-action-item:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 100%;
+  top: 0;
+  margin-left: var(--sp-2);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  white-space: normal;
+  max-width: 180px;
+  line-height: var(--leading-loose);
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* ── Smooth scrollbar polish ──────────────────────────────────────── */
+.fp-debrief-body,
+.fp-wr-body,
+.fp-right-content,
+.fp-pools-scroll,
+.fp-center-panel {
+  scroll-behavior: smooth;
+}
+
+/* ── Pool panel: sticky group headers ─────────────────────────────── */
+.fp-pool-group-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--surface);
+}
+
+/* ── Gate filter bar sticky refinement ───────────────────────────── */
+.fp-gate-filter-bar {
+  background: var(--surface-2);
+}
